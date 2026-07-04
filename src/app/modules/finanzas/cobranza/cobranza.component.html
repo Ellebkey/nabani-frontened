@@ -1,0 +1,134 @@
+<div class="flex flex-col flex-auto w-full">
+  <div class="flex flex-col w-full max-w-screen-xl mx-auto p-4 sm:p-6 md:p-8">
+    <!-- Page header -->
+    <div class="mb-5 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+      <div>
+        <h1 class="text-[23px] font-bold leading-[30px] tracking-[-0.01em] text-ink">Cobranza</h1>
+        <div class="mt-0.5 text-[13px] text-ink-3 tabular-nums">Pagos pendientes por antigüedad</div>
+      </div>
+      <div class="text-right sm:ml-auto">
+        <div class="text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Por cobrar</div>
+        <div class="text-[26px] font-bold leading-tight text-gold tabular-nums">
+          {{ porCobrar() | currency: 'MXN' : 'symbol-narrow' }}
+        </div>
+        <div class="text-[12px] text-ink-3 tabular-nums">{{ pagination().count | number }} pagos pendientes</div>
+      </div>
+    </div>
+
+    <!-- Section sub-navigation -->
+    <app-finanzas-nav></app-finanzas-nav>
+
+    <div class="bg-card rounded-card w-full overflow-hidden">
+      <!-- Card header: search + aging filter chips + pager -->
+      <div class="flex flex-wrap items-center gap-3 border-b border-line px-5 pb-3 pt-4">
+        <label
+          class="flex h-9 w-60 items-center gap-2 rounded-[9px] border border-line-strong bg-surface px-3 text-[13px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+          <mat-icon class="icon-size-4 text-ink-3" [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+          <input
+            class="w-full border-0 bg-transparent outline-none placeholder:text-ink-3"
+            placeholder="Buscar por paciente"
+            [formControl]="searchControl" />
+        </label>
+        <mg-chip-row>
+          <mg-chip [active]="agingFilter() === 'vencidos'" (click)="setAgingFilter('vencidos')">
+            Vencidos · {{ vencidosCount() }}
+          </mg-chip>
+          <mg-chip [active]="agingFilter() === 'semana'" (click)="setAgingFilter('semana')">
+            Esta semana · {{ semanaCount() }}
+          </mg-chip>
+          <mg-chip [active]="agingFilter() === 'todos'" (click)="setAgingFilter('todos')">
+            Todos · {{ todosCount() }}
+          </mg-chip>
+        </mg-chip-row>
+        <div class="ml-auto" [class.opacity-60]="!isDataLoaded()" [class.pointer-events-none]="!isDataLoaded()">
+          <mg-pager
+            [limit]="pagination().limit"
+            [offset]="pagination().offset"
+            [count]="pagination().count"
+            (pageChange)="onPageChange($event)">
+          </mg-pager>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full border-collapse">
+          <thead>
+            <tr>
+              <th class="border-b border-line px-3.5 py-2.5 pl-5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Paciente</th>
+              <th class="w-[140px] border-b border-line px-3.5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Fecha de pago</th>
+              <th class="w-[170px] border-b border-line px-3.5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Antigüedad</th>
+              <th class="w-[140px] border-b border-line px-3.5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Tipo de pago</th>
+              <th class="w-[150px] border-b border-line px-3.5 py-2.5 text-right text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Total de la venta</th>
+              <th class="w-[110px] border-b border-line px-3.5 py-2.5"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (!isDataLoaded()) {
+              @for (i of skeletonRows; track i) {
+                <tr>
+                  <td class="border-b border-line px-3.5 py-3 pl-5" colspan="6">
+                    <div class="h-5 w-full animate-pulse rounded bg-ink/[.06]"></div>
+                  </td>
+                </tr>
+              }
+            } @else {
+              @for (payment of visiblePayments(); track payment.id) {
+                <tr class="hover:bg-ink/[.025]">
+                  <td class="border-b border-line px-3.5 py-3 pl-5">
+                    <span class="mr-2 font-mono text-[11.5px] text-ink-3">{{ payment.folio }}</span>
+                    <span class="text-[13.5px] font-semibold text-ink">{{ paymentPatientName(payment) }}</span>
+                  </td>
+                  <td class="border-b border-line px-3.5 py-3 text-[13px] text-ink-2 tabular-nums">
+                    {{ payment.dueDate | date: 'd MMM y' }}
+                  </td>
+                  <td class="border-b border-line px-3.5 py-3">
+                    @if (agingMeta(payment.agingDays); as aging) {
+                      <mg-pill [variant]="aging.variant" size="sm">{{ aging.label }}</mg-pill>
+                    }
+                  </td>
+                  <td class="border-b border-line px-3.5 py-3">
+                    @if (payment.method) {
+                      <mg-pill variant="neutral" size="sm">{{ paymentMethodLabel(payment.method) }}</mg-pill>
+                    } @else {
+                      <span class="text-[13px] text-ink-3">—</span>
+                    }
+                  </td>
+                  <td class="border-b border-line px-3.5 py-3 text-right text-[14.5px] font-bold text-ink tabular-nums">
+                    {{ payment.amount | currency: 'MXN' : 'symbol-narrow' }}
+                  </td>
+                  <td class="border-b border-line px-3.5 py-3">
+                    <div class="flex items-center justify-end gap-1.5">
+                      <button
+                        type="button"
+                        class="h-8 rounded-btn bg-brand px-3 text-[12.5px] font-semibold text-white hover:bg-brand-strong"
+                        (click)="registrarPago(payment)">
+                        Pagar
+                      </button>
+                      <button
+                        type="button"
+                        class="grid h-[30px] w-[30px] place-items-center rounded-lg text-ink-3 hover:bg-rose-tint hover:text-rose"
+                        (click)="deletePayment(payment)"
+                        aria-label="Eliminar">
+                        <mat-icon class="icon-size-[17px] text-current" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6">
+                    <mg-empty-state
+                      icon="heroicons_outline:banknotes"
+                      title="Sin pagos pendientes"
+                      message="No hay pagos que coincidan con el filtro seleccionado.">
+                    </mg-empty-state>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

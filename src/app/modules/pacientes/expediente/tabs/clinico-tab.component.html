@@ -1,0 +1,119 @@
+<div class="grid w-full grid-cols-1 gap-4 lg:grid-cols-[1fr_380px]">
+  <!-- Mediciones + chart -->
+  <div class="flex flex-col gap-4">
+    <div class="bg-card rounded-card overflow-hidden">
+      <div class="px-5 pt-4">
+        <h2 class="text-[15px] font-semibold text-ink">Mediciones</h2>
+      </div>
+      <div class="mt-2 overflow-x-auto">
+        <table class="w-full border-collapse">
+          <thead>
+            <tr>
+              <th class="border-b border-line px-3.5 py-2.5 pl-5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Fecha</th>
+              <th class="border-b border-line px-3.5 py-2.5 text-right text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Peso</th>
+              @for (col of medicionColumns; track col.key) {
+                <th class="border-b border-line px-3.5 py-2.5 text-right text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">{{ col.label }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @if (!isLoaded()) {
+              @for (i of [1, 2, 3, 4]; track i) {
+                <tr><td class="border-b border-line px-3.5 py-3 pl-5" [attr.colspan]="medicionColumns.length + 2">
+                  <div class="h-5 w-full animate-pulse rounded bg-ink/[.06]"></div>
+                </td></tr>
+              }
+            } @else {
+              @for (row of rows(); track row.consultation.id) {
+                <tr class="hover:bg-ink/[.025]">
+                  <td class="border-b border-line px-3.5 py-3 pl-5 text-[13px] text-ink-2 tabular-nums whitespace-nowrap">
+                    {{ row.consultation.consultDate | date: 'd MMM y' }}
+                  </td>
+                  <td class="border-b border-line px-3.5 py-3 text-right tabular-nums">
+                    <span class="text-[13.5px] font-semibold text-ink">{{ metric(row.consultation, 'weight') }}</span>
+                    @if (row.weightDelta !== null) {
+                      <span class="ml-1.5 text-[11.5px] font-medium text-teal">
+                        {{ row.weightDelta > 0 ? '+' : '' }}{{ row.weightDelta }}
+                      </span>
+                    }
+                  </td>
+                  @for (col of medicionColumns; track col.key) {
+                    <td class="border-b border-line px-3.5 py-3 text-right text-[13px] text-ink-2 tabular-nums">{{ metric(row.consultation, col.key) }}</td>
+                  }
+                </tr>
+              } @empty {
+                <tr><td [attr.colspan]="medicionColumns.length + 2">
+                  <mg-empty-state icon="heroicons_outline:chart-bar" title="Sin mediciones"
+                    message="Registra una consulta para empezar el historial."></mg-empty-state>
+                </td></tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    @if (chartBars().length) {
+      <div class="bg-card rounded-card p-5">
+        <div class="text-[11px] font-bold uppercase tracking-[.07em] text-ink-3">Peso · últimas mediciones</div>
+        <div class="mt-4 flex h-40 items-end gap-4">
+          @for (bar of chartBars(); track $index) {
+            <div class="flex flex-1 flex-col items-center gap-2">
+              <div class="text-[11.5px] font-semibold text-ink tabular-nums">{{ bar.weight }}</div>
+              <div class="flex w-full items-end justify-center" style="height: 110px">
+                <div class="w-full max-w-[36px] rounded-t"
+                  [class.bg-brand]="bar.isLast"
+                  [class.bg-brand-tint-2]="!bar.isLast"
+                  [style.height.%]="bar.heightPct"></div>
+              </div>
+              <div class="text-[11px] text-ink-3">{{ bar.label }}</div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Consultas list -->
+  <div class="bg-card rounded-card overflow-hidden">
+    <div class="px-5 pt-4">
+      <h2 class="text-[15px] font-semibold text-ink">Consultas</h2>
+    </div>
+    <div class="mt-2 flex flex-col divide-y divide-line">
+      @if (!isLoaded()) {
+        @for (i of [1, 2, 3]; track i) {
+          <div class="px-5 py-3"><div class="h-8 w-full animate-pulse rounded bg-ink/[.06]"></div></div>
+        }
+      } @else {
+        @for (consultation of rows(); track consultation.consultation.id) {
+          <div class="flex items-center gap-3.5 px-5 py-[13px]">
+            <div class="min-w-0 flex-1">
+              <div class="text-[14px] font-semibold text-ink">
+                {{ consultation.consultation.type || 'Consulta de seguimiento' }}
+              </div>
+              <div class="mt-0.5 flex flex-wrap items-center gap-1.5 text-[12.5px] text-ink-3">
+                <span class="tabular-nums">{{ consultation.consultation.consultDate | date: 'd MMM y' }}</span>
+                @if (consultation.consultation.objetivoKcal) {
+                  <span>·</span>
+                  <span class="tabular-nums">{{ consultation.consultation.objetivoKcal }} kcal</span>
+                }
+                @if (consultation.consultation.notes) {
+                  <span>·</span>
+                  <span class="truncate">{{ consultation.consultation.notes }}</span>
+                }
+              </div>
+            </div>
+            @if (consultation.consultation.price != null) {
+              <div class="text-right text-[14.5px] font-bold text-ink tabular-nums">
+                {{ consultation.consultation.price | currency: 'MXN' : 'symbol-narrow' }}
+              </div>
+            }
+          </div>
+        } @empty {
+          <mg-empty-state icon="heroicons_outline:clipboard-document-list" title="Sin consultas"
+            message="Aún no hay consultas registradas."></mg-empty-state>
+        }
+      }
+    </div>
+  </div>
+</div>

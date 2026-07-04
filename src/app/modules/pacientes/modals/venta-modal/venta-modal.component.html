@@ -1,0 +1,109 @@
+<mg-modal-shell title="Nueva venta" [subtitle]="data.patientName" (closed)="closeDialog()">
+  <form class="flex flex-col gap-3.5 p-5" [formGroup]="form">
+    <div>
+      <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Paquete *</label>
+      <mg-compact-select size="field" placeholder="Elegir paquete" [options]="packageOptions()" formControlName="packageId">
+      </mg-compact-select>
+      @if (showError('packageId')) {
+        <div class="mt-1 text-[12.5px] text-rose">El paquete es obligatorio</div>
+      }
+      @if (selectedPackage(); as pkg) {
+        <div class="mt-2 flex flex-wrap items-center gap-2">
+          @if (pkg.pricePerDay != null) {
+            <span class="text-[13px] font-semibold text-ink tabular-nums">{{ pkg.pricePerDay | currency: 'MXN' : 'symbol-narrow' }}/día</span>
+          }
+          @if (pkg.meals?.length) {
+            @for (code of pkg.meals; track code) {
+              <mg-pill variant="brand" size="sm">{{ code }}</mg-pill>
+            }
+          }
+        </div>
+      }
+    </div>
+
+    <div class="grid grid-cols-2 gap-2.5">
+      <div>
+        <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Fecha inicio *</label>
+        <label
+          class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+          <input type="date" formControlName="startDate"
+            class="w-full border-0 bg-transparent outline-none tabular-nums placeholder:text-ink-3" />
+        </label>
+      </div>
+      <div>
+        <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Días de entrega *</label>
+        <label
+          class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+          <input type="number" formControlName="days" placeholder="0"
+            class="w-full border-0 bg-transparent text-right outline-none tabular-nums placeholder:text-ink-3" />
+        </label>
+        @if (showError('days')) {
+          <div class="mt-1 text-[12.5px] text-rose">Requerido</div>
+        }
+      </div>
+    </div>
+
+    <div>
+      <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Facturación</label>
+      <mg-chip-row>
+        @for (option of billingOptions; track option.value) {
+          <mg-chip [active]="selectedBilling() === option.value" (click)="selectBilling(option.value)">{{ option.label }}</mg-chip>
+        }
+      </mg-chip-row>
+    </div>
+
+    <div class="grid grid-cols-2 gap-2.5">
+      <div>
+        <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Descuento</label>
+        <label
+          class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+          <span class="mr-1 text-ink-3">$</span>
+          <input type="number" formControlName="discount" placeholder="0.00"
+            class="w-full border-0 bg-transparent text-right outline-none tabular-nums placeholder:text-ink-3" />
+        </label>
+      </div>
+      <div>
+        <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Precio por día</label>
+        <div class="flex h-10 items-center rounded-field bg-brand-tint px-3 text-[14px] font-semibold text-brand tabular-nums">
+          {{ breakdown().pricePerDay | currency: 'MXN' : 'symbol-narrow' }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Breakdown box -->
+    <div class="rounded-field border border-line bg-surface p-3.5">
+      <div class="flex items-center justify-between text-[13px] text-ink-2">
+        <span class="tabular-nums">{{ breakdown().days }} días × {{ breakdown().pricePerDay | currency: 'MXN' : 'symbol-narrow' }}</span>
+        <span class="tabular-nums">{{ breakdown().subtotal | currency: 'MXN' : 'symbol-narrow' }}</span>
+      </div>
+      @if (breakdown().discount > 0) {
+        <div class="mt-1.5 flex items-center justify-between text-[13px]">
+          <span class="text-ink-2">Descuento {{ billingLabel(selectedBilling()) }}</span>
+          <span class="font-semibold text-teal tabular-nums">−{{ breakdown().discount | currency: 'MXN' : 'symbol-narrow' }}</span>
+        </div>
+      }
+      <div class="mt-2.5 flex items-center justify-between border-t border-line pt-2.5 text-[14px] font-semibold text-ink">
+        <span>Total a pagar</span>
+        <span class="tabular-nums">{{ breakdown().total | currency: 'MXN' : 'symbol-narrow' }}</span>
+      </div>
+    </div>
+  </form>
+
+  <div mgModalInfo>
+    <div class="text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Total</div>
+    <div class="text-[20px] font-bold text-ink tabular-nums">
+      {{ breakdown().total | currency: 'MXN' : 'symbol-narrow' }}
+    </div>
+  </div>
+
+  <ng-container mgModalActions>
+    <button type="button" mat-stroked-button (click)="closeDialog()">Cancelar</button>
+    <button mat-flat-button [color]="'primary'" [disabled]="formDisabled()" (click)="save()">
+      @if (!formDisabled()) {
+        <span>Registrar venta</span>
+      } @else {
+        <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+      }
+    </button>
+  </ng-container>
+</mg-modal-shell>

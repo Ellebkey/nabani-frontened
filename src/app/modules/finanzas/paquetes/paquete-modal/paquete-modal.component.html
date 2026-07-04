@@ -1,0 +1,90 @@
+<mg-modal-shell [title]="title()" (closed)="closeDialog()">
+  <form class="flex flex-col gap-3.5 p-5" [formGroup]="form">
+    <div class="grid grid-cols-3 gap-2.5">
+      <div class="col-span-2">
+        <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Nombre *</label>
+        <label
+          class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+          <input formControlName="displayLabel" placeholder="Nombre del paquete"
+            class="w-full border-0 bg-transparent outline-none placeholder:text-ink-3" />
+        </label>
+        @if (showError('displayLabel')) {
+          <div class="mt-1 text-[12.5px] text-rose">El nombre es obligatorio</div>
+        }
+      </div>
+      <div>
+        <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Código *</label>
+        <label
+          class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+          <input formControlName="code" placeholder="DCSS"
+            class="w-full border-0 bg-transparent outline-none placeholder:text-ink-3" />
+        </label>
+        @if (showError('code')) {
+          <div class="mt-1 text-[12.5px] text-rose">Requerido</div>
+        }
+      </div>
+    </div>
+
+    <div class="grid grid-cols-3 gap-2.5">
+      <div>
+        <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Precio por día *</label>
+        <label
+          class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+          <span class="mr-1 text-ink-3">$</span>
+          <input type="number" formControlName="pricePerDay" placeholder="0.00"
+            class="w-full border-0 bg-transparent text-right outline-none tabular-nums placeholder:text-ink-3" />
+        </label>
+        @if (showError('pricePerDay')) {
+          <div class="mt-1 text-[12.5px] text-rose">Requerido</div>
+        }
+      </div>
+      <div>
+        <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Precio consulta</label>
+        <label
+          class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+          <span class="mr-1 text-ink-3">$</span>
+          <input type="number" formControlName="consultPrice" placeholder="0.00"
+            class="w-full border-0 bg-transparent text-right outline-none tabular-nums placeholder:text-ink-3" />
+        </label>
+      </div>
+      <div>
+        <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Descuento mensual</label>
+        <label
+          class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+          <span class="mr-1 text-ink-3">$</span>
+          <input type="number" formControlName="monthDiscount" placeholder="0.00"
+            class="w-full border-0 bg-transparent text-right outline-none tabular-nums placeholder:text-ink-3" />
+        </label>
+      </div>
+    </div>
+
+    <div>
+      <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Comidas incluidas</label>
+      <mg-chip-row>
+        @for (meal of mealToggles; track meal.control) {
+          <mg-chip [active]="isMealOn(meal.control)" (click)="toggleMeal(meal.control)">
+            {{ meal.code }} · {{ meal.label }}
+          </mg-chip>
+        }
+      </mg-chip-row>
+    </div>
+  </form>
+
+  <div mgModalInfo>
+    <div class="text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Precio por día</div>
+    <div class="text-[20px] font-bold text-ink tabular-nums">
+      {{ (formValue().pricePerDay || 0) | currency: 'MXN' : 'symbol-narrow' }}
+    </div>
+  </div>
+
+  <ng-container mgModalActions>
+    <button type="button" mat-stroked-button (click)="closeDialog()">Cancelar</button>
+    <button mat-flat-button [color]="'primary'" [disabled]="formDisabled()" (click)="save()">
+      @if (!formDisabled()) {
+        <span>Guardar</span>
+      } @else {
+        <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+      }
+    </button>
+  </ng-container>
+</mg-modal-shell>

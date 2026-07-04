@@ -1,0 +1,59 @@
+<mg-modal-shell title="Registrar pago" [subtitle]="subtitle" (closed)="closeDialog()">
+  <form class="flex flex-col gap-3.5 p-5" [formGroup]="form">
+    @if (isOverdue()) {
+      <div class="rounded-field bg-rose-tint px-3.5 py-2.5 text-[12.5px] font-semibold text-rose">
+        Pago vencido hace {{ payment.agingDays }} día{{ payment.agingDays === 1 ? '' : 's' }} · programado para el
+        {{ payment.dueDate | date: 'd MMM y' }}
+      </div>
+    }
+
+    <div>
+      <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Monto</label>
+      <div
+        class="flex h-14 items-center justify-center rounded-xl border border-line-strong bg-brand-tint px-3 text-[22px] font-bold text-ink tabular-nums">
+        {{ payment.amount | currency: 'MXN' : 'symbol-narrow' }}
+      </div>
+    </div>
+
+    <div>
+      <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Método *</label>
+      <mg-chip-row>
+        @for (method of methodOptions; track method.value) {
+          <mg-chip [active]="selectedMethod() === method.value" (click)="selectMethod(method.value)">
+            {{ method.label }}
+          </mg-chip>
+        }
+      </mg-chip-row>
+    </div>
+
+    <div>
+      <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Nota</label>
+      <label
+        class="flex rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+        <textarea
+          rows="2"
+          formControlName="note"
+          placeholder="Opcional"
+          class="w-full resize-none border-0 bg-transparent py-2.5 outline-none placeholder:text-ink-3"></textarea>
+      </label>
+    </div>
+  </form>
+
+  <div mgModalInfo>
+    <div class="text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Por cobrar</div>
+    <div class="text-[20px] font-bold text-ink tabular-nums">
+      {{ payment.amount | currency: 'MXN' : 'symbol-narrow' }}
+    </div>
+  </div>
+
+  <ng-container mgModalActions>
+    <button type="button" mat-stroked-button (click)="closeDialog()">Cancelar</button>
+    <button mat-flat-button [color]="'primary'" [disabled]="formDisabled()" (click)="save()">
+      @if (!formDisabled()) {
+        <span>Confirmar pago</span>
+      } @else {
+        <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+      }
+    </button>
+  </ng-container>
+</mg-modal-shell>

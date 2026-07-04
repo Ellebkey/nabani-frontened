@@ -1,0 +1,75 @@
+<mg-modal-shell title="Nueva consulta" [subtitle]="subtitle()" (closed)="closeDialog()">
+  <form class="flex flex-col gap-4 p-5" [formGroup]="form">
+    <div class="grid grid-cols-2 gap-2.5">
+      <div>
+        <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Fecha *</label>
+        <label
+          class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+          <input type="date" formControlName="consultDate"
+            class="w-full border-0 bg-transparent outline-none tabular-nums placeholder:text-ink-3" />
+        </label>
+      </div>
+      <div>
+        <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Precio de consulta</label>
+        <label
+          class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+          <span class="mr-1 text-ink-3">$</span>
+          <input type="number" formControlName="price" placeholder="0.00"
+            class="w-full border-0 bg-transparent text-right outline-none tabular-nums placeholder:text-ink-3" />
+        </label>
+      </div>
+    </div>
+
+    <div>
+      <div class="mb-2 flex items-center gap-2">
+        <span class="text-[11px] font-bold uppercase tracking-[.07em] text-ink-3">Mediciones</span>
+        @if (lastDateLabel()) {
+          <span class="text-[11.5px] text-ink-3">{{ lastDateLabel() }}</span>
+        }
+      </div>
+      <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+        @for (med of mediciones; track med.key) {
+          <div>
+            <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">{{ med.label }}</label>
+            <label
+              class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+              <input type="number" [formControlName]="med.key" [placeholder]="placeholder(med.key, med.unit)"
+                class="w-full border-0 bg-transparent text-right outline-none tabular-nums placeholder:text-ink-3" />
+            </label>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div>
+      <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Objetivo de calorías</label>
+      <mg-compact-select size="field" placeholder="Elegir nivel" [options]="kcalOptions()" formControlName="objetivoKcal">
+      </mg-compact-select>
+      <p class="mt-1.5 text-[12px] text-ink-3">Si cambia, sus menús se precargan con el nuevo nivel.</p>
+    </div>
+
+    <div>
+      <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Notas</label>
+      <label
+        class="flex rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+        <textarea rows="2" formControlName="notes" placeholder="Opcional"
+          class="w-full resize-none border-0 bg-transparent py-2.5 outline-none placeholder:text-ink-3"></textarea>
+      </label>
+    </div>
+  </form>
+
+  <div mgModalInfo>
+    <div class="text-[12px] text-ink-3">Se agregará al historial clínico.</div>
+  </div>
+
+  <ng-container mgModalActions>
+    <button type="button" mat-stroked-button (click)="closeDialog()">Cancelar</button>
+    <button mat-flat-button [color]="'primary'" [disabled]="formDisabled()" (click)="save()">
+      @if (!formDisabled()) {
+        <span>Guardar consulta</span>
+      } @else {
+        <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+      }
+    </button>
+  </ng-container>
+</mg-modal-shell>

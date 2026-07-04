@@ -1,0 +1,139 @@
+<div class="flex flex-col flex-auto w-full">
+  <div class="flex flex-col w-full max-w-screen-xl mx-auto p-4 sm:p-6 md:p-8">
+    <!-- Page header -->
+    <div class="mb-5 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+      <div>
+        <h1 class="text-[23px] font-bold leading-[30px] tracking-[-0.01em] text-ink">Paquetes</h1>
+        <div class="mt-0.5 text-[13px] text-ink-3 tabular-nums">{{ pagination().count | number }} paquetes</div>
+      </div>
+      <div class="flex items-center gap-2.5 sm:ml-auto">
+        <button mat-flat-button [color]="'primary'" (click)="openCreate()">
+          <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+          <span class="ml-2">Nuevo</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Section sub-navigation -->
+    <app-finanzas-nav></app-finanzas-nav>
+
+    <div class="bg-card rounded-card w-full overflow-hidden">
+      <!-- Card header: search + pager -->
+      <div class="flex flex-wrap items-center gap-3 border-b border-line px-5 pb-3 pt-4">
+        <label
+          class="flex h-9 w-60 items-center gap-2 rounded-[9px] border border-line-strong bg-surface px-3 text-[13px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+          <mat-icon class="icon-size-4 text-ink-3" [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+          <input
+            class="w-full border-0 bg-transparent outline-none placeholder:text-ink-3"
+            placeholder="Buscar por nombre"
+            [formControl]="searchControl" />
+        </label>
+        <div class="ml-auto" [class.opacity-60]="!isDataLoaded()" [class.pointer-events-none]="!isDataLoaded()">
+          <mg-pager
+            [limit]="pagination().limit"
+            [offset]="pagination().offset"
+            [count]="pagination().count"
+            (pageChange)="onPageChange($event)">
+          </mg-pager>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full border-collapse">
+          <thead>
+            <tr>
+              <th class="w-20 border-b border-line px-3.5 py-2.5 pl-5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Id</th>
+              <th class="border-b border-line px-3.5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Nombre</th>
+              <th class="w-[210px] border-b border-line px-3.5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Comidas incluidas</th>
+              <th class="w-[170px] border-b border-line px-3.5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Facturación</th>
+              <th class="w-[140px] border-b border-line px-3.5 py-2.5 text-right text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Precio por día</th>
+              <th class="w-[60px] border-b border-line px-3.5 py-2.5"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (!isDataLoaded()) {
+              @for (i of skeletonRows; track i) {
+                <tr>
+                  <td class="border-b border-line px-3.5 py-3 pl-5" colspan="6">
+                    <div class="h-5 w-full animate-pulse rounded bg-ink/[.06]"></div>
+                  </td>
+                </tr>
+              }
+            } @else {
+              @for (pkg of packages(); track pkg.id) {
+                <tr class="hover:bg-ink/[.025]">
+                  <td class="border-b border-line px-3.5 py-3 pl-5 font-mono text-[12px] text-ink-3 tabular-nums">{{ pkg.id }}</td>
+                  <td class="border-b border-line px-3.5 py-3">
+                    <div class="text-[13.5px] font-semibold text-ink">{{ pkg.displayLabel }}</div>
+                    <div class="mt-0.5 text-[12px] text-ink-3 tabular-nums">
+                      <span class="font-mono">{{ pkg.code }}</span>
+                      @if (pkg.consultPrice) {
+                        <span> · Consulta {{ pkg.consultPrice | currency: 'MXN' : 'symbol-narrow' }}</span>
+                      }
+                    </div>
+                  </td>
+                  <td class="border-b border-line px-3.5 py-3">
+                    @if (packageMealCodes(pkg); as codes) {
+                      @if (codes.length) {
+                        <div class="flex flex-wrap gap-1.5">
+                          @for (code of codes; track code) {
+                            <mg-pill variant="brand" size="sm">{{ code }}</mg-pill>
+                          }
+                        </div>
+                      } @else {
+                        <span class="text-[13px] text-ink-3">—</span>
+                      }
+                    }
+                  </td>
+                  <td class="border-b border-line px-3.5 py-3">
+                    @if (pkg.monthDiscount) {
+                      <mg-pill variant="neutral" size="sm">−{{ pkg.monthDiscount | currency: 'MXN' : 'symbol-narrow' }} / mes</mg-pill>
+                    } @else {
+                      <span class="text-[13px] text-ink-3">—</span>
+                    }
+                  </td>
+                  <td class="border-b border-line px-3.5 py-3 text-right text-[14.5px] font-bold text-ink tabular-nums">
+                    {{ pkg.pricePerDay | currency: 'MXN' : 'symbol-narrow' }}
+                  </td>
+                  <td class="border-b border-line px-3.5 py-3">
+                    <button
+                      type="button"
+                      class="grid h-[30px] w-[30px] place-items-center rounded-lg text-ink-3 hover:bg-brand-tint hover:text-ink"
+                      [matMenuTriggerFor]="packageMenu"
+                      (menuOpened)="menuPackage.set(pkg)"
+                      aria-label="Acciones">
+                      <mat-icon class="icon-size-[17px] text-current" [svgIcon]="'heroicons_outline:ellipsis-horizontal'"></mat-icon>
+                    </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6">
+                    <mg-empty-state
+                      icon="heroicons_outline:cube"
+                      title="Sin paquetes"
+                      message="Ajusta la búsqueda o registra un nuevo paquete.">
+                    </mg-empty-state>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <mat-menu #packageMenu="matMenu">
+        @if (menuPackage(); as pkg) {
+          <button mat-menu-item (click)="edit(pkg)">
+            <mat-icon [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+            <span>Editar</span>
+          </button>
+          <button mat-menu-item (click)="delete(pkg)">
+            <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+            <span>Eliminar</span>
+          </button>
+        }
+      </mat-menu>
+    </div>
+  </div>
+</div>

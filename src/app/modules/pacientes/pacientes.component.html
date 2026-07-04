@@ -1,0 +1,142 @@
+<div class="flex flex-col flex-auto w-full">
+  <div class="flex flex-col w-full max-w-screen-xl mx-auto p-4 sm:p-6 md:p-8">
+    <!-- Page header -->
+    <div class="mb-5 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+      <div>
+        <h1 class="text-[23px] font-bold leading-[30px] tracking-[-0.01em] text-ink">Pacientes</h1>
+        <div class="mt-0.5 text-[13px] text-ink-3 tabular-nums">{{ subtitle() }}</div>
+      </div>
+      <div class="flex items-center gap-2.5 sm:ml-auto">
+        <button mat-flat-button [color]="'primary'" (click)="openCreate()">
+          <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+          <span class="ml-2">Nuevo paciente</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="bg-card rounded-card w-full overflow-hidden">
+      <!-- Card header: search + filter chips + pager -->
+      <div class="flex flex-wrap items-center gap-3 border-b border-line px-5 pb-3 pt-4">
+        <label
+          class="flex h-9 w-60 items-center gap-2 rounded-[9px] border border-line-strong bg-surface px-3 text-[13px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+          <mat-icon class="icon-size-4 text-ink-3" [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+          <input
+            class="w-full border-0 bg-transparent outline-none placeholder:text-ink-3"
+            placeholder="Buscar por nombre"
+            [formControl]="searchControl" />
+        </label>
+        <mg-chip-row>
+          @for (f of filters; track f.value) {
+            <mg-chip [active]="filter() === f.value" (click)="setFilter(f.value)">{{ f.label }}</mg-chip>
+          }
+        </mg-chip-row>
+        <div class="ml-auto" [class.opacity-60]="!isDataLoaded()" [class.pointer-events-none]="!isDataLoaded()">
+          <mg-pager
+            [limit]="pagination().limit"
+            [offset]="pagination().offset"
+            [count]="pagination().count"
+            (pageChange)="onPageChange($event)">
+          </mg-pager>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full border-collapse">
+          <thead>
+            <tr>
+              <th class="border-b border-line px-3.5 py-2.5 pl-5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Paciente</th>
+              <th class="w-[90px] border-b border-line px-3.5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Kcal</th>
+              <th class="border-b border-line px-3.5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Paquete</th>
+              <th class="w-[140px] border-b border-line px-3.5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Celular</th>
+              <th class="w-[170px] border-b border-line px-3.5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Último día</th>
+              <th class="w-[60px] border-b border-line px-3.5 py-2.5"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (!isDataLoaded()) {
+              @for (i of skeletonRows; track i) {
+                <tr>
+                  <td class="border-b border-line px-3.5 py-3 pl-5" colspan="6">
+                    <div class="h-8 w-full animate-pulse rounded bg-ink/[.06]"></div>
+                  </td>
+                </tr>
+              }
+            } @else {
+              @for (patient of patients(); track patient.id) {
+                <tr class="cursor-pointer hover:bg-ink/[.025]" (click)="openPatient(patient)">
+                  <td class="border-b border-line px-3.5 py-3 pl-5">
+                    <div class="flex items-center gap-3">
+                      <nb-init size="sm" [name]="fullName(patient)"></nb-init>
+                      <div class="min-w-0">
+                        <div class="text-[13.5px] font-semibold text-ink truncate">{{ fullName(patient) }}</div>
+                        <div class="text-[12.5px] text-ink-3 truncate">{{ patient.email || '—' }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="border-b border-line px-3.5 py-3 text-[13px] text-ink-2 tabular-nums">
+                    {{ patient.calorieLevel?.kcal ? (patient.calorieLevel!.kcal | number) : '—' }}
+                  </td>
+                  <td class="border-b border-line px-3.5 py-3 text-[13px] text-ink-2">{{ patient.packageName || '—' }}</td>
+                  <td class="border-b border-line px-3.5 py-3 text-[13px] text-ink-2 tabular-nums">{{ patient.cellphone || '—' }}</td>
+                  <td class="border-b border-line px-3.5 py-3">
+                    @if (patient.lastDay) {
+                      @if (isDueToday(patient.lastDay)) {
+                        <mg-pill variant="amber" size="sm">hoy · {{ patient.lastDay | date: 'dd MMM' }}</mg-pill>
+                      } @else {
+                        <span class="text-[13px] text-ink-2 tabular-nums">{{ patient.lastDay | date: 'dd MMM' }}</span>
+                      }
+                    } @else {
+                      <span class="text-[13px] text-ink-3">—</span>
+                    }
+                  </td>
+                  <td class="border-b border-line px-3.5 py-3">
+                    <button
+                      type="button"
+                      class="grid h-[30px] w-[30px] place-items-center rounded-lg text-ink-3 hover:bg-brand-tint hover:text-ink"
+                      [matMenuTriggerFor]="patientMenu"
+                      (click)="$event.stopPropagation()"
+                      (menuOpened)="menuPatient.set(patient)"
+                      aria-label="Acciones">
+                      <mat-icon class="icon-size-[17px] text-current" [svgIcon]="'heroicons_outline:ellipsis-horizontal'"></mat-icon>
+                    </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6">
+                    <mg-empty-state
+                      icon="heroicons_outline:users"
+                      title="Sin pacientes"
+                      message="Ajusta la búsqueda o registra un nuevo paciente.">
+                      <button mat-stroked-button (click)="openCreate()">
+                        <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                        <span class="ml-2">Nuevo paciente</span>
+                      </button>
+                    </mg-empty-state>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <mat-menu #patientMenu="matMenu">
+        @if (menuPatient(); as patient) {
+          <button mat-menu-item (click)="openPatient(patient)">
+            <mat-icon [svgIcon]="'heroicons_outline:folder-open'"></mat-icon>
+            <span>Ver expediente</span>
+          </button>
+          <button mat-menu-item (click)="edit(patient)">
+            <mat-icon [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+            <span>Editar</span>
+          </button>
+          <button mat-menu-item (click)="toggleStatus(patient)">
+            <mat-icon [svgIcon]="'heroicons_outline:power'"></mat-icon>
+            <span>{{ (patient.status || '').toLowerCase() === 'activo' ? 'Marcar inactivo' : 'Marcar activo' }}</span>
+          </button>
+        }
+      </mat-menu>
+    </div>
+  </div>
+</div>

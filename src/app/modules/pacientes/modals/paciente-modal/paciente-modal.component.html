@@ -1,0 +1,184 @@
+<mg-modal-shell [title]="title()" subtitle="Datos, evaluación inicial y plan nutricional" (closed)="closeDialog()">
+  <form class="flex flex-col gap-6 p-5" [formGroup]="form">
+
+    <!-- 1. Información general -->
+    <section>
+      <div class="mb-3 text-[11px] font-bold uppercase tracking-[.07em] text-ink-3">Información general</div>
+      <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+        <div>
+          <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Nombre *</label>
+          <label class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+            <input formControlName="firstName" placeholder="Nombre" class="w-full border-0 bg-transparent outline-none placeholder:text-ink-3" />
+          </label>
+          @if (showError('firstName')) { <div class="mt-1 text-[12.5px] text-rose">El nombre es obligatorio</div> }
+        </div>
+        <div>
+          <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Apellidos *</label>
+          <label class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+            <input formControlName="lastName" placeholder="Apellidos" class="w-full border-0 bg-transparent outline-none placeholder:text-ink-3" />
+          </label>
+          @if (showError('lastName')) { <div class="mt-1 text-[12.5px] text-rose">Los apellidos son obligatorios</div> }
+        </div>
+        <div>
+          <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Email</label>
+          <label class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+            <input type="email" formControlName="email" placeholder="correo@ejemplo.com" class="w-full border-0 bg-transparent outline-none placeholder:text-ink-3" />
+          </label>
+          @if (showError('email')) { <div class="mt-1 text-[12.5px] text-rose">Ingresa un email válido</div> }
+        </div>
+        <div>
+          <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Celular</label>
+          <label class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+            <input formControlName="cellphone" placeholder="10 dígitos" class="w-full border-0 bg-transparent outline-none tabular-nums placeholder:text-ink-3" />
+          </label>
+        </div>
+        <div>
+          <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Cumpleaños</label>
+          <label class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+            <input type="date" formControlName="birthday" class="w-full border-0 bg-transparent outline-none tabular-nums placeholder:text-ink-3" />
+          </label>
+        </div>
+        <div>
+          <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Género</label>
+          <mg-compact-select size="field" placeholder="Elegir" [options]="genderOptions" formControlName="gender"></mg-compact-select>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Entrega -->
+    <section>
+      <div class="mb-3 text-[11px] font-bold uppercase tracking-[.07em] text-ink-3">Entrega</div>
+      <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-[2fr_1fr_1fr]" formGroupName="address">
+        <div>
+          <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Calle y número *</label>
+          <label class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+            <input formControlName="street" placeholder="Calle y número" class="w-full border-0 bg-transparent outline-none placeholder:text-ink-3" />
+          </label>
+          @if (showError('address.street')) { <div class="mt-1 text-[12.5px] text-rose">La dirección es obligatoria</div> }
+        </div>
+        <div>
+          <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">CP</label>
+          <label class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+            <input formControlName="zipCode" placeholder="00000" class="w-full border-0 bg-transparent outline-none tabular-nums placeholder:text-ink-3" />
+          </label>
+        </div>
+        <div>
+          <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Colonia</label>
+          <label class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+            <input formControlName="neighborhood" placeholder="Colonia" class="w-full border-0 bg-transparent outline-none placeholder:text-ink-3" />
+          </label>
+        </div>
+      </div>
+      <div class="mt-2.5 grid grid-cols-1 gap-2.5 sm:grid-cols-[1fr_auto] sm:items-center">
+        <div>
+          <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Semana de entrega</label>
+          <mg-compact-select size="field" placeholder="Elegir" [options]="weekOptions" formControlName="week"></mg-compact-select>
+        </div>
+        <label class="flex cursor-pointer items-center gap-2 pt-6 text-[13px] text-ink">
+          <input type="checkbox" class="accent-brand" formControlName="tuppers" />
+          <span>Entrega en tuppers propios</span>
+        </label>
+      </div>
+    </section>
+
+    <!-- 3. Evaluación inicial -->
+    <section>
+      <div class="mb-3 text-[11px] font-bold uppercase tracking-[.07em] text-ink-3">Evaluación inicial</div>
+      <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-4" formGroupName="evaluation">
+        @for (field of evaluationFields; track field.key) {
+          <div>
+            <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">{{ field.label }}</label>
+            <label class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+              <input type="number" [formControlName]="field.key" placeholder="0" class="w-full border-0 bg-transparent text-right outline-none tabular-nums placeholder:text-ink-3" />
+            </label>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- 4. Enfermedades -->
+    <section>
+      <div class="mb-3 text-[11px] font-bold uppercase tracking-[.07em] text-ink-3">Enfermedades</div>
+      @if (diseases().length) {
+        <div class="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3">
+          @for (disease of diseases(); track disease.id) {
+            <label class="flex cursor-pointer items-center gap-2 text-[13px] text-ink">
+              <input type="checkbox" class="accent-brand" [checked]="isDiseaseSelected(disease.id)" (change)="toggleDisease(disease.id)" />
+              <span class="truncate">{{ disease.name }}</span>
+            </label>
+          }
+        </div>
+      }
+      <div class="mt-3">
+        <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Otras enfermedades</label>
+        <label class="flex rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+          <textarea rows="2" formControlName="otherDiseases" placeholder="Opcional" class="w-full resize-none border-0 bg-transparent py-2.5 outline-none placeholder:text-ink-3"></textarea>
+        </label>
+      </div>
+    </section>
+
+    <!-- 5. Preferencias alimenticias -->
+    <section>
+      <div class="mb-3 text-[11px] font-bold uppercase tracking-[.07em] text-ink-3">Preferencias alimenticias</div>
+      <div>
+        <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Ingredientes que no come</label>
+        <mg-compact-select size="field" placeholder="Agregar ingrediente" [options]="availableIngredientOptions()"
+          [ngModel]="preferencePicker()" [ngModelOptions]="{ standalone: true }" (ngModelChange)="addPreference($event)">
+        </mg-compact-select>
+        @if (selectedPreferences().length) {
+          <div class="mt-2 flex flex-wrap gap-1.5">
+            @for (pref of selectedPreferences(); track pref.id) {
+              <span class="inline-flex h-6 items-center gap-1 rounded-full bg-amber-tint px-2.5 text-[12px] font-semibold text-amber">
+                {{ pref.name }}
+                <button type="button" (click)="removePreference(pref.id)" class="grid h-4 w-4 place-items-center rounded-full hover:bg-amber/20" aria-label="Quitar">
+                  <mat-icon class="icon-size-[13px] text-current" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                </button>
+              </span>
+            }
+          </div>
+        }
+      </div>
+      <div class="mt-3">
+        <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Otras preferencias</label>
+        <label class="flex rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+          <textarea rows="2" formControlName="otherPreferences" placeholder="Opcional" class="w-full resize-none border-0 bg-transparent py-2.5 outline-none placeholder:text-ink-3"></textarea>
+        </label>
+      </div>
+    </section>
+
+    <!-- 6. Plan nutricional -->
+    <section>
+      <div class="mb-3 text-[11px] font-bold uppercase tracking-[.07em] text-ink-3">Plan nutricional</div>
+      <div class="mb-3 max-w-[240px]">
+        <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Calorías *</label>
+        <mg-compact-select size="field" placeholder="Elegir nivel" [options]="calorieOptions()" formControlName="calorieLevelId"></mg-compact-select>
+        @if (showError('calorieLevelId')) { <div class="mt-1 text-[12.5px] text-rose">El nivel calórico es obligatorio</div> }
+      </div>
+      <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5" formGroupName="nutritionPlan">
+        @for (ration of rations; track ration.key) {
+          <div>
+            <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">{{ ration.label }}</label>
+            <label class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+              <input type="number" [formControlName]="ration.key" placeholder="0" class="w-full border-0 bg-transparent text-right outline-none tabular-nums placeholder:text-ink-3" />
+            </label>
+          </div>
+        }
+      </div>
+    </section>
+  </form>
+
+  <div mgModalInfo>
+    <div class="text-[12px] text-ink-3">Quedará inactivo hasta registrar su primera venta.</div>
+  </div>
+
+  <ng-container mgModalActions>
+    <button type="button" mat-stroked-button (click)="closeDialog()">Cancelar</button>
+    <button mat-flat-button [color]="'primary'" [disabled]="formDisabled()" (click)="save()">
+      @if (!formDisabled()) {
+        <span>Guardar paciente</span>
+      } @else {
+        <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+      }
+    </button>
+  </ng-container>
+</mg-modal-shell>

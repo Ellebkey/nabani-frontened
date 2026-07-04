@@ -1,29 +1,310 @@
-<!-- Canonical page container (design-spec §2.1 .mg-page) -->
-<div class="flex w-full max-w-screen-xl flex-col mx-auto p-4 sm:p-6 md:p-8">
+<div class="flex flex-col flex-auto w-full">
+  <div class="flex w-full max-w-screen-xl flex-col mx-auto p-4 sm:p-6 md:p-8">
 
-  <!-- Pagehead -->
-  <div class="mb-5 flex items-start gap-4">
-    <div class="min-w-0">
-      <h1 class="text-[23px] font-bold tracking-[-0.01em] text-ink">
-        Hoy <span class="font-normal text-ink-3">· {{ today }}</span>
-      </h1>
-      <div class="mt-0.5 text-[13px] text-ink-3">
-        Panel del día — pacientes con entrega, pendientes y producción.
-      </div>
-    </div>
-  </div>
-
-  <!-- Card -->
-  <div class="rounded-card bg-card p-6">
-    <div class="flex items-center gap-3">
-      <nb-init size="lg" [initials]="'NB'"></nb-init>
+    <!-- Pagehead (design-spec §4.1) -->
+    <div class="mb-5 flex flex-col items-start gap-4 sm:flex-row">
       <div class="min-w-0">
-        <div class="text-[15px] font-semibold text-ink">Bienvenida a Nabani</div>
-        <div class="mt-0.5 text-[13px] text-ink-3">
-          El tablero de Hoy se construye en la siguiente fase. La estructura, la marca
-          y la navegación ya están listas.
+        <h1 class="text-[23px] font-bold tracking-[-0.01em] text-ink">
+          Hoy <span class="font-normal text-ink-3">· {{ longDate }}</span>
+        </h1>
+        <div class="mt-0.5 text-[13px] text-ink-3 tabular-nums">
+          @if (today(); as t) {
+            {{ t.metrics.deliveriesToday }} pacientes activos con entrega hoy
+          } @else {
+            Panel del día — pacientes con entrega, pendientes y producción.
+          }
         </div>
       </div>
+      <div class="flex items-center gap-2.5 sm:ml-auto">
+        <button mat-stroked-button routerLink="/produccion">
+          <mat-icon class="icon-size-4" svgIcon="heroicons_outline:printer"></mat-icon>
+          <span class="ml-2">Imprimir mapa</span>
+        </button>
+      </div>
     </div>
+
+    @if (!isLoaded()) {
+      <!-- Skeletons -->
+      <div class="mb-5 rounded-card bg-card p-5">
+        <div class="grid grid-cols-1 gap-4 lg:grid-cols-4">
+          @for (i of skeletonCols; track i) {
+            <div class="h-20 animate-pulse rounded-lg bg-ink/[.06]"></div>
+          }
+        </div>
+      </div>
+      <div class="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_380px]">
+        <div class="h-80 animate-pulse rounded-card bg-ink/[.06]"></div>
+        <div class="h-80 animate-pulse rounded-card bg-ink/[.06]"></div>
+      </div>
+    } @else {
+
+      <!-- Pipeline of the day (design-spec §4.1) -->
+      @if (today(); as t) {
+        <div class="mb-5 overflow-hidden rounded-card bg-card">
+          <div class="grid grid-cols-1 lg:grid-cols-4">
+
+            <!-- 1 · Menú del día -->
+            <a
+              routerLink="/planeacion"
+              class="group flex items-start gap-3 border-b border-line p-5 last:border-b-0 hover:bg-ink/[.02] lg:border-b-0 lg:border-r lg:last:border-r-0">
+              <div class="min-w-0 flex-1">
+                <div class="text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">1 · Menú del día</div>
+                <div class="mt-2 flex items-center gap-2">
+                  @if (t.pipeline.menuDelDia.done) {
+                    <mat-icon class="icon-size-5 text-teal" svgIcon="heroicons_outline:check-circle"></mat-icon>
+                    <span class="text-[15px] font-semibold text-ink capitalize">{{ t.pipeline.menuDelDia.status || 'Completo' }}</span>
+                  } @else {
+                    <mat-icon class="icon-size-5 text-ink-3" svgIcon="heroicons_outline:clock"></mat-icon>
+                    <span class="text-[15px] font-semibold text-ink capitalize">{{ t.pipeline.menuDelDia.status || 'Pendiente' }}</span>
+                  }
+                </div>
+                <div class="mt-1 text-[12.5px] text-ink-3 tabular-nums">{{ t.pipeline.menuDelDia.mealsAssigned }} comidas asignadas</div>
+              </div>
+              <mat-icon class="icon-size-4 text-ink-3 opacity-0 transition-opacity group-hover:opacity-100" svgIcon="heroicons_outline:arrow-right"></mat-icon>
+            </a>
+
+            <!-- 2 · Ajustes por paciente -->
+            <a
+              routerLink="/planeacion"
+              class="group flex items-start gap-3 border-b border-line p-5 last:border-b-0 hover:bg-ink/[.02] lg:border-b-0 lg:border-r lg:last:border-r-0">
+              <div class="min-w-0 flex-1">
+                <div class="text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">2 · Ajustes por paciente</div>
+                <div class="mt-2 flex items-center gap-2">
+                  @if (t.pipeline.ajustes.conflictos > 0) {
+                    <span class="grid h-6 min-w-6 place-items-center rounded-full bg-amber-tint px-1.5 text-[12px] font-bold text-amber tabular-nums">{{ t.pipeline.ajustes.conflictos }}</span>
+                    <span class="text-[15px] font-semibold text-ink">por revisar</span>
+                  } @else {
+                    <mat-icon class="icon-size-5 text-teal" svgIcon="heroicons_outline:check-circle"></mat-icon>
+                    <span class="text-[15px] font-semibold text-ink">Todo listo</span>
+                  }
+                </div>
+                <div class="mt-1 text-[12.5px] text-ink-3 tabular-nums">{{ t.pipeline.ajustes.listos }} listos automáticamente · {{ t.pipeline.ajustes.total }} pacientes</div>
+              </div>
+              <mat-icon class="icon-size-4 text-ink-3 opacity-0 transition-opacity group-hover:opacity-100" svgIcon="heroicons_outline:arrow-right"></mat-icon>
+            </a>
+
+            <!-- 3 · Autorización -->
+            <a
+              routerLink="/planeacion"
+              class="group flex items-start gap-3 border-b border-line p-5 last:border-b-0 hover:bg-ink/[.02] lg:border-b-0 lg:border-r lg:last:border-r-0">
+              <div class="min-w-0 flex-1">
+                <div class="text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">3 · Autorización</div>
+                <div class="mt-2 flex items-center gap-2">
+                  @if (t.pipeline.autorizacion.adeudos > 0) {
+                    <span class="grid h-6 min-w-6 place-items-center rounded-full bg-amber-tint px-1.5 text-[12px] font-bold text-amber tabular-nums">{{ t.pipeline.autorizacion.adeudos }}</span>
+                    <span class="text-[15px] font-semibold text-ink">con adeudo</span>
+                  } @else {
+                    <mat-icon class="icon-size-5 text-teal" svgIcon="heroicons_outline:check-circle"></mat-icon>
+                    <span class="text-[15px] font-semibold text-ink">Autorizado</span>
+                  }
+                </div>
+                <div class="mt-1 text-[12.5px] text-ink-3 tabular-nums">{{ t.pipeline.autorizacion.autorizados }} autorizados · {{ t.pipeline.autorizacion.pendientes }} pendientes</div>
+              </div>
+              <mat-icon class="icon-size-4 text-ink-3 opacity-0 transition-opacity group-hover:opacity-100" svgIcon="heroicons_outline:arrow-right"></mat-icon>
+            </a>
+
+            <!-- 4 · Producción -->
+            <a
+              routerLink="/produccion"
+              class="group flex items-start gap-3 border-b border-line p-5 last:border-b-0 hover:bg-ink/[.02] lg:border-b-0 lg:border-r lg:last:border-r-0">
+              <div class="min-w-0 flex-1">
+                <div class="text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">4 · Producción</div>
+                <div class="mt-2 flex items-center gap-2">
+                  <mat-icon class="icon-size-5 text-brand" svgIcon="heroicons_outline:printer"></mat-icon>
+                  <span class="text-[15px] font-semibold text-ink">Mapa y etiquetas</span>
+                </div>
+                <div class="mt-1 text-[12.5px] text-ink-3 tabular-nums">
+                  @if (t.pipeline.produccion.total > 0 && t.pipeline.produccion.ready >= t.pipeline.produccion.total) {
+                    Listos para imprimir
+                  } @else {
+                    {{ t.pipeline.produccion.ready }}/{{ t.pipeline.produccion.total }} listos
+                  }
+                </div>
+              </div>
+              <mat-icon class="icon-size-4 text-ink-3 opacity-0 transition-opacity group-hover:opacity-100" svgIcon="heroicons_outline:arrow-right"></mat-icon>
+            </a>
+
+          </div>
+        </div>
+      }
+
+      <!-- Two-column body: 1fr (atención + semana) / 380px (admin) -->
+      <div [class]="isAdmin() ? 'grid grid-cols-1 gap-5 lg:grid-cols-[1fr_380px]' : 'grid grid-cols-1 gap-5'">
+
+        <!-- LEFT column (1fr) -->
+        <div class="flex min-w-0 flex-col gap-5">
+
+          <!-- Requiere atención -->
+          <div class="overflow-hidden rounded-card bg-card">
+            <div class="flex items-center gap-2.5 border-b border-line px-5 pb-3 pt-4">
+              <h2 class="text-[15px] font-semibold text-ink">Requiere atención</h2>
+              <span class="ml-auto text-[11px] font-bold uppercase tracking-[.06em] text-ink-3 tabular-nums">{{ attentionCount() }}</span>
+            </div>
+
+            @if (attention(); as a) {
+              @if (hasAttention()) {
+                <div class="divide-y divide-line">
+
+                  @for (c of a.conflicts; track c.deliveryDayId) {
+                    <a routerLink="/planeacion" class="grid grid-cols-[1fr_auto] items-center gap-x-3.5 px-5 py-[13px] hover:bg-ink/[.025]">
+                      <div class="min-w-0">
+                        <div class="truncate text-[14px] font-semibold text-ink">{{ c.patientName }}</div>
+                        <div class="mt-1 flex flex-wrap items-center gap-1.5">
+                          @if (c.preferenceConflicts > 0) {
+                            <mg-pill variant="amber" size="sm">Preferencia</mg-pill>
+                          }
+                          @if (c.diseaseConflicts > 0) {
+                            <span class="inline-flex h-5 items-center rounded-full bg-blue-tint px-2 text-[11px] font-semibold text-blue">Enfermedad</span>
+                          }
+                          @if (!c.preferenceConflicts && !c.diseaseConflicts) {
+                            <mg-pill variant="neutral" size="sm">Conflicto</mg-pill>
+                          }
+                        </div>
+                      </div>
+                      <mat-icon class="icon-size-4 text-ink-3" svgIcon="heroicons_outline:chevron-right"></mat-icon>
+                    </a>
+                  }
+
+                  @for (p of a.overduePayments; track p.paymentId) {
+                    <a routerLink="/finanzas" class="grid grid-cols-[1fr_auto] items-center gap-x-3.5 px-5 py-[13px] hover:bg-ink/[.025]">
+                      <div class="min-w-0">
+                        <div class="truncate text-[14px] font-semibold text-ink">{{ p.patientName }}</div>
+                        <div class="mt-1 flex flex-wrap items-center gap-1.5 text-[12.5px] text-ink-3">
+                          <mg-pill variant="rose" size="sm">Adeudo</mg-pill>
+                          <span class="tabular-nums">Vencido hace {{ p.agingDays }} días</span>
+                        </div>
+                      </div>
+                      <div class="text-right text-[14.5px] font-bold text-rose tabular-nums">{{ p.amount | currency: 'MXN' : 'symbol-narrow' }}</div>
+                    </a>
+                  }
+
+                  @for (e of a.expiringPackages; track e.patientId) {
+                    <a routerLink="/pacientes" class="grid grid-cols-[1fr_auto] items-center gap-x-3.5 px-5 py-[13px] hover:bg-ink/[.025]">
+                      <div class="min-w-0">
+                        <div class="truncate text-[14px] font-semibold text-ink">{{ e.patientName }}</div>
+                        <div class="mt-1 flex flex-wrap items-center gap-1.5 text-[12.5px] text-ink-3">
+                          <mg-pill variant="amber" size="sm">Vence</mg-pill>
+                          <span class="tabular-nums">{{ e.daysUntil > 0 ? 'En ' + e.daysUntil + ' días' : 'Hoy' }}</span>
+                        </div>
+                      </div>
+                      <mat-icon class="icon-size-4 text-ink-3" svgIcon="heroicons_outline:chevron-right"></mat-icon>
+                    </a>
+                  }
+
+                  @if (a.missingMenu.length > 0) {
+                    <a routerLink="/planeacion" class="grid grid-cols-[1fr_auto] items-center gap-x-3.5 px-5 py-[13px] hover:bg-ink/[.025]">
+                      <div class="min-w-0">
+                        <div class="truncate text-[14px] font-semibold text-ink">{{ missingMenuNames() }}</div>
+                        <div class="mt-1 flex flex-wrap items-center gap-1.5">
+                          <mg-pill variant="neutral" size="sm">Sin menú · {{ a.missingMenu.length }}</mg-pill>
+                        </div>
+                      </div>
+                      <mat-icon class="icon-size-4 text-ink-3" svgIcon="heroicons_outline:chevron-right"></mat-icon>
+                    </a>
+                  }
+
+                </div>
+              } @else {
+                <mg-empty-state
+                  icon="heroicons_outline:check-circle"
+                  title="Todo en orden"
+                  message="No hay pendientes que requieran tu atención hoy.">
+                </mg-empty-state>
+              }
+            }
+          </div>
+
+          <!-- La semana -->
+          <div class="overflow-hidden rounded-card bg-card">
+            <div class="flex items-center gap-2.5 border-b border-line px-5 pb-3 pt-4">
+              <h2 class="text-[15px] font-semibold text-ink">La semana</h2>
+              <a routerLink="/planeacion" class="ml-auto inline-flex items-center gap-1 text-[13px] font-semibold text-brand hover:underline">Planear semana →</a>
+            </div>
+            <div class="p-5">
+              @if (week(); as w) {
+                <div class="grid grid-cols-7 gap-1.5">
+                  @for (day of w.days; track day.date) {
+                    <div
+                      class="flex min-h-[76px] flex-col items-center justify-center gap-2 rounded-[10px] p-2.5 text-center"
+                      [class.border]="!isToday(day.date)"
+                      [class.border-line]="!isToday(day.date)"
+                      [class.border-2]="isToday(day.date)"
+                      [class.border-brand]="isToday(day.date)"
+                      [class.bg-brand-tint]="isToday(day.date)">
+                      <span class="text-[10.5px] font-semibold uppercase tracking-[.04em] text-ink-3">{{ weekdayLabel(day.date) }}</span>
+                      @switch (day.status) {
+                        @case ('completo') {
+                          <mat-icon class="icon-size-4 text-teal" svgIcon="heroicons_outline:check"></mat-icon>
+                        }
+                        @case ('ajustes') {
+                          <span class="text-[11px] font-semibold text-amber tabular-nums">{{ day.conflictCount }} ajustes</span>
+                        }
+                        @default {
+                          <span class="text-[11px] text-ink-3">Borrador</span>
+                        }
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT column (380px) — admin only (design-spec §4.1, §8.2) -->
+        @if (isAdmin()) {
+          <div class="flex flex-col gap-5">
+
+            @if (today(); as t) {
+              <!-- Ingresos de hoy — the one hero-gold number of the screen -->
+              <div class="rounded-card bg-card p-5">
+                <div class="text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Ingresos de hoy</div>
+                <div class="mt-1 text-[30px] font-bold leading-9 text-gold tabular-nums">{{ t.metrics.incomeToday | currency: 'MXN' : 'symbol-narrow' }}</div>
+                <div class="mt-0.5 text-[12.5px] text-ink-3">Total facturado del día</div>
+              </div>
+
+              <!-- Pacientes activos / Entregas hoy -->
+              <div class="grid grid-cols-2 divide-x divide-line rounded-card bg-card">
+                <div class="p-5">
+                  <div class="text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Pacientes activos</div>
+                  <div class="mt-1 text-[23px] font-bold text-ink tabular-nums">{{ t.metrics.activePatients }}</div>
+                </div>
+                <div class="p-5">
+                  <div class="text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Entregas hoy</div>
+                  <div class="mt-1 text-[23px] font-bold text-ink tabular-nums">{{ t.metrics.deliveriesToday }}</div>
+                </div>
+              </div>
+            }
+
+            <!-- Cobranza urgente -->
+            <div class="overflow-hidden rounded-card bg-card">
+              <div class="flex items-center gap-2.5 border-b border-line px-5 pb-3 pt-4">
+                <h2 class="text-[15px] font-semibold text-ink">Cobranza urgente</h2>
+              </div>
+              <div class="divide-y divide-line">
+                @for (p of topOverdue(); track p.paymentId) {
+                  <div class="grid grid-cols-[1fr_auto] items-center gap-x-3 px-5 py-[13px]">
+                    <div class="min-w-0">
+                      <div class="truncate text-[14px] font-semibold text-ink">{{ p.patientName }}</div>
+                      <div class="mt-0.5 text-[12.5px] text-rose tabular-nums">Vencido hace {{ p.agingDays }} días</div>
+                    </div>
+                    <div class="text-right text-[14.5px] font-bold text-rose tabular-nums">{{ p.amount | currency: 'MXN' : 'symbol-narrow' }}</div>
+                  </div>
+                } @empty {
+                  <div class="px-5 py-6 text-center text-[13px] text-ink-3">Sin adeudos vencidos.</div>
+                }
+              </div>
+              <a routerLink="/finanzas" class="flex items-center justify-end gap-1 border-t border-line px-5 py-3 text-[13px] font-semibold text-brand hover:bg-brand-tint">
+                Ir a Cobranza
+                <mat-icon class="icon-size-4" svgIcon="heroicons_outline:arrow-right"></mat-icon>
+              </a>
+            </div>
+
+          </div>
+        }
+
+      </div>
+    }
   </div>
 </div>

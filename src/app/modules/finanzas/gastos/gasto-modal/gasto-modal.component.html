@@ -1,0 +1,96 @@
+<mg-modal-shell [title]="title()" (closed)="closeDialog()">
+  <form class="flex flex-col gap-3.5 p-5" [formGroup]="form">
+    <div>
+      <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Beneficiario</label>
+      <label
+        class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+        <input formControlName="beneficiary" list="beneficiary-options" placeholder="Buscar o crear beneficiario"
+          class="w-full border-0 bg-transparent outline-none placeholder:text-ink-3" />
+      </label>
+      <datalist id="beneficiary-options">
+        @for (beneficiary of beneficiaries(); track beneficiary.id) {
+          <option [value]="beneficiary.name"></option>
+        }
+      </datalist>
+    </div>
+
+    <div>
+      <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Concepto *</label>
+      <label
+        class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+        <input formControlName="concept" placeholder="Concepto del gasto"
+          class="w-full border-0 bg-transparent outline-none placeholder:text-ink-3" />
+      </label>
+      @if (showError('concept')) {
+        <div class="mt-1 text-[12.5px] text-rose">El concepto es obligatorio</div>
+      }
+    </div>
+
+    <div class="grid grid-cols-2 gap-2.5">
+      <div>
+        <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Total a pagar *</label>
+        <label
+          class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+          <span class="mr-1 text-ink-3">$</span>
+          <input type="number" formControlName="totalAmount" placeholder="0.00"
+            class="w-full border-0 bg-transparent text-right outline-none tabular-nums placeholder:text-ink-3" />
+        </label>
+        @if (showError('totalAmount')) {
+          <div class="mt-1 text-[12.5px] text-rose">Requerido</div>
+        }
+      </div>
+      <div>
+        <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Fecha *</label>
+        <label
+          class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+          <input type="date" formControlName="expenseDate"
+            class="w-full border-0 bg-transparent outline-none tabular-nums placeholder:text-ink-3" />
+        </label>
+        @if (showError('expenseDate')) {
+          <div class="mt-1 text-[12.5px] text-rose">Requerida</div>
+        }
+      </div>
+    </div>
+
+    <div>
+      <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Tipo *</label>
+      <mg-chip-row>
+        @for (type of typeOptions; track type.value) {
+          <mg-chip [active]="selectedType() === type.value" (click)="selectType(type.value)">
+            {{ type.label }}
+          </mg-chip>
+        }
+      </mg-chip-row>
+    </div>
+
+    <div>
+      <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Comentarios</label>
+      <label
+        class="flex rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+        <textarea
+          rows="2"
+          formControlName="comments"
+          placeholder="Opcional"
+          class="w-full resize-none border-0 bg-transparent py-2.5 outline-none placeholder:text-ink-3"></textarea>
+      </label>
+    </div>
+  </form>
+
+  <div mgModalInfo>
+    <div class="text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Total</div>
+    <div class="text-[20px] font-bold text-ink tabular-nums">
+      {{ (formValue().totalAmount || 0) | currency: 'MXN' : 'symbol-narrow' }}
+    </div>
+  </div>
+
+  <ng-container mgModalActions>
+    <button type="button" mat-stroked-button (click)="closeDialog()">Cancelar</button>
+    <button mat-flat-button [color]="'primary'" [disabled]="formDisabled()" (click)="save()">
+      @if (!formDisabled()) {
+        <span>Guardar gasto</span>
+      } @else {
+        <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+      }
+    </button>
+  </ng-container>
+</mg-modal-shell>

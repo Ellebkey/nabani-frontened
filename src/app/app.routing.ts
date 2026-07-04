@@ -32,14 +32,12 @@ export const appRoutes: Routes = [
       },
       {
         path: 'pacientes',
-        loadComponent: () => import('./modules/shell/section-placeholder.component').then(m => m.SectionPlaceholderComponent),
-        data: {title: 'Pacientes'},
+        loadChildren: () => import('./modules/pacientes/pacientes.routing').then(m => m.PacientesRoutes),
         canActivate: [authGuardFn]
       },
       {
         path: 'finanzas',
-        loadComponent: () => import('./modules/shell/section-placeholder.component').then(m => m.SectionPlaceholderComponent),
-        data: {title: 'Finanzas'},
+        loadChildren: () => import('./modules/finanzas/finanzas.routing').then(m => m.FinanzasRoutes),
         canActivate: [authGuardFn]
       },
       {

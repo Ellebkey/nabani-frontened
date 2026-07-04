@@ -1,0 +1,97 @@
+<div class="flex flex-col flex-auto w-full">
+  <div class="flex flex-col w-full max-w-screen-xl mx-auto p-4 sm:p-6 md:p-8">
+    <!-- Page header -->
+    <div class="mb-5 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+      <div>
+        <h1 class="text-[23px] font-bold leading-[30px] tracking-[-0.01em] text-ink">Balance General</h1>
+        <div class="mt-0.5 text-[13px] text-ink-3 tabular-nums">Ingresos, gastos y ganancia del periodo</div>
+      </div>
+    </div>
+
+    <!-- Section sub-navigation -->
+    <app-finanzas-nav></app-finanzas-nav>
+
+    <!-- Date range filter -->
+    <div class="mb-5 grid w-full grid-cols-1 gap-2.5 sm:grid-cols-[320px]">
+      <app-date-range-filter [defaultPreset]="'thisMonth'" (rangeChange)="onDateRangeChange($event)">
+      </app-date-range-filter>
+    </div>
+
+    <!-- 3-figure card -->
+    <div class="bg-card rounded-card mb-5 w-full overflow-hidden">
+      @if (!isDataLoaded()) {
+        <div class="grid grid-cols-1 divide-y divide-line sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+          @for (i of [1, 2, 3]; track i) {
+            <div class="px-6 py-6">
+              <div class="h-4 w-24 animate-pulse rounded bg-ink/[.06]"></div>
+              <div class="mt-2 h-8 w-32 animate-pulse rounded bg-ink/[.06]"></div>
+            </div>
+          }
+        </div>
+      } @else if (balance(); as balance) {
+        <div class="grid grid-cols-1 divide-y divide-line sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+          <div class="px-6 py-6">
+            <div class="text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Ganancia</div>
+            <div class="mt-1 text-[30px] font-bold leading-9 text-gold tabular-nums">
+              {{ balance.ganancia | currency: 'MXN' : 'symbol-narrow' }}
+            </div>
+          </div>
+          <div class="px-6 py-6">
+            <div class="text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Ingresos</div>
+            <div class="mt-1 text-[30px] font-bold leading-9 text-teal tabular-nums">
+              +{{ balance.ingresos | currency: 'MXN' : 'symbol-narrow' }}
+            </div>
+          </div>
+          <div class="px-6 py-6">
+            <div class="text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Gastos</div>
+            <div class="mt-1 text-[30px] font-bold leading-9 text-ink tabular-nums">
+              −{{ balance.gastos | currency: 'MXN' : 'symbol-narrow' }}
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Ingresos por paquete -->
+    <div class="bg-card rounded-card w-full overflow-hidden">
+      <div class="flex flex-wrap items-center gap-3 border-b border-line px-5 pb-3 pt-4">
+        <h2 class="text-[15px] font-semibold text-ink">Ingresos por paquete</h2>
+        <div class="ml-auto text-[11px] font-bold uppercase tracking-[.06em] text-ink-3 tabular-nums">
+          {{ periodTotal() | currency: 'MXN' : 'symbol-narrow' }}
+        </div>
+      </div>
+
+      <div class="p-5">
+        @if (!isDataLoaded()) {
+          <div class="flex flex-col gap-4">
+            @for (i of [1, 2, 3, 4]; track i) {
+              <div class="h-5 w-full animate-pulse rounded bg-ink/[.06]"></div>
+            }
+          </div>
+        } @else if (packageBars().length) {
+          <div class="flex flex-col gap-4">
+            @for (bar of packageBars(); track bar.packageId) {
+              <div>
+                <div class="mb-1.5 flex items-center justify-between gap-3">
+                  <div class="flex min-w-0 items-center gap-2">
+                    <span class="truncate text-[13.5px] font-semibold text-ink">{{ bar.displayLabel }}</span>
+                    <span class="font-mono text-[11.5px] text-ink-3">{{ bar.code }}</span>
+                    <span class="text-[12px] text-ink-3 tabular-nums">· {{ bar.deliveries | number }} entregas</span>
+                  </div>
+                  <span class="flex-none text-[13.5px] font-bold text-ink tabular-nums">
+                    {{ bar.total | currency: 'MXN' : 'symbol-narrow' }}
+                  </span>
+                </div>
+                <div class="h-1.5 w-full overflow-hidden rounded-full bg-ink/[.06]">
+                  <div class="h-full rounded-full" [style.width.%]="bar.widthPercent" [style.background-color]="bar.color"></div>
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="py-6 text-center text-[13px] text-ink-3">Sin ingresos por paquete en el periodo.</div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

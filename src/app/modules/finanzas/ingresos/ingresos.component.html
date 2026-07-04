@@ -1,0 +1,89 @@
+<div class="flex flex-col flex-auto w-full">
+  <div class="flex flex-col w-full max-w-screen-xl mx-auto p-4 sm:p-6 md:p-8">
+    <!-- Page header -->
+    <div class="mb-5 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+      <div>
+        <h1 class="text-[23px] font-bold leading-[30px] tracking-[-0.01em] text-ink">Ingresos Diarios</h1>
+        <div class="mt-0.5 text-[13px] text-ink-3 tabular-nums">Ingresos por día de entrega</div>
+      </div>
+      <div class="text-right sm:ml-auto">
+        <div class="text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Total del periodo</div>
+        <div class="text-[26px] font-bold leading-tight text-gold tabular-nums">
+          {{ grandTotal() | currency: 'MXN' : 'symbol-narrow' }}
+        </div>
+        <div class="text-[12px] text-ink-3 tabular-nums">{{ individualCount() | number }} ingresos individuales</div>
+      </div>
+    </div>
+
+    <!-- Section sub-navigation -->
+    <app-finanzas-nav></app-finanzas-nav>
+
+    <!-- Date range filter -->
+    <div class="mb-5 grid w-full grid-cols-1 gap-2.5 sm:grid-cols-[320px]">
+      <app-date-range-filter [defaultPreset]="'thisMonth'" (rangeChange)="onDateRangeChange($event)">
+      </app-date-range-filter>
+    </div>
+
+    <div class="bg-card rounded-card w-full overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full border-collapse">
+          <thead>
+            <tr>
+              <th class="w-20 border-b border-line px-3.5 py-2.5 pl-5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Id</th>
+              <th class="border-b border-line px-3.5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Paciente</th>
+              <th class="border-b border-line px-3.5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Paquete</th>
+              <th class="w-[170px] border-b border-line px-3.5 py-2.5 text-right text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Ingreso por día</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (!isDataLoaded()) {
+              @for (i of skeletonRows; track i) {
+                <tr>
+                  <td class="border-b border-line px-3.5 py-3 pl-5" colspan="4">
+                    <div class="h-5 w-full animate-pulse rounded bg-ink/[.06]"></div>
+                  </td>
+                </tr>
+              }
+            } @else {
+              @for (day of days(); track day.date) {
+                <tr class="bg-ink/[.02]">
+                  <td class="border-b border-line px-3.5 py-2 pl-5 text-[11px] font-bold uppercase tracking-[.07em] text-ink-3 tabular-nums" colspan="3">
+                    {{ day.date | date: 'EEEE d MMM y' }}
+                  </td>
+                  <td class="border-b border-line px-3.5 py-2 text-right text-[13px] font-bold text-ink tabular-nums">
+                    {{ day.total | currency: 'MXN' : 'symbol-narrow' }}
+                  </td>
+                </tr>
+                @for (item of day.items; track item.deliveryDayId) {
+                  <tr class="hover:bg-ink/[.025]">
+                    <td class="border-b border-line px-3.5 py-3 pl-5 font-mono text-[12px] text-ink-3 tabular-nums">{{ item.deliveryDayId }}</td>
+                    <td class="border-b border-line px-3.5 py-3 text-[13.5px] font-semibold text-ink">{{ item.patientName }}</td>
+                    <td class="border-b border-line px-3.5 py-3 text-[13px] text-ink-2">
+                      {{ item.packageLabel }}
+                      @if (item.type) {
+                        <span class="ml-1.5 text-[11.5px] text-ink-3">· {{ item.type }}</span>
+                      }
+                    </td>
+                    <td class="border-b border-line px-3.5 py-3 text-right text-[14.5px] font-bold text-teal tabular-nums">
+                      +{{ item.amount | currency: 'MXN' : 'symbol-narrow' }}
+                    </td>
+                  </tr>
+                }
+              } @empty {
+                <tr>
+                  <td colspan="4">
+                    <mg-empty-state
+                      icon="heroicons_outline:arrow-trending-up"
+                      title="Sin ingresos en el periodo"
+                      message="Ajusta el rango de fechas para ver los ingresos diarios.">
+                    </mg-empty-state>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

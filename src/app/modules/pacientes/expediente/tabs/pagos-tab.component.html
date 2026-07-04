@@ -1,0 +1,117 @@
+@if (patient(); as patient) {
+  <div class="grid w-full grid-cols-1 gap-4 lg:grid-cols-[380px_1fr]">
+    <!-- Left column: saldo + paquete -->
+    <div class="flex flex-col gap-4">
+      <div class="bg-card rounded-card p-5">
+        <div class="text-[11px] font-bold uppercase tracking-[.07em] text-ink-3">Saldo pendiente</div>
+        <div class="text-[30px] font-bold leading-9 text-gold tabular-nums">
+          {{ saldo() | currency: 'MXN' : 'symbol-narrow' }}
+        </div>
+        @if (adeudoNote()) {
+          <div class="mt-1 text-[12.5px] font-semibold text-rose">{{ adeudoNote() }}</div>
+        }
+        <button mat-flat-button [color]="'primary'" class="mt-4 w-full" [disabled]="!unpaid().length" (click)="registrarPago()">
+          <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:banknotes'"></mat-icon>
+          <span class="ml-2">Registrar pago</span>
+        </button>
+      </div>
+
+      <div class="bg-card rounded-card">
+        <div class="px-5 pt-4">
+          <h2 class="text-[15px] font-semibold text-ink">Paquete activo</h2>
+        </div>
+        <div class="flex flex-col gap-3.5 p-5">
+          <div>
+            <div class="text-[11px] font-bold uppercase tracking-[.07em] text-ink-3">Paquete</div>
+            <div class="mt-1 text-[13.5px] font-semibold text-ink">{{ patient.packageName || '—' }}</div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <div class="text-[11px] font-bold uppercase tracking-[.07em] text-ink-3">Precio / día</div>
+              <div class="mt-1 text-[13.5px] text-ink tabular-nums">
+                {{ patient.pricePerDay != null ? (patient.pricePerDay | currency: 'MXN' : 'symbol-narrow') : '—' }}
+              </div>
+            </div>
+            <div>
+              <div class="text-[11px] font-bold uppercase tracking-[.07em] text-ink-3">Facturación</div>
+              <div class="mt-1 text-[13.5px] text-ink">{{ billingLabel(patient.billing) }}</div>
+            </div>
+          </div>
+          <div>
+            <div class="text-[11px] font-bold uppercase tracking-[.07em] text-ink-3">Vigencia</div>
+            <div class="mt-1 text-[13.5px] text-ink tabular-nums">
+              @if (patient.startDate || patient.lastDay) {
+                {{ patient.startDate ? (patient.startDate | date: 'd MMM') : '—' }} – {{ patient.lastDay ? (patient.lastDay | date: 'd MMM') : '—' }}
+              } @else {
+                —
+              }
+            </div>
+          </div>
+          @if (patient.mealCodes?.length) {
+            <div>
+              <div class="mb-2 text-[11px] font-bold uppercase tracking-[.07em] text-ink-3">Comidas</div>
+              <div class="flex flex-wrap gap-1.5">
+                @for (code of patient.mealCodes; track code) {
+                  <mg-pill variant="brand" size="sm">{{ code }}</mg-pill>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column: historial de pagos -->
+    <div class="bg-card rounded-card overflow-hidden">
+      <div class="px-5 pt-4">
+        <h2 class="text-[15px] font-semibold text-ink">Historial de pagos</h2>
+      </div>
+      <div class="mt-2 flex flex-col divide-y divide-line">
+        @if (!isLoaded()) {
+          @for (i of [1, 2, 3, 4]; track i) {
+            <div class="px-5 py-3"><div class="h-8 w-full animate-pulse rounded bg-ink/[.06]"></div></div>
+          }
+        } @else {
+          @for (payment of history(); track payment.id) {
+            <div class="flex items-center gap-3.5 px-5 py-[13px]">
+              <div class="min-w-0 flex-1">
+                <div class="text-[14px] font-semibold text-ink">
+                  @if (payment.folio) {
+                    <span class="relative -top-px mr-2 font-mono text-[11.5px] font-medium text-ink-3">{{ payment.folio }}</span>
+                  }
+                  {{ payment.paid ? 'Pagado' : 'Pendiente' }}
+                </div>
+                <div class="mt-0.5 flex flex-wrap items-center gap-1.5 text-[12.5px] text-ink-3">
+                  @if (payment.paid && payment.paidAt) {
+                    <span class="tabular-nums">{{ payment.paidAt | date: 'd MMM y' }}</span>
+                    @if (payment.method) {
+                      <span>·</span>
+                      <span>{{ methodLabel(payment.method) }}</span>
+                    }
+                  } @else if (payment.dueDate) {
+                    <span class="tabular-nums">Vence {{ payment.dueDate | date: 'd MMM y' }}</span>
+                    @if (payment.agingDays && payment.agingDays > 0) {
+                      <span>·</span>
+                      <span class="text-rose">vencido {{ payment.agingDays }} días</span>
+                    }
+                  }
+                </div>
+              </div>
+              <div class="text-right text-[14.5px] font-bold tabular-nums"
+                [class.text-teal]="payment.paid" [class.text-ink]="!payment.paid">
+                {{ payment.paid ? '+' : '' }}{{ payment.amount | currency: 'MXN' : 'symbol-narrow' }}
+              </div>
+              @if (!payment.paid) {
+                <button type="button" (click)="openPago(payment)"
+                  class="rounded-btn px-2.5 py-1 text-[12.5px] font-semibold text-brand hover:bg-brand-tint">Registrar</button>
+              }
+            </div>
+          } @empty {
+            <mg-empty-state icon="heroicons_outline:banknotes" title="Sin pagos"
+              message="Aún no hay pagos registrados para este paciente."></mg-empty-state>
+          }
+        }
+      </div>
+    </div>
+  </div>
+}

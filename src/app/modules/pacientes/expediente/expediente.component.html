@@ -1,0 +1,83 @@
+<div class="flex flex-col flex-auto w-full">
+  <div class="flex flex-col w-full max-w-screen-xl mx-auto p-4 sm:p-6 md:p-8">
+    <!-- Back link -->
+    <a routerLink="/pacientes"
+      class="mb-4 inline-flex w-fit items-center gap-1 rounded-btn px-1 text-[13px] font-semibold text-brand hover:bg-brand-tint">
+      <mat-icon class="icon-size-4 text-current" [svgIcon]="'heroicons_outline:chevron-left'"></mat-icon>
+      <span>Pacientes</span>
+    </a>
+
+    @if (patient(); as patient) {
+      <!-- Pagehead -->
+      <div class="mb-5 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+        <div class="flex items-center gap-4">
+          <nb-init size="lg" [name]="fullName(patient)"></nb-init>
+          <div>
+            <h1 class="text-[23px] font-bold leading-[30px] tracking-[-0.01em] text-ink">{{ fullName(patient) }}</h1>
+            <div class="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-[13px] text-ink-3">
+              @if (patient.calorieLevel?.kcal) {
+                <span class="tabular-nums">{{ patient.calorieLevel!.kcal | number }} kcal</span>
+                <span>·</span>
+              }
+              @if (patient.packageName) {
+                <span>{{ patient.packageName }}</span>
+                <span>·</span>
+              }
+              <span>{{ weekLabel(patient.week) }}</span>
+              @if (patient.tuppers) {
+                <span>·</span>
+                <span>Tuppers</span>
+              }
+              @if (patient.lastDay) {
+                <span>·</span>
+                <span class="text-amber tabular-nums">vence {{ patient.lastDay | date: 'dd MMM' }}</span>
+              }
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2.5 sm:ml-auto">
+          <button mat-stroked-button (click)="openVenta()">
+            <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:shopping-bag'"></mat-icon>
+            <span class="ml-2">Nueva venta</span>
+          </button>
+          <button mat-flat-button [color]="'primary'" (click)="openConsulta()">
+            <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+            <span class="ml-2">Nueva consulta</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab sub-navigation -->
+      <mg-chip-row class="mb-5">
+        @for (t of tabs; track t.value) {
+          <mg-chip [active]="tab() === t.value" (click)="setTab(t.value)">{{ t.label }}</mg-chip>
+        }
+      </mg-chip-row>
+
+      @switch (tab()) {
+        @case ('clinico') {
+          <app-clinico-tab [patientId]="patient.id" [reloadTick]="reloadTick()"></app-clinico-tab>
+        }
+        @case ('calendario') {
+          <app-calendario-tab [patientId]="patient.id" [reloadTick]="reloadTick()"></app-calendario-tab>
+        }
+        @case ('pagos') {
+          <app-pagos-tab [patient]="patient" [reloadTick]="reloadTick()" (changed)="refresh()"></app-pagos-tab>
+        }
+        @default {
+          <app-resumen-tab [patient]="patient"></app-resumen-tab>
+        }
+      }
+    } @else if (isLoaded()) {
+      <div class="bg-card rounded-card w-full py-14 text-center">
+        <div class="text-[15px] font-semibold text-ink">Paciente no encontrado</div>
+        <p class="mt-1 text-[13px] text-ink-3">Verifica el enlace o regresa al listado.</p>
+      </div>
+    } @else {
+      <div class="bg-card rounded-card w-full p-6">
+        <div class="h-8 w-1/3 animate-pulse rounded bg-ink/[.06]"></div>
+        <div class="mt-4 h-40 w-full animate-pulse rounded bg-ink/[.06]"></div>
+      </div>
+    }
+  </div>
+</div>
