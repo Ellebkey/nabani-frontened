@@ -1,62 +1,66 @@
 <!-- Loading bar -->
 <mg-loading-bar></mg-loading-bar>
 
-<!-- Navigation -->
-<mg-vertical-navigation
-  class="dark print:hidden maguey-sidebar"
-  [appearance]="'compact'"
-  [mode]="isScreenSmall() ? 'over' : 'side'"
-  [name]="'mainNavigation'"
-  [navigation]="navigation()"
-  [opened]="!isScreenSmall()">
-  <!-- Navigation header hook -->
-  <ng-container magueyVerticalNavigationContentHeader>
-    <!-- Logo -->
-    <div class="flex items-center justify-center h-20 mt-3 mb-4">
-      <img
-        class="w-16"
-        src="assets/images/logo/maguey-logo.png"
-        alt="Maguey Logo">
-    </div>
-  </ng-container>
-</mg-vertical-navigation>
+<!-- Nabani shell: 92px brand sidebar + main column -->
+<div class="nabani-shell">
 
-<!-- Wrapper -->
-<div class="flex flex-col flex-auto w-full min-w-0 bg-canvas">
+  <!-- Sidebar (92px, brand, sticky full height) -->
+  <aside class="nabani-sidebar">
+    <!-- Logo 44px r12 -->
+    <img
+      class="nabani-logo"
+      src="assets/images/logo/nabani-logo.png"
+      alt="Nabani">
 
-  <!-- Header -->
-  <div class="relative flex flex-0 items-center w-full h-16 px-4 md:px-6 z-49 print:hidden bg-card border-b border-line">
-    <!-- Navigation toggle button -->
-    <button
-      mat-icon-button
-      (click)="toggleNavigation('mainNavigation')">
-      <mat-icon [svgIcon]="'heroicons_outline:bars-3'"></mat-icon>
-    </button>
-    <!-- Components -->
-    <div class="flex items-center pl-2 ml-auto space-x-0.5 sm:space-x-2">
-      <button
-        mat-icon-button
-        [title]="resolvedScheme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
-        (click)="toggleScheme()">
-        <mat-icon [svgIcon]="resolvedScheme === 'dark' ? 'heroicons_outline:sun' : 'heroicons_outline:moon'"></mat-icon>
+    <!-- Section nav -->
+    <nav class="nabani-nav">
+      @for (item of navigation(); track item.id) {
+        <a
+          class="nb-nav-item"
+          [routerLink]="item.link"
+          routerLinkActive="nb-nav-active"
+          [attr.aria-label]="item.title">
+          <mat-icon class="icon-size-[21px]" [svgIcon]="item.icon ?? ''"></mat-icon>
+          <span>{{ item.title }}</span>
+        </a>
+      }
+    </nav>
+  </aside>
+
+  <!-- Main column -->
+  <div class="nabani-col">
+
+    <!-- Topbar (60px, card, sticky) -->
+    <header class="nabani-topbar">
+      <!-- Global search (stub → opens Búsqueda global modal later) -->
+      <button type="button" class="nb-search" (click)="openSearch()">
+        <mat-icon class="icon-size-[17px]" [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+        <span>Buscar pacientes, ventas…</span>
       </button>
-      <draft-notification></draft-notification>
-      <user></user>
-    </div>
-  </div>
 
-  <!-- Content -->
-  <div class="flex flex-col flex-auto bg-canvas">
-    @if (true) {
+      <div class="flex-1"></div>
+
+      <!-- Notifications -->
+      <button type="button" class="nb-iconbtn" aria-label="Notificaciones">
+        <mat-icon class="icon-size-[21px]" [svgIcon]="'heroicons_outline:bell'"></mat-icon>
+        <span class="nb-dot"></span>
+      </button>
+
+      <!-- User block -->
+      <user></user>
+    </header>
+
+    <!-- Page content -->
+    <main class="nabani-main">
       <router-outlet></router-outlet>
-    }
+    </main>
   </div>
 </div>
 
 <!-- Global Alert -->
 @if (alertConfig(); as alert) {
   <mg-alert
-    class="absolute bottom-0 left-1/2 transform -translate-x-1/2"
+    class="absolute bottom-0 left-1/2 transform -translate-x-1/2 nb-noprint"
     [appearance]="alert.appearance"
     [dismissible]="alert.dismissible"
     [showIcon]="alert.showIcon"

@@ -15,13 +15,6 @@ describe('NavigationService', () => {
     return items;
   };
 
-  const findChild = (
-    items: MagueyNavigationItem[],
-    parentId: string,
-    childId: string
-  ): MagueyNavigationItem | undefined =>
-    items.find(item => item.id === parentId)?.children?.find(child => child.id === childId);
-
   beforeEach(() => {
     auth = { isAdmin: jest.fn().mockReturnValue(false) };
 
@@ -32,106 +25,47 @@ describe('NavigationService', () => {
     service = TestBed.inject(NavigationService);
   });
 
-  it('should emit the full menu synchronously', () => {
-    const items = getMenu();
+  it('should expose the 6 Nabani sections to admins', () => {
+    auth.isAdmin.mockReturnValue(true);
 
-    expect(items.map(item => item.id)).toEqual([
-      'dashboard',
-      'expenses',
-      'inventory',
-      'incomes',
-      'reports',
-      'family',
-      'admin'
+    expect(getMenu().map(item => item.id)).toEqual([
+      'hoy',
+      'planeacion',
+      'produccion',
+      'pacientes',
+      'finanzas',
+      'catalogos'
     ]);
   });
 
-  it('should hide admin.categories for non-admin users', () => {
+  it('should hide Finanzas and Catálogos for non-admins (incl. nutrióloga)', () => {
     auth.isAdmin.mockReturnValue(false);
 
-    const child = findChild(getMenu(), 'admin', 'admin.categories');
-
-    expect(child?.hidden).toBeDefined();
-    expect(child!.hidden!(child!)).toBe(true);
-  });
-
-  it('should show admin.categories for admins', () => {
-    auth.isAdmin.mockReturnValue(true);
-
-    const child = findChild(getMenu(), 'admin', 'admin.categories');
-
-    expect(child!.hidden!(child!)).toBe(false);
-  });
-
-  it('should re-evaluate the admin role on every hidden() call', () => {
-    auth.isAdmin.mockReturnValue(false);
-    const child = findChild(getMenu(), 'admin', 'admin.categories')!;
-
-    expect(child.hidden!(child)).toBe(true);
-
-    auth.isAdmin.mockReturnValue(true);
-
-    expect(child.hidden!(child)).toBe(false);
-  });
-
-  it('should not attach hidden to other admin children', () => {
-    const items = getMenu();
-
-    expect(findChild(items, 'admin', 'admin.accounts')?.hidden).toBeUndefined();
-    expect(findChild(items, 'admin', 'admin.payment-methods')?.hidden).toBeUndefined();
-    expect(findChild(items, 'admin', 'admin.tags')?.hidden).toBeUndefined();
-  });
-
-  it('should keep non-admin sections untouched', () => {
-    const items = getMenu();
-    const family = items.find(item => item.id === 'family');
-
-    expect(family?.children?.map(child => child.id)).toEqual([
-      'family.spending',
-      'family.budgets',
-      'family.settings'
+    expect(getMenu().map(item => item.id)).toEqual([
+      'hoy',
+      'planeacion',
+      'produccion',
+      'pacientes'
     ]);
-    expect(family?.children?.every(child => child.hidden === undefined)).toBe(true);
+  });
+
+  it('should re-evaluate the admin role on every call', () => {
+    auth.isAdmin.mockReturnValue(false);
+    expect(getMenu()).toHaveLength(4);
+
+    auth.isAdmin.mockReturnValue(true);
+    expect(getMenu()).toHaveLength(6);
   });
 
   it('should not mutate the source menu data', () => {
     getMenu();
-
-    const sourceChild = menu
-      .find(item => item.id === 'admin')
-      ?.children?.find(child => child.id === 'admin.categories');
-
-    expect(sourceChild?.hidden).toBeUndefined();
-  });
-
-  describe('top-level items without children', () => {
-    // Every real top-level item has children, so we temporarily append a
-    // childless item to the imported menu array and restore it afterwards.
-    const orphan: MagueyNavigationItem = {
-      id: 'standalone',
-      title: 'Suelto',
-      type: 'basic',
-      link: '/standalone'
-    };
-
-    beforeEach(() => {
-      menu.push(orphan);
-    });
-
-    afterEach(() => {
-      const index = menu.indexOf(orphan);
-      if (index !== -1) {
-        menu.splice(index, 1);
-      }
-    });
-
-    it('should pass a childless top-level item through unchanged', () => {
-      const items = getMenu();
-      const result = items.find(item => item.id === 'standalone');
-
-      expect(result).toBe(orphan);
-      expect(result?.children).toBeUndefined();
-      expect(result?.hidden).toBeUndefined();
-    });
+    expect(menu.map(item => item.id)).toEqual([
+      'hoy',
+      'planeacion',
+      'produccion',
+      'pacientes',
+      'finanzas',
+      'catalogos'
+    ]);
   });
 });

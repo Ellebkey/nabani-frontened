@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { MagueyNavigationItem } from '@maguey/components/navigation';
-import { menu } from '@app/core/navigation/navigation.menu.data';
+import { ADMIN_ONLY_SECTIONS, menu } from '@app/core/navigation/navigation.menu.data';
 import { AuthService } from '@app/core/auth/auth.service';
 
 @Injectable({providedIn: 'root'})
@@ -9,22 +9,13 @@ export class NavigationService
 {
   private readonly authService = inject(AuthService);
 
+  /** Sidebar sections visible to the current role. Finanzas + Catálogos are
+   *  dropped for everyone except admins (design-spec §3, RBAC §8). */
   get(): Observable<MagueyNavigationItem[]> {
-    return of(this.applyRoleRestrictions(menu));
-  }
-
-  private applyRoleRestrictions(items: MagueyNavigationItem[]): MagueyNavigationItem[] {
-    return items.map(item => {
-      if (!item.children) return item;
-      return {
-        ...item,
-        children: item.children.map(child => {
-          if (child.id === 'admin.categories') {
-            return { ...child, hidden: () => !this.authService.isAdmin() };
-          }
-          return child;
-        })
-      };
-    });
+    const isAdmin = this.authService.isAdmin();
+    const items = isAdmin
+      ? menu
+      : menu.filter(item => !ADMIN_ONLY_SECTIONS.has(item.id ?? ''));
+    return of(items);
   }
 }

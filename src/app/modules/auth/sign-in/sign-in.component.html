@@ -1,139 +1,117 @@
-<!-- Always-light split screen: illustration left, form right (see register for the mirror) -->
-<div class="light grid min-h-screen w-full grid-cols-1 md:grid-cols-2" style="color-scheme: light">
-    <!-- Illustration panel -->
-    <div class="relative hidden overflow-hidden md:block" aria-hidden="true">
-        <img
-            src="assets/images/logo/financial_background.png"
-            alt=""
-            class="absolute inset-0 h-full w-full object-cover" />
-    </div>
+<!-- Nabani login (design-spec §4.20): centered 400px column on canvas -->
+<div class="flex min-h-screen w-full items-center justify-center bg-canvas px-6 py-10">
+    <div class="w-full max-w-[400px]">
 
-    <!-- Form panel -->
-    <div class="flex min-w-0 flex-col items-center justify-center bg-card px-6 py-10 sm:px-12">
-        <div class="w-full max-w-[400px]">
-            <!-- Logo -->
-            <div class="w-48">
-                <img src="assets/images/logo/maguey-banner.png" alt="Maguey"/>
-            </div>
-
-            <!-- Title -->
-            <h1 class="mt-8 text-[30px] font-bold leading-9 tracking-tight text-ink">Iniciar sesión</h1>
-            <div class="mt-1.5 text-[13px] text-ink-3">
-                ¿No tienes cuenta?
-                <a class="font-semibold text-brand hover:underline" [routerLink]="['/authentication/register']">Crear cuenta</a>
-            </div>
-
-            <!-- Alert -->
-            @if (showAlert()) {
-                <mg-alert
-                    class="mt-6 block"
-                    [appearance]="'outline'"
-                    [showIcon]="false"
-                    [type]="alertConfig().type"
-                    [@shake]="alertConfig().type === 'error'">
-                    {{ alertConfig().message }}
-                </mg-alert>
-                @if (showResendLink()) {
-                    <div class="mt-2 text-center">
-                        <button
-                            class="text-[13px] font-medium text-brand hover:underline"
-                            [disabled]="isResending()"
-                            (click)="resendVerification()">
-                            @if (!isResending()) {
-                                Reenviar correo de verificacion
-                            } @else {
-                                Enviando...
-                            }
-                        </button>
-                    </div>
-                }
-            }
-
-            <!-- Sign in form -->
-            <form class="mt-8 flex flex-col gap-5" [formGroup]="signInForm">
-
-                <!-- Email field -->
-                <div>
-                    <label for="username" class="mb-1.5 block text-[13px] font-semibold text-ink">
-                        Correo electrónico <span class="text-rose">*</span>
-                    </label>
-                    <div class="flex h-11 items-center rounded-field border border-line-strong bg-card px-3.5 focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
-                        <input
-                            id="username"
-                            type="email"
-                            formControlName="username"
-                            placeholder="tu@correo.com"
-                            class="w-full border-0 bg-transparent text-[14px] text-ink outline-none placeholder:text-ink-3" />
-                    </div>
-                    @if (usernameErrors()?.['required']) {
-                        <div class="mt-1.5 text-[12.5px] text-rose">El correo es obligatorio</div>
-                    }
-                    @if (usernameErrors()?.['email']) {
-                        <div class="mt-1.5 text-[12.5px] text-rose">Ingresa un correo electronico valido</div>
-                    }
-                </div>
-
-                <!-- Password field -->
-                <div>
-                    <label for="password" class="mb-1.5 block text-[13px] font-semibold text-ink">
-                        Contraseña <span class="text-rose">*</span>
-                    </label>
-                    <div class="flex h-11 items-center gap-2 rounded-field border border-line-strong bg-card px-3.5 focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
-                        <input
-                            id="password"
-                            type="password"
-                            formControlName="password"
-                            placeholder="••••••••"
-                            class="w-full border-0 bg-transparent text-[14px] text-ink outline-none placeholder:text-ink-3"
-                            #passwordField />
-                        <button
-                            type="button"
-                            class="grid h-7 w-7 flex-none place-items-center rounded-lg text-ink-3 hover:text-ink"
-                            aria-label="Ver u ocultar"
-                            (click)="passwordField.type === 'password' ? passwordField.type = 'text' : passwordField.type = 'password'">
-                            @if (passwordField.type === 'password') {
-                                <mat-icon class="icon-size-[18px] text-current" [svgIcon]="'heroicons_outline:eye'"></mat-icon>
-                            } @else {
-                                <mat-icon class="icon-size-[18px] text-current" [svgIcon]="'heroicons_outline:eye-slash'"></mat-icon>
-                            }
-                        </button>
-                    </div>
-                    @if (showPasswordRequired()) {
-                        <div class="mt-1.5 text-[12.5px] text-rose">La contraseña es obligatoria</div>
-                    }
-                </div>
-
-                <!-- Actions -->
-                <div class="flex w-full items-center justify-between">
-                    <label class="flex cursor-pointer items-center gap-2 text-[13px] text-ink-2">
-                        <input
-                            type="checkbox"
-                            formControlName="rememberMe"
-                            class="h-4 w-4 rounded accent-[#2A4C3C]" />
-                        Recordarme
-                    </label>
-                    <a
-                        class="text-[13px] font-medium text-brand hover:underline"
-                        [routerLink]="['/authentication/forgot-password']">¿Olvidaste tu contraseña?
-                    </a>
-                </div>
-
-                <!-- Submit button -->
-                <button
-                    class="w-full !h-12 !min-h-12"
-                    mat-flat-button
-                    [color]="'primary'"
-                    [disabled]="isLoading()"
-                    (click)="onSubmit()">
-                    @if (!isLoading()) {
-                        <span>Iniciar sesión</span>
-                    } @else {
-                        <mat-progress-spinner
-                            [diameter]="24"
-                            [mode]="'indeterminate'"></mat-progress-spinner>
-                    }
-                </button>
-            </form>
+        <!-- Brand -->
+        <div class="flex flex-col items-center text-center">
+            <img
+                src="assets/images/logo/nabani-logo.png"
+                alt="Nabani"
+                class="h-[84px] w-[84px] rounded-[22px] object-cover" />
+            <h1 class="mt-4 text-[26px] font-extrabold leading-none tracking-[-0.01em] text-brand">Nabani</h1>
+            <p class="mt-2 text-[13px] text-ink-3">Nutrición y cocina saludable · Oaxaca</p>
         </div>
+
+        <!-- Alert -->
+        @if (showAlert()) {
+            <mg-alert
+                class="mt-6 block"
+                [appearance]="'outline'"
+                [showIcon]="false"
+                [type]="alertConfig().type"
+                [@shake]="alertConfig().type === 'error'">
+                {{ alertConfig().message }}
+            </mg-alert>
+            @if (showResendLink()) {
+                <div class="mt-2 text-center">
+                    <button
+                        class="text-[13px] font-medium text-brand hover:underline"
+                        [disabled]="isResending()"
+                        (click)="resendVerification()">
+                        @if (!isResending()) {
+                            Reenviar correo de verificacion
+                        } @else {
+                            Enviando...
+                        }
+                    </button>
+                </div>
+            }
+        }
+
+        <!-- Card -->
+        <form class="mt-7 flex flex-col gap-4 rounded-card bg-card p-6" [formGroup]="signInForm">
+
+            <!-- Correo -->
+            <div>
+                <label for="username" class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Correo</label>
+                <div class="flex h-11 items-center gap-2 rounded-field border border-line-strong bg-card px-3.5 focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+                    <mat-icon class="icon-size-[17px] text-ink-3" [svgIcon]="'heroicons_outline:user'"></mat-icon>
+                    <input
+                        id="username"
+                        type="email"
+                        formControlName="username"
+                        placeholder="tu@correo.com"
+                        class="w-full border-0 bg-transparent text-[14px] text-ink outline-none placeholder:text-ink-3" />
+                </div>
+                @if (usernameErrors()?.['required']) {
+                    <div class="mt-1.5 text-[12.5px] text-rose">El correo es obligatorio</div>
+                }
+                @if (usernameErrors()?.['email']) {
+                    <div class="mt-1.5 text-[12.5px] text-rose">Ingresa un correo electrónico válido</div>
+                }
+            </div>
+
+            <!-- Contraseña -->
+            <div>
+                <label for="password" class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Contraseña</label>
+                <div class="flex h-11 items-center gap-2 rounded-field border border-line-strong bg-card px-3.5 focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+                    <input
+                        id="password"
+                        type="password"
+                        formControlName="password"
+                        placeholder="••••••••"
+                        class="w-full border-0 bg-transparent text-[14px] text-ink outline-none placeholder:text-ink-3"
+                        #passwordField />
+                    <button
+                        type="button"
+                        class="grid h-7 w-7 flex-none place-items-center rounded-lg text-ink-3 hover:text-ink"
+                        aria-label="Ver u ocultar"
+                        (click)="passwordField.type === 'password' ? passwordField.type = 'text' : passwordField.type = 'password'">
+                        @if (passwordField.type === 'password') {
+                            <mat-icon class="icon-size-[18px] text-current" [svgIcon]="'heroicons_outline:eye'"></mat-icon>
+                        } @else {
+                            <mat-icon class="icon-size-[18px] text-current" [svgIcon]="'heroicons_outline:eye-slash'"></mat-icon>
+                        }
+                    </button>
+                </div>
+                @if (showPasswordRequired()) {
+                    <div class="mt-1.5 text-[12.5px] text-rose">La contraseña es obligatoria</div>
+                }
+            </div>
+
+            <!-- Entrar -->
+            <button
+                class="mt-1 w-full !h-11 !min-h-11"
+                mat-flat-button
+                [color]="'primary'"
+                [disabled]="isLoading()"
+                (click)="onSubmit()">
+                @if (!isLoading()) {
+                    <span>Entrar</span>
+                } @else {
+                    <mat-progress-spinner
+                        [diameter]="24"
+                        [mode]="'indeterminate'"></mat-progress-spinner>
+                }
+            </button>
+
+            <!-- Ghost: forgot password -->
+            <a
+                class="text-center text-[13px] font-medium text-brand hover:underline"
+                [routerLink]="['/authentication/forgot-password']">¿Olvidaste tu contraseña?</a>
+        </form>
+
+        <!-- Footer -->
+        <p class="mt-6 text-center text-[12px] text-ink-3">nabani.app · v2.0</p>
     </div>
 </div>

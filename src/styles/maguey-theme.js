@@ -34,6 +34,9 @@ const schemes = {
     'rose-tint': '#FCE8ED',
     'amber-tint': '#FCF0DC',
     'amber': '#B45309',
+    // Domain blue — enfermedad / alergia / sustitución (design-spec §1.2)
+    'blue': '#3B5F82',
+    'blue-tint': '#E3EDF6',
   },
   dark: {
     'canvas': '#141715',
@@ -49,6 +52,9 @@ const schemes = {
     'rose-tint': '#3A1A22',
     'amber-tint': '#3A2C14',
     'amber': '#E8A84C', // amber text raises luminance in dark
+    // Domain blue — dark variant (lighter text, deep-navy tint)
+    'blue': '#8FB4D6',
+    'blue-tint': '#1E2A38',
   },
 };
 
@@ -60,6 +66,14 @@ const constants = {
   'teal': '#0D9488',         // ONLY amounts with a + sign
   'rose': '#E11D48',         // ONLY subtraction / debt / destructive
   'amber-bright': '#F59E0B', // ONLY notification dot and alert bars
+  // Ingredient food-group colors (design-spec §1.3) — pill tint + dot.
+  // Scheme-independent: their mid saturation reads on both backgrounds.
+  'food-verdura': '#4E8A6A',
+  'food-fruta': '#C08A4E',
+  'food-cereal': '#C9A45C',
+  'food-lacteo': '#58939C',
+  'food-condimento': '#7D6A85',
+  'food-otros': '#5F7386',
 };
 
 /** Brand text readable on dark surfaces (dark-mode.html §3). Light mauve for the plum brand. */

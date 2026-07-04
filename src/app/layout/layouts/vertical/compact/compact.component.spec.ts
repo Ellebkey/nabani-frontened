@@ -1,9 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MagueyNavigationItem, MagueyNavigationService } from '@maguey/components/navigation';
-import { MagueyMediaWatcherService } from '@maguey/services/media-watcher';
+import { MagueyNavigationItem } from '@maguey/components/navigation';
 import { NavigationService } from 'app/core/navigation/navigation.service';
 import { AlertConfig, AlertService } from 'app/modules/shared/services/alert.service';
-import { BehaviorSubject, Subject, of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 
 import { ThemeService } from 'app/core/theme/theme.service';
 import { CompactLayoutComponent } from './compact.component';
@@ -11,33 +10,25 @@ import { CompactLayoutComponent } from './compact.component';
 describe('CompactLayoutComponent', () => {
   let fixture: ComponentFixture<CompactLayoutComponent>;
   let component: CompactLayoutComponent;
-  let mediaSubject: Subject<{ matchingAliases: string[] }>;
   let alertSubject: BehaviorSubject<AlertConfig | null>;
   let navigationService: { get: jest.Mock };
-  let magueyNavigationService: { getComponent: jest.Mock };
+  let themeService: { init: jest.Mock };
 
   const navFixture = [
-    { id: 'dashboard', title: 'Dashboard', type: 'basic', link: '/dashboard' }
+    { id: 'hoy', title: 'Hoy', type: 'basic', icon: 'heroicons_outline:home', link: '/hoy' }
   ] as MagueyNavigationItem[];
 
-  let themeService: { scheme: () => string; setScheme: jest.Mock; resolvedScheme: jest.Mock; init: jest.Mock; toggle: jest.Mock };
-
   beforeEach(() => {
-    themeService = { scheme: () => 'light', setScheme: jest.fn(), resolvedScheme: jest.fn().mockReturnValue('light'), init: jest.fn(), toggle: jest.fn() };
-    mediaSubject = new Subject<{ matchingAliases: string[] }>();
+    themeService = { init: jest.fn() };
     alertSubject = new BehaviorSubject<AlertConfig | null>(null);
     navigationService = { get: jest.fn().mockReturnValue(of(navFixture)) };
-    magueyNavigationService = { getComponent: jest.fn() };
 
-    // The component is intentionally NOT listed in `imports`: its standalone
-    // imports (Maguey navigation/alert tree) trip the eager TestBed scan with a
-    // circular ES-module import. The template/imports are overridden away and
-    // only the class logic is under test here.
+    // The component's standalone imports (Maguey navigation/alert tree) trip the
+    // eager TestBed scan with a circular ES-module import; the template/imports
+    // are overridden away and only the class logic is under test here.
     TestBed.configureTestingModule({
       providers: [
         { provide: NavigationService, useValue: navigationService },
-        { provide: MagueyMediaWatcherService, useValue: { onMediaChange$: mediaSubject.asObservable() } },
-        { provide: MagueyNavigationService, useValue: magueyNavigationService },
         { provide: AlertService, useValue: { currentAlert$: alertSubject.asObservable() } },
         { provide: ThemeService, useValue: themeService }
       ]
@@ -50,24 +41,20 @@ describe('CompactLayoutComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should load the navigation from the navigation service', () => {
-    expect(navigationService.get).toHaveBeenCalled();
-    expect(component.navigation()).toEqual(navFixture);
+  it('should apply the persisted theme on init', () => {
+    expect(themeService.init).toHaveBeenCalledTimes(1);
   });
 
-  it('should flag a small screen when the md alias is not matching', () => {
-    mediaSubject.next({ matchingAliases: ['sm'] });
-    expect(component.isScreenSmall()).toBe(true);
-
-    mediaSubject.next({ matchingAliases: ['sm', 'md'] });
-    expect(component.isScreenSmall()).toBe(false);
+  it('should load the role-filtered navigation from the navigation service', () => {
+    expect(navigationService.get).toHaveBeenCalled();
+    expect(component.navigation()).toEqual(navFixture);
   });
 
   it('should mirror the alert service emissions into alertConfig', () => {
     expect(component.alertConfig()).toBeNull();
 
     const alert: AlertConfig = {
-      message: 'Gasto guardado',
+      message: 'Paciente guardado',
       type: 'success',
       appearance: 'soft',
       dismissible: true,
@@ -82,35 +69,13 @@ describe('CompactLayoutComponent', () => {
     expect(component.alertConfig()).toBeNull();
   });
 
-  it('should expose the current year', () => {
-    expect(component.currentYear).toBe(new Date().getFullYear());
+  it('should expose a no-op search stub', () => {
+    expect(() => component.openSearch()).not.toThrow();
   });
 
-  describe('toggleNavigation', () => {
-    it('should toggle the named navigation component', () => {
-      const toggle = jest.fn();
-      magueyNavigationService.getComponent.mockReturnValue({ toggle });
-
-      component.toggleNavigation('mainNavigation');
-
-      expect(magueyNavigationService.getComponent).toHaveBeenCalledWith('mainNavigation');
-      expect(toggle).toHaveBeenCalledTimes(1);
-    });
-
-    it('should do nothing when the navigation component is not registered', () => {
-      magueyNavigationService.getComponent.mockReturnValue(null);
-
-      expect(() => component.toggleNavigation('mainNavigation')).not.toThrow();
-    });
-  });
-
-  it('should ignore media and alert emissions after destroy', () => {
-    mediaSubject.next({ matchingAliases: [] });
-    expect(component.isScreenSmall()).toBe(true);
-
+  it('should ignore navigation and alert emissions after destroy', () => {
     fixture.destroy();
 
-    mediaSubject.next({ matchingAliases: ['md'] });
     alertSubject.next({
       message: 'tarde',
       type: 'info',
@@ -121,15 +86,6 @@ describe('CompactLayoutComponent', () => {
       duration: 5000
     });
 
-    expect(component.isScreenSmall()).toBe(true);
     expect(component.alertConfig()).toBeNull();
   });
-
-  it('exposes the resolved scheme and delegates the quick toggle to the theme service', () => {
-    expect(component.resolvedScheme).toBe('light');
-
-    component.toggleScheme();
-    expect(themeService.toggle).toHaveBeenCalled();
-  });
-
 });

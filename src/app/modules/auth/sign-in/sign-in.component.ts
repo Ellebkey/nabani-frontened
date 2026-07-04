@@ -76,7 +76,7 @@ export class SignInComponent {
       .subscribe({
         next: (result) => {
           this.authService.setUser(result.token, result.refreshToken, result.roles, result.expiresIn, result.username, (result as any).fullname);
-          const redirectURL = this.activatedRoute.snapshot.queryParamMap.get('redirectURL') || '/dashboard';
+          const redirectURL = this.activatedRoute.snapshot.queryParamMap.get('redirectURL') || '/hoy';
           this.router.navigateByUrl(redirectURL);
         },
         error: (err: HttpErrorResponse) => {

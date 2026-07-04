@@ -5,12 +5,50 @@ import { authGuardFn } from '@app/core/auth/auth-guard.service';
 import { LayoutComponent } from 'app/layout/layout.component';
 
 export const appRoutes: Routes = [
-  {path: '', pathMatch: 'full', redirectTo: 'dashboard'},
+  {path: '', pathMatch: 'full', redirectTo: 'hoy'},
   {
     path: '',
     component: LayoutComponent,
     data: {layout: 'compact'},
     children: [
+      // Nabani sections (design-spec §3). Only Hoy has a real screen in Phase 2;
+      // the rest render a placeholder so the shell is fully navigable.
+      {
+        path: 'hoy',
+        loadChildren: () => import('./modules/hoy/hoy.routing').then(m => m.HoyRoutes),
+        canActivate: [authGuardFn]
+      },
+      {
+        path: 'planeacion',
+        loadComponent: () => import('./modules/shell/section-placeholder.component').then(m => m.SectionPlaceholderComponent),
+        data: {title: 'Planeación'},
+        canActivate: [authGuardFn]
+      },
+      {
+        path: 'produccion',
+        loadComponent: () => import('./modules/shell/section-placeholder.component').then(m => m.SectionPlaceholderComponent),
+        data: {title: 'Producción'},
+        canActivate: [authGuardFn]
+      },
+      {
+        path: 'pacientes',
+        loadComponent: () => import('./modules/shell/section-placeholder.component').then(m => m.SectionPlaceholderComponent),
+        data: {title: 'Pacientes'},
+        canActivate: [authGuardFn]
+      },
+      {
+        path: 'finanzas',
+        loadComponent: () => import('./modules/shell/section-placeholder.component').then(m => m.SectionPlaceholderComponent),
+        data: {title: 'Finanzas'},
+        canActivate: [authGuardFn]
+      },
+      {
+        path: 'catalogos',
+        loadComponent: () => import('./modules/shell/section-placeholder.component').then(m => m.SectionPlaceholderComponent),
+        data: {title: 'Catálogos'},
+        canActivate: [authGuardFn]
+      },
+      // --- Legacy finance modules (unrouted from the Nabani nav; replaced later) ---
       {
         path: 'dashboard',
         loadChildren: () => import('./modules/accounts/accounts.routing').then(m => m.AccountsRoutes),

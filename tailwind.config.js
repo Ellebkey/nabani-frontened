@@ -129,6 +129,22 @@ const config = {
                     tint: 'rgb(var(--maguey-amber-tint) / <alpha-value>)'
                 },
 
+                // Domain blue — enfermedad / alergia / sustitución (flips in dark)
+                blue: {
+                    DEFAULT: 'rgb(var(--maguey-blue) / <alpha-value>)',
+                    tint: 'rgb(var(--maguey-blue-tint) / <alpha-value>)'
+                },
+
+                // Ingredient food-group colors (Verdura/Fruta/Cereal/Lácteo/Condimento/Otros)
+                food: {
+                    verdura: 'rgb(var(--maguey-food-verdura) / <alpha-value>)',
+                    fruta: 'rgb(var(--maguey-food-fruta) / <alpha-value>)',
+                    cereal: 'rgb(var(--maguey-food-cereal) / <alpha-value>)',
+                    lacteo: 'rgb(var(--maguey-food-lacteo) / <alpha-value>)',
+                    condimento: 'rgb(var(--maguey-food-condimento) / <alpha-value>)',
+                    otros: 'rgb(var(--maguey-food-otros) / <alpha-value>)'
+                },
+
                 // Paleta terrosa para charts (no cambia en dark)
                 earth: {
                     forest: '#33604A',

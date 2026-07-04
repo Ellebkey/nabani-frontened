@@ -1,0 +1,29 @@
+<!-- Canonical page container (design-spec §2.1 .mg-page) -->
+<div class="flex w-full max-w-screen-xl flex-col mx-auto p-4 sm:p-6 md:p-8">
+
+  <!-- Pagehead -->
+  <div class="mb-5 flex items-start gap-4">
+    <div class="min-w-0">
+      <h1 class="text-[23px] font-bold tracking-[-0.01em] text-ink">
+        Hoy <span class="font-normal text-ink-3">· {{ today }}</span>
+      </h1>
+      <div class="mt-0.5 text-[13px] text-ink-3">
+        Panel del día — pacientes con entrega, pendientes y producción.
+      </div>
+    </div>
+  </div>
+
+  <!-- Card -->
+  <div class="rounded-card bg-card p-6">
+    <div class="flex items-center gap-3">
+      <nb-init size="lg" [initials]="'NB'"></nb-init>
+      <div class="min-w-0">
+        <div class="text-[15px] font-semibold text-ink">Bienvenida a Nabani</div>
+        <div class="mt-0.5 text-[13px] text-ink-3">
+          El tablero de Hoy se construye en la siguiente fase. La estructura, la marca
+          y la navegación ya están listas.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

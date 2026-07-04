@@ -125,14 +125,14 @@ describe('SignInComponent', () => {
       expect(submitButton.disabled).toBe(true);
     });
 
-    it('should store the session and navigate to /dashboard by default on success', () => {
+    it('should store the session and navigate to /hoy by default on success', () => {
       setup();
       fillForm();
 
       component['onSubmit']();
 
       expect(auth.setUser).toHaveBeenCalledWith('jwt-token', 'refresh-token', ['premium'], '3600', 'joel@test.com', undefined);
-      expect(router.navigateByUrl).toHaveBeenCalledWith('/dashboard');
+      expect(router.navigateByUrl).toHaveBeenCalledWith('/hoy');
     });
 
     it('should honor the redirectURL query param on success', () => {

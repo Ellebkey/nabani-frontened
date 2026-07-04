@@ -32,7 +32,7 @@ module.exports = defineConfig([
       ],
       "@angular-eslint/component-selector": [
         "error",
-        { type: "element", prefix: ["app", "mg", "auth"], style: "kebab-case" },
+        { type: "element", prefix: ["app", "mg", "nb", "auth"], style: "kebab-case" },
       ],
       "@angular-eslint/prefer-inject": "error",
       "@angular-eslint/prefer-on-push-component-change-detection": "error",

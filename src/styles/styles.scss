@@ -193,3 +193,38 @@
 .quick-actions-menu {
   min-width: 220px !important;
 }
+
+/* ------------------------------------------------------------------
+   Print — Mapa de producción / Etiquetas print single-column, white.
+   Mirrors nabani.css: hide the shell chrome + anything marked .nb-noprint,
+   collapse the grid to one column, drop page padding. Screens add
+   `.nb-noprint` to filter chips, page-head actions, legends, etc.
+   ------------------------------------------------------------------ */
+@media print {
+  .nabani-sidebar,
+  .nabani-topbar,
+  mg-chip-row,
+  .mg-loading-bar,
+  .nb-noprint {
+    display: none !important;
+  }
+
+  .nabani-shell {
+    display: block !important;
+  }
+
+  .nabani-main {
+    background: #fff !important;
+  }
+
+  /* Canonical page container: no padding / no max-width when printing */
+  .nabani-main .max-w-screen-xl {
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  body {
+    background: #fff !important;
+  }
+}

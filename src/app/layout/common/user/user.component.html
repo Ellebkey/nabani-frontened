@@ -1,8 +1,14 @@
-<!-- Button -->
+<!-- User block trigger: initials tile + name + role label -->
 <button
-    mat-icon-button
+    type="button"
+    class="nb-user"
     [matMenuTriggerFor]="userActions">
-    <mat-icon [svgIcon]="'heroicons_outline:user-circle'"></mat-icon>
+    <nb-init size="sm" [name]="displayName"></nb-init>
+    <span class="hidden min-w-0 text-left leading-tight sm:block">
+        <span class="block truncate text-[13px] font-semibold text-ink">{{ displayName }}</span>
+        <span class="block truncate text-[11.5px] text-ink-3">{{ roleLabel }}</span>
+    </span>
+    <mat-icon class="hidden icon-size-[16px] text-ink-3 sm:block" [svgIcon]="'heroicons_outline:chevron-down'"></mat-icon>
 </button>
 
 <mat-menu
@@ -10,7 +16,7 @@
     class="usermenu-panel"
     #userActions="matMenu">
     <div class="flex items-center gap-3 border-b border-line px-4 py-3.5" (click)="$event.stopPropagation()">
-        <span class="grid h-9 w-9 flex-none place-items-center rounded-full bg-brand text-[13px] font-bold text-gold">{{ initials }}</span>
+        <nb-init size="sm" [name]="displayName"></nb-init>
         <div class="min-w-0">
             <div class="truncate text-[13px] font-semibold text-ink">{{ displayName }}</div>
             <div class="truncate text-[11.5px] text-ink-3">{{ subtitle }}</div>

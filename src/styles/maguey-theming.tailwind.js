@@ -26,7 +26,7 @@ module.exports = plugin(({ addBase }) => {
     // Light islands: subtrees that stay light under a dark scheme (auth screens)
     'body .light, .light': toVars(schemes.light),
     // Brand green is unreadable on dark surfaces: all brand text uses its light version
-    '.dark .text-brand, .dark mg-pill.brand, .dark mg-tile.neutral, .dark mg-empty-state .text-brand': {
+    '.dark .text-brand, .dark mg-pill.brand, .dark mg-tile.neutral, .dark nb-init, .dark mg-empty-state .text-brand': {
       color: `${brandOnDark} !important`,
     },
     // …but inside a light island the normal brand green applies again

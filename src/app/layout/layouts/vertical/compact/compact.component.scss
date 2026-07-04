@@ -1,151 +1,165 @@
-/* Maguey theme sidebar styling — clean minimal */
-:host ::ng-deep mg-vertical-navigation {
-  background-color: var(--sidebar-bg, #2a4c3c) !important;
+/* ============================================================
+   Nabani shell — Agave (design-spec §2.1). ViewEncapsulation.None,
+   so classes are global; all colors come from --maguey-* tokens and
+   flip in dark automatically. Sidebar brand is constant in both modes.
+   ============================================================ */
+.nabani-shell {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  min-height: 100vh;
+}
 
-  .mg-vertical-navigation-wrapper {
-    background-color: var(--sidebar-bg, #2a4c3c) !important;
-    box-shadow: none !important;
-  }
+/* --- Sidebar (92px, brand) --- */
+.nabani-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 8px 20px;
+  background: rgb(var(--maguey-brand));
+}
 
-  /* The sidebar is theme-independent: nothing may paint plates
-     over the header/logo or the content in dark */
-  .mg-vertical-navigation-header,
-  .mg-vertical-navigation-content-header,
-  .mg-vertical-navigation-content,
-  .mg-vertical-navigation-content-header > div {
-    background-color: transparent !important;
-  }
+.nabani-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  margin-bottom: 14px;
+  object-fit: cover;
+}
 
-  /* Navigation items — hover */
-  .mg-vertical-navigation-item {
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.06) !important;
-    }
+.nabani-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+}
 
-    &.mg-vertical-navigation-item-active,
-    &.mg-vertical-navigation-item-active-forced {
-      background-color: rgba(255, 255, 255, 0.10) !important;
-    }
-  }
+.nb-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 4px 8px;
+  border-radius: 10px;
+  font-size: 10.5px;
+  font-weight: 500;
+  line-height: 1.1;
+  text-align: center;
+  color: rgb(255 255 255 / 0.72);
+  transition: background 0.12s, color 0.12s;
+}
 
-  /* Icons and text — white (slightly transparent for inactive) */
-  .mg-vertical-navigation-item-icon,
-  .mg-vertical-navigation-item-title {
-    color: rgba(255, 255, 255, 0.7) !important;
-  }
+.nb-nav-item mat-icon {
+  color: inherit !important;
+}
 
-  /* Active menu item — gold */
-  .mg-vertical-navigation-item-active,
-  .mg-vertical-navigation-item.mg-vertical-navigation-item-active {
-    .mg-vertical-navigation-item-icon,
-    .mg-vertical-navigation-item-title,
-    .mg-vertical-navigation-item-title span,
-    mat-icon,
-    mat-icon svg {
-      color: var(--sidebar-active, #e1b66b) !important;
-      stroke: currentColor !important;
-    }
-  }
+.nb-nav-item:hover {
+  background: rgb(255 255 255 / 0.06);
+  color: #fff;
+}
 
-  /* Aside items (main menu with icon) active state */
-  mg-vertical-navigation-aside-item {
-    .mg-vertical-navigation-item.mg-vertical-navigation-item-active {
-      .mg-vertical-navigation-item-icon,
-      .mg-vertical-navigation-item-title,
-      mat-icon {
-        color: var(--sidebar-active, #e1b66b) !important;
-      }
+/* Active section — the ONE place gold is used in the shell (accent rule) */
+.nb-nav-item.nb-nav-active {
+  background: rgb(255 255 255 / 0.10);
+  color: rgb(var(--maguey-gold));
+  font-weight: 600;
+}
 
-      mat-icon svg {
-        color: var(--sidebar-active, #e1b66b) !important;
-        stroke: var(--sidebar-active, #e1b66b) !important;
-      }
-    }
-  }
+/* --- Main column --- */
+.nabani-col {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
 
-  /* Submenu/Children items */
-  .mg-vertical-navigation-item-children {
-    background-color: transparent !important;
+/* --- Topbar (60px, card) --- */
+.nabani-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 24px;
+  background: rgb(var(--maguey-card));
+  border-bottom: 1px solid rgb(var(--maguey-line));
+}
 
-    mg-vertical-navigation-basic-item,
-    .mg-vertical-navigation-item-wrapper {
-      .mg-vertical-navigation-item {
-        background-color: transparent !important;
+.nb-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  width: 280px;
+  max-width: 42vw;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid rgb(var(--maguey-line-strong));
+  background: rgb(var(--maguey-card));
+  color: rgb(var(--maguey-ink-3));
+  font-size: 13px;
+  text-align: left;
+  transition: border-color 0.12s;
+}
 
-        &:hover {
-          background-color: rgba(255, 255, 255, 0.06) !important;
-        }
+.nb-search span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
-        &.mg-vertical-navigation-item-active {
-          background-color: transparent !important;
-        }
+.nb-search:hover {
+  border-color: rgb(var(--maguey-brand));
+}
 
-        /* White text for submenu items */
-        mat-icon,
-        mat-icon.mg-vertical-navigation-item-icon,
-        .mg-vertical-navigation-item-icon,
-        .mg-vertical-navigation-item-title,
-        .mg-vertical-navigation-item-title-wrapper,
-        .mg-vertical-navigation-item-title-wrapper .mg-vertical-navigation-item-title,
-        .mg-vertical-navigation-item-title-wrapper .mg-vertical-navigation-item-title span {
-          color: rgba(255, 255, 255, 0.7) !important;
-        }
+.nb-iconbtn {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  color: rgb(var(--maguey-ink-2));
+  transition: background 0.12s, color 0.12s;
+}
 
-        /* SVG icons */
-        mat-icon svg,
-        .mg-vertical-navigation-item-icon svg {
-          color: rgba(255, 255, 255, 0.7) !important;
-          fill: currentColor !important;
-          stroke: currentColor !important;
-        }
+.nb-iconbtn:hover {
+  background: rgb(var(--maguey-brand-tint));
+  color: rgb(var(--maguey-ink));
+}
 
-        &.mg-vertical-navigation-item-active {
-          mat-icon,
-          mat-icon.mg-vertical-navigation-item-icon,
-          .mg-vertical-navigation-item-icon,
-          .mg-vertical-navigation-item-title,
-          .mg-vertical-navigation-item-title-wrapper,
-          .mg-vertical-navigation-item-title-wrapper .mg-vertical-navigation-item-title,
-          .mg-vertical-navigation-item-title-wrapper .mg-vertical-navigation-item-title span {
-            color: var(--sidebar-active, #e1b66b) !important;
-          }
+.nb-dot {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgb(var(--maguey-amber-bright));
+  border: 2px solid rgb(var(--maguey-card));
+}
 
-          mat-icon svg,
-          .mg-vertical-navigation-item-icon svg {
-            color: var(--sidebar-active, #e1b66b) !important;
-            stroke: currentColor !important;
-          }
-        }
-      }
-    }
-  }
+/* --- User block trigger (in user.component) --- */
+.nb-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 42px;
+  padding: 0 6px 0 4px;
+  border-radius: 10px;
+  transition: background 0.12s;
+}
 
-  /* Submenu/Aside items (side panel) */
-  .mg-vertical-navigation-aside-wrapper {
-    background-color: transparent !important;
-    border-left: 2px solid var(--sidebar-active, #e1b66b) !important;
+.nb-user:hover {
+  background: rgb(var(--maguey-brand-tint));
+}
 
-    .mg-vertical-navigation-item {
-      &:hover {
-        background-color: rgba(255, 255, 255, 0.06) !important;
-      }
-
-      &.mg-vertical-navigation-item-active {
-        background-color: transparent !important;
-      }
-    }
-
-    /* White text for aside menu items */
-    .mg-vertical-navigation-item-icon,
-    .mg-vertical-navigation-item-title {
-      color: rgba(255, 255, 255, 0.7) !important;
-    }
-
-    .mg-vertical-navigation-item-active {
-      .mg-vertical-navigation-item-icon,
-      .mg-vertical-navigation-item-title {
-        color: var(--sidebar-active, #e1b66b) !important;
-      }
-    }
-  }
+/* --- Page content --- */
+.nabani-main {
+  flex: 1 1 auto;
+  background: rgb(var(--maguey-canvas));
 }
