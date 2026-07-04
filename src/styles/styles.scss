@@ -1,0 +1,195 @@
+/* ----------------------------------------------------------------------------------------------------- */
+/*  @ Import/write your custom styles here.
+/*  @ Styles from this file will override 'vendors.scss' and Maguey's base styles.
+/* ----------------------------------------------------------------------------------------------------- */
+@import "maguey-tokens";
+@import "server-table-pagination";
+@import "custom-ng-select" ;
+
+/* ========================================
+   Design System — Clean Minimal Theme
+   ======================================== */
+
+:root {
+  --primary-color: #2a4c3c;
+}
+
+.theme-maguey-dev {
+  --primary-color: #2a3c4c;
+}
+
+/* ------------------------------------------------------------------
+   Global: Borders instead of shadows on cards
+   ------------------------------------------------------------------ */
+.bg-card {
+  border: 1px solid rgb(var(--maguey-line)) !important;
+  box-shadow: none !important;
+}
+
+/* ------------------------------------------------------------------
+   Sidebar Navigation — Keep Maguey nav, restyle colors
+   ------------------------------------------------------------------ */
+.theme-maguey mg-vertical-navigation,
+.theme-maguey mg-vertical-navigation.dark,
+.theme-maguey mg-vertical-navigation .mg-vertical-navigation-wrapper {
+  background-color: #2a4c3c !important;
+}
+
+/* Active main menu item — gold */
+.theme-maguey mg-vertical-navigation .mg-vertical-navigation-item-active mat-icon,
+.theme-maguey mg-vertical-navigation .mg-vertical-navigation-item-active .mg-vertical-navigation-item-icon,
+.theme-maguey mg-vertical-navigation .mg-vertical-navigation-item-active .mg-vertical-navigation-item-title {
+  color: #e1b66b !important;
+}
+
+.theme-maguey mg-vertical-navigation .mg-vertical-navigation-item-active mat-icon svg {
+  color: #e1b66b !important;
+  stroke: #e1b66b !important;
+}
+
+/* Aside items active state */
+.theme-maguey mg-vertical-navigation mg-vertical-navigation-aside-item .mg-vertical-navigation-item-wrapper .mg-vertical-navigation-item.mg-vertical-navigation-item-active mat-icon.mg-vertical-navigation-item-icon {
+  color: #e1b66b !important;
+}
+
+.theme-maguey mg-vertical-navigation mg-vertical-navigation-aside-item .mg-vertical-navigation-item-wrapper .mg-vertical-navigation-item.mg-vertical-navigation-item-active mat-icon.mg-vertical-navigation-item-icon svg {
+  color: #e1b66b !important;
+  stroke: #e1b66b !important;
+  fill: none !important;
+}
+
+/* Dark variant active items */
+.theme-maguey mg-vertical-navigation.dark .mg-vertical-navigation-item-active mat-icon,
+.theme-maguey mg-vertical-navigation.dark .mg-vertical-navigation-item-active .mg-vertical-navigation-item-icon,
+.theme-maguey mg-vertical-navigation.dark .mg-vertical-navigation-item-active .mg-vertical-navigation-item-title,
+.theme-maguey mg-vertical-navigation.dark .mg-vertical-navigation-item-active .mg-vertical-navigation-item-title span {
+  color: #e1b66b !important;
+}
+
+.theme-maguey mg-vertical-navigation.dark .mg-vertical-navigation-item-active svg {
+  color: #e1b66b !important;
+  stroke: #e1b66b !important;
+}
+
+/* Submenu items — white text, gold when active */
+.theme-maguey .mg-vertical-navigation-item-children * {
+  color: #ffffff !important;
+}
+
+.theme-maguey .mg-vertical-navigation-item-children .mg-vertical-navigation-item-active * {
+  color: #e1b66b !important;
+}
+
+.theme-maguey .mg-vertical-navigation-item-children {
+  background-color: transparent !important;
+}
+
+/* ------------------------------------------------------------------
+   Sidebar Navigation — Dev theme (navy blue variant)
+   ------------------------------------------------------------------ */
+.theme-maguey-dev mg-vertical-navigation,
+.theme-maguey-dev mg-vertical-navigation.dark,
+.theme-maguey-dev mg-vertical-navigation .mg-vertical-navigation-wrapper {
+  background-color: #2a3c4c !important;
+}
+
+.theme-maguey-dev mg-vertical-navigation .mg-vertical-navigation-item-active mat-icon,
+.theme-maguey-dev mg-vertical-navigation .mg-vertical-navigation-item-active .mg-vertical-navigation-item-icon,
+.theme-maguey-dev mg-vertical-navigation .mg-vertical-navigation-item-active .mg-vertical-navigation-item-title {
+  color: #6ba5e1 !important;
+}
+
+.theme-maguey-dev mg-vertical-navigation .mg-vertical-navigation-item-active mat-icon svg {
+  color: #6ba5e1 !important;
+  stroke: #6ba5e1 !important;
+}
+
+.theme-maguey-dev mg-vertical-navigation mg-vertical-navigation-aside-item .mg-vertical-navigation-item-wrapper .mg-vertical-navigation-item.mg-vertical-navigation-item-active mat-icon.mg-vertical-navigation-item-icon {
+  color: #6ba5e1 !important;
+}
+
+.theme-maguey-dev mg-vertical-navigation mg-vertical-navigation-aside-item .mg-vertical-navigation-item-wrapper .mg-vertical-navigation-item.mg-vertical-navigation-item-active mat-icon.mg-vertical-navigation-item-icon svg {
+  color: #6ba5e1 !important;
+  stroke: #6ba5e1 !important;
+  fill: none !important;
+}
+
+.theme-maguey-dev mg-vertical-navigation.dark .mg-vertical-navigation-item-active mat-icon,
+.theme-maguey-dev mg-vertical-navigation.dark .mg-vertical-navigation-item-active .mg-vertical-navigation-item-icon,
+.theme-maguey-dev mg-vertical-navigation.dark .mg-vertical-navigation-item-active .mg-vertical-navigation-item-title,
+.theme-maguey-dev mg-vertical-navigation.dark .mg-vertical-navigation-item-active .mg-vertical-navigation-item-title span {
+  color: #6ba5e1 !important;
+}
+
+.theme-maguey-dev mg-vertical-navigation.dark .mg-vertical-navigation-item-active svg {
+  color: #6ba5e1 !important;
+  stroke: #6ba5e1 !important;
+}
+
+.theme-maguey-dev .mg-vertical-navigation-item-children * {
+  color: #ffffff !important;
+}
+
+.theme-maguey-dev .mg-vertical-navigation-item-children .mg-vertical-navigation-item-active * {
+  color: #6ba5e1 !important;
+}
+
+.theme-maguey-dev .mg-vertical-navigation-item-children {
+  background-color: transparent !important;
+}
+
+/* ------------------------------------------------------------------
+   Expense List Components
+   ------------------------------------------------------------------ */
+
+
+/* ------------------------------------------------------------------
+   Snackbar Variants
+   ------------------------------------------------------------------ */
+.snackbar-success {
+  --mat-snackbar-container-color: #0D9488 !important;
+  --mat-snackbar-supporting-text-color: #FFFFFF !important;
+}
+
+.snackbar-error {
+  --mat-snackbar-container-color: #E11D48 !important;
+  --mat-snackbar-supporting-text-color: #FFFFFF !important;
+}
+
+.snackbar-warning {
+  --mat-snackbar-container-color: #F59E0B !important;
+  --mat-snackbar-supporting-text-color: #FFFFFF !important;
+}
+
+.snackbar-info {
+  --mat-snackbar-container-color: #2a4c3c !important;
+  --mat-snackbar-supporting-text-color: #FFFFFF !important;
+}
+
+/* ------------------------------------------------------------------
+   Utility Classes (kept from original)
+   ------------------------------------------------------------------ */
+.list-img {
+  width: 60px;
+}
+
+.concept-cell {
+  width: 16em;
+  max-width: 16em;
+  min-width: 16em;
+}
+
+.quantity-cell {
+  width: 1em;
+  max-width: 1em;
+  min-width: 1em;
+}
+
+.credit-card-statement-input .mat-mdc-form-field-subscript-wrapper.mat-mdc-form-field-bottom-align {
+  display: none;
+}
+
+/* Quick Actions Menu */
+.quick-actions-menu {
+  min-width: 220px !important;
+}

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maguey 2.0 — Dark mode spec</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/maguey.css">
+<style>
+  body{ background:var(--card); }
+  .doc{ max-width:880px; margin:0 auto; padding:48px 40px 80px; }
+  .doc h1{ font-size:28px; font-weight:700; letter-spacing:-.02em; }
+  .doc .lead{ font-size:14.5px; color:var(--ink-2); margin:8px 0 0; max-width:640px; }
+  .doc h2{ font-size:19px; font-weight:700; margin:44px 0 6px; padding-top:24px; border-top:1px solid var(--line); letter-spacing:-.01em; }
+  .doc p, .doc li{ font-size:13.5px; color:var(--ink-2); }
+  .doc ul{ margin:6px 0; padding-left:18px; }
+  .doc li{ margin:4px 0; }
+  code{ font-family:'JetBrains Mono',monospace; font-size:11.5px; background:color-mix(in srgb, var(--ink) 5%, var(--card)); border-radius:5px; padding:1.5px 6px; color:var(--ink); }
+  table.spec{ width:100%; border-collapse:collapse; font-size:13px; margin:10px 0; }
+  table.spec th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-3); padding:8px 10px; border-bottom:1px solid var(--line); }
+  table.spec td{ padding:9px 10px; border-bottom:1px solid var(--line); color:var(--ink-2); vertical-align:top; }
+  table.spec td:first-child{ font-weight:600; color:var(--ink); white-space:nowrap; font-family:'JetBrains Mono',monospace; font-size:12px; }
+  .sw{ display:inline-block; width:14px; height:14px; border-radius:4px; vertical-align:-2px; margin-right:7px; border:1px solid rgb(0 0 0/.15); }
+  .note{ border-left:3px solid var(--gold); background:var(--amber-tint); border-radius:0 10px 10px 0; padding:10px 14px; font-size:13px; color:var(--ink-2); margin:10px 0; max-width:680px; }
+  .note b{ color:var(--ink); }
+
+  /* Demo dark embebido */
+  .darkdemo{ border-radius:16px; overflow:hidden; border:1px solid var(--line); margin:14px 0; }
+</style>
+</head>
+<body class="depth-a">
+<div class="doc">
+  <span class="mg-kicker">Maguey · Maguey 2.0</span>
+  <h1>Dark mode — spec</h1>
+  <p class="lead">Dark mode es SOLO un segundo set de valores para los mismos tokens — cero cambios de layout, componentes o clases. En Angular: clase <code>dark</code> en <code>&lt;body&gt;</code> (o <code>&lt;html&gt;</code>) que redefine las CSS variables; Tailwind con <code>darkMode: 'class'</code> únicamente si necesitas utilidades puntuales.</p>
+
+  <h2>1 · Tokens (light → dark)</h2>
+  <table class="spec">
+    <tr><th>Token</th><th>Light</th><th>Dark</th><th>Nota</th></tr>
+    <tr><td>--canvas</td><td><span class="sw" style="background:#F8F9FA"></span>#F8F9FA</td><td><span class="sw" style="background:#141715"></span>#141715</td><td>Negro verdoso, mismo hue de marca</td></tr>
+    <tr><td>--card</td><td><span class="sw" style="background:#FFFFFF"></span>#FFFFFF</td><td><span class="sw" style="background:#1C201E"></span>#1C201E</td><td>1 paso más claro que el canvas</td></tr>
+    <tr><td>--ink</td><td><span class="sw" style="background:#17201B"></span>#17201B</td><td><span class="sw" style="background:#ECEFED"></span>#ECEFED</td><td>Nunca blanco puro</td></tr>
+    <tr><td>--ink-2</td><td><span class="sw" style="background:#4E5A54"></span>#4E5A54</td><td><span class="sw" style="background:#A9B1AD"></span>#A9B1AD</td><td></td></tr>
+    <tr><td>--ink-3</td><td><span class="sw" style="background:#7C8680"></span>#7C8680</td><td><span class="sw" style="background:#788079"></span>#788079</td><td>Casi igual — funciona en ambos</td></tr>
+    <tr><td>--line</td><td><span class="sw" style="background:#E7EAE8"></span>#E7EAE8</td><td><span class="sw" style="background:#2A2F2C"></span>#2A2F2C</td><td>Divisores</td></tr>
+    <tr><td>--line-strong</td><td><span class="sw" style="background:#D8DDDA"></span>#D8DDDA</td><td><span class="sw" style="background:#39403C"></span>#39403C</td><td>Bordes de inputs</td></tr>
+    <tr><td>--brand-tint</td><td><span class="sw" style="background:#EDF2EF"></span>#EDF2EF</td><td><span class="sw" style="background:#243830"></span>#243830</td><td>Hovers, fila en edición</td></tr>
+    <tr><td>--brand-tint-2</td><td><span class="sw" style="background:#DCE7E1"></span>#DCE7E1</td><td><span class="sw" style="background:#2C443A"></span>#2C443A</td><td></td></tr>
+    <tr><td>--teal-tint</td><td><span class="sw" style="background:#E6F4F1"></span>#E6F4F1</td><td><span class="sw" style="background:#12312C"></span>#12312C</td><td>Fondos de pills semánticas</td></tr>
+    <tr><td>--rose-tint</td><td><span class="sw" style="background:#FCE8ED"></span>#FCE8ED</td><td><span class="sw" style="background:#3A1A22"></span>#3A1A22</td><td></td></tr>
+    <tr><td>--amber-tint</td><td><span class="sw" style="background:#FCF0DC"></span>#FCF0DC</td><td><span class="sw" style="background:#3A2C14"></span>#3A2C14</td><td></td></tr>
+    <tr><td>--amber</td><td><span class="sw" style="background:#B45309"></span>#B45309</td><td><span class="sw" style="background:#E8A84C"></span>#E8A84C</td><td>Texto ámbar sube de luminancia</td></tr>
+  </table>
+
+  <h2>2 · Lo que NO cambia</h2>
+  <ul>
+    <li><b>Brand</b> <code>#2A4C3C</code> (sidebar idéntico en ambos modos — ya es oscuro), <b>gold</b> <code>#E1B66B</code>, <b>teal</b> <code>#0D9488</code>, <b>rose</b> <code>#E11D48</code>.</li>
+    <li>Los <b>16 colores muted de usuario</b> (cuentas/métodos) y la <b>paleta terrosa</b> de charts: al ser de saturación media funcionan sin ajuste sobre fondo oscuro — esa fue la razón de bajarles la saturación.</li>
+    <li>Toda la geometría: radios, espaciados, tamaños, tipografía, componentes.</li>
+  </ul>
+
+  <h2>3 · Reglas específicas de dark</h2>
+  <ul>
+    <li><b>Cards siempre con borde 1px</b> <code>--line</code> en dark. La Opción A ya usa borde, así que no cambia nada — pero si algún overlay dependía solo de sombra, en dark la sombra no se lee: borde obligatorio.</li>
+    <li>Texto sobre <code>brand-tint</code> que en light era <code>--brand</code> → en dark usa <code>#9DBAA9</code> (verde claro legible). Aplica a: botón ghost, pill brand, ícono de empty state, tile neutral. Ya está en el CSS (<code>body.dark .mg-btn.ghost</code> etc.).</li>
+    <li>Ámbar de texto usa <code>--amber</code> (#E8A84C en dark); el ámbar brillante <code>#F59E0B</code> queda solo para el dot de notificación y barras de presupuesto en alerta.</li>
+    <li>Scrim de modales: mismo <code>rgb(23 32 27/.45)</code> — funciona en ambos.</li>
+    <li>ccard (tarjeta de crédito) no cambia: su gradiente parte del color del método, no del tema.</li>
+  </ul>
+
+  <h2>4 · Implementación</h2>
+  <ul>
+    <li>Copiar el bloque <code>body.dark{ … }</code> de <code>shared/maguey.css</code> tal cual — son ~15 líneas de variables.</li>
+    <li>Toggle: en el menú de usuario del topbar (Ver perfil / <b>Tema: claro·oscuro·sistema</b> / Cerrar sesión). Persistir en localStorage + respetar <code>prefers-color-scheme</code> como default.</li>
+    <li>Angular Material: si usas theme dual de Material, mapea solo surface/on-surface a estos tokens; los componentes ya sobreescritos heredan las variables solos.</li>
+    <li>Charts (ECharts/etc.): ejes y gridlines a <code>--line</code>, labels a <code>--ink-3</code>; las series no cambian.</li>
+  </ul>
+
+  <div class="note"><b>Referencia visual:</b> <code>gastos.html#dark</code> muestra la pantalla completa en dark con estos tokens (también está en el canvas). Cualquier pantalla de los mockups puede verse en dark agregando <code>#dark</code> a la URL — mismo HTML, solo cambian las variables: esa es la prueba de que la implementación es solo tokens.</div>
+</div>
+<script src="shared/shell.js"></script>
+</body>
+</html>

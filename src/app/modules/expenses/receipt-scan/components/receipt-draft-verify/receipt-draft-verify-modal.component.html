@@ -1,0 +1,367 @@
+<mg-modal-shell
+  class="h-[calc(100%+3rem)]"
+  title="Revisar recibo"
+  [subtitle]="store ? store + ' · ' + items().length + ' artículos' : items().length + ' artículos'"
+  (closed)="cancel()">
+
+  <div class="flex h-full min-h-0 flex-col">
+    <!-- Toolbar -->
+    <div class="flex flex-none items-center gap-3 border-b border-line px-5 py-3">
+      <mat-slide-toggle
+        [checked]="costcoMode()"
+        (change)="toggleCostco($event.checked)"
+        matTooltip="Ajusta los precios ÷1.023 (recibos Costco / Sam's)">
+        <span class="text-[13px] font-medium text-ink">Ajuste Costco / Sam's</span>
+      </mat-slide-toggle>
+
+      @if (!selectionMode()) {
+        <button mat-stroked-button class="ml-auto !h-8 !min-h-8 !px-3 !text-[13px]" (click)="toggleSelectionMode()">
+          <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:squares-plus'"></mat-icon>
+          <span class="ml-1.5">Combinar</span>
+        </button>
+      } @else {
+        <span class="ml-auto text-[12.5px] text-ink-3 tabular-nums">{{ selectedCount() }} seleccionados</span>
+        <button mat-stroked-button class="!h-8 !min-h-8 !px-3 !text-[13px]" (click)="toggleSelectionMode()">
+          Cancelar
+        </button>
+        <button
+          mat-flat-button
+          color="primary"
+          class="!h-8 !min-h-8 !px-3 !text-[13px]"
+          [disabled]="selectedCount() < 2"
+          (click)="combineSelected()">
+          <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:squares-plus'"></mat-icon>
+          <span class="ml-1.5">Combinar {{ selectedCount() }}</span>
+        </button>
+      }
+    </div>
+
+    <!-- Table (same anatomy as the expense modal) -->
+    <div class="min-h-0 grow overflow-y-auto">
+      <div class="min-w-[720px]">
+        <div
+          class="arthead sticky top-0 z-10 grid h-[38px] grid-cols-[36px_56px_minmax(0,1fr)_100px_148px_148px_92px_36px] items-center gap-2 border-b border-line pl-3 pr-5 text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">
+          <span></span>
+          <span>Cant</span>
+          <span>Artículo</span>
+          <span class="text-right">Precio</span>
+          <span>Categoría</span>
+          <span>Subcategoría</span>
+          <span class="text-right">Subtotal</span>
+          <span></span>
+        </div>
+
+        <!-- TO REVIEW -->
+        @if (pendingRows().length) {
+          <div class="flex items-center gap-[7px] px-5 pb-2 pt-3.5 text-[11px] font-bold uppercase tracking-[.07em] text-amber">
+            <mat-icon class="icon-size-[14px] text-current" [svgIcon]="'heroicons_outline:exclamation-triangle'"></mat-icon>
+            Por revisar <span class="font-semibold text-ink-3">· {{ pendingRows().length }}</span>
+            <span class="ml-auto text-[12px] font-medium normal-case tracking-normal text-ink-3">Vincula cada renglón a un artículo tuyo</span>
+          </div>
+
+          <div class="divide-y divide-line">
+            @for (row of pendingRows(); track row.index) {
+              <div class="item bg-amber-bright/[.03]" [class.merge-flash]="row.index === justMergedIndex()">
+                <div class="artrow group grid h-[54px] grid-cols-[36px_56px_minmax(0,1fr)_100px_148px_148px_92px_36px] items-center gap-2 pl-3 pr-5 text-[13.5px]">
+                  @if (selectionMode()) {
+                    <mat-checkbox class="-ml-1" [checked]="selected().has(row.index)" (change)="toggleSelected(row.index)"></mat-checkbox>
+                  } @else {
+                    <span class="grid h-7 w-7 place-items-center rounded-full bg-amber-tint text-amber">
+                      <mat-icon class="icon-size-4 text-current" [svgIcon]="'heroicons_outline:exclamation-triangle'"></mat-icon>
+                    </span>
+                  }
+                  <label class="flex h-8 items-center rounded-compact border border-line-strong bg-surface px-2 focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+                    <input
+                      type="number"
+                      min="1"
+                      [value]="row.item.quantity"
+                      (change)="updateQuantity(row.index, $any($event.target).value)"
+                      class="w-full border-0 bg-transparent text-center text-[13px] text-ink outline-none" />
+                  </label>
+                  <span class="flex min-w-0 items-center gap-2 truncate font-medium">
+                    <span class="truncate">{{ row.item.name }}</span>
+                    @if (row.item.mergedCount && row.item.mergedCount > 1) {
+                      <mg-pill variant="neutral" size="sm" [matTooltip]="'Combinado de ' + row.item.mergedCount + ' artículos'">×{{ row.item.mergedCount }}</mg-pill>
+                    }
+                    @if (row.item.hasDiscount) {
+                      <button
+                        type="button"
+                        class="flex-none"
+                        title="Con descuento (clic para quitar)"
+                        (click)="toggleDiscount(row.index)">
+                        <mg-pill variant="amber" size="sm">%</mg-pill>
+                      </button>
+                    } @else {
+                      <button
+                        type="button"
+                        class="grid h-[22px] w-[22px] flex-none place-items-center rounded-full text-[11px] font-semibold text-ink-3 opacity-0 transition-opacity hover:bg-amber-tint hover:text-amber group-hover:opacity-100"
+                        title="Marcar como descuento"
+                        (click)="toggleDiscount(row.index)">
+                        %
+                      </button>
+                    }
+                  </span>
+                  <label class="flex h-8 items-center rounded-compact border border-line-strong bg-surface px-2 focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+                    <input
+                      type="number"
+                      step="0.01"
+                      [value]="row.item.unitPrice"
+                      (change)="updatePrice(row.index, $any($event.target).value)"
+                      class="w-full border-0 bg-transparent text-right text-[13px] text-ink outline-none" />
+                  </label>
+                  <mg-compact-select
+                    placeholder="Categoría"
+                    [options]="categoryOptions()"
+                    [ngModel]="row.item.categoryId ?? null"
+                    (ngModelChange)="updateCategory(row.index, $event)">
+                  </mg-compact-select>
+                  <mg-compact-select
+                    placeholder="Subcategoría"
+                    [options]="subcategoryOptionsFor(row.item)"
+                    [ngModel]="row.item.subcategoryId ?? null"
+                    [disabled]="!row.item.categoryId"
+                    (ngModelChange)="updateSubcategory(row.index, $event)">
+                  </mg-compact-select>
+                  <span class="text-right font-semibold tabular-nums">{{ subtotal(row.item) | currency: 'MXN' : 'symbol-narrow' }}</span>
+                  <span></span>
+                </div>
+
+                <!-- Resolution line -->
+                <div class="-mt-1 flex items-center gap-2 pb-3 pl-[56px] pr-5">
+                    <div class="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+                      @if (row.item.candidates.length) {
+                        <span class="flex-none text-[12.5px] text-ink-3">¿Es…?</span>
+                        @for (candidate of row.item.candidates.slice(0, 3); track candidate.articleId) {
+                          <button
+                            type="button"
+                            class="h-[26px] max-w-[260px] truncate rounded-full border border-brand-tint-2 bg-brand-tint px-[11px] text-[12.5px] font-semibold text-brand hover:bg-brand-tint-2"
+                            (click)="selectCandidate(row.index, candidate.articleId)">
+                            {{ candidate.concept }}
+                          </button>
+                        }
+                      } @else {
+                        <span class="text-[12.5px] text-ink-3">Sin candidatos</span>
+                      }
+                    </div>
+                    <div class="flex flex-none items-center gap-1">
+                      <button
+                        type="button"
+                        class="inline-flex items-center gap-[5px] whitespace-nowrap rounded-lg px-2 py-1.5 text-[12.5px] font-semibold text-brand hover:bg-brand-tint"
+                        (click)="searchArticle(row.index)">
+                        <mat-icon class="icon-size-[14px] text-current" [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+                        Buscar
+                      </button>
+                      <button
+                        type="button"
+                        class="inline-flex items-center gap-[5px] whitespace-nowrap rounded-lg px-2 py-1.5 text-[12.5px] font-semibold text-brand hover:bg-brand-tint"
+                        (click)="startCreateNew(row.index)">
+                        <mat-icon class="icon-size-[14px] text-current" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                        Crear artículo
+                      </button>
+                    </div>
+                  </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- VERIFIED -->
+        @if (resolvedRows().length) {
+          <div class="mt-1 flex items-center gap-[7px] border-t border-line px-5 pb-2 pt-3.5 text-[11px] font-bold uppercase tracking-[.07em] text-teal">
+            <mat-icon class="icon-size-[14px] text-current" [svgIcon]="'heroicons_outline:check'"></mat-icon>
+            Verificados <span class="font-semibold text-ink-3">· {{ resolvedRows().length }}</span>
+            <span class="ml-auto text-[12px] font-medium normal-case tracking-normal text-ink-3">Pasa el cursor para editar, como en el gasto</span>
+          </div>
+
+          <div class="divide-y divide-line">
+            @for (row of resolvedRows(); track row.index) {
+              <div
+                class="item"
+                [class.hoverable]="editingIndex() !== row.index"
+                [class.editing]="editingIndex() === row.index"
+                [class.merge-flash]="row.index === justMergedIndex()">
+                <div
+                  class="artrow group grid h-[54px] grid-cols-[36px_56px_minmax(0,1fr)_100px_148px_148px_92px_36px] items-center gap-2 pl-3 pr-5 text-[13.5px]"
+                  [class.bg-brand-tint]="editingIndex() === row.index"
+                  (keydown.escape)="stopEditing()"
+                  (keydown.enter)="stopEditing()">
+                  @if (selectionMode()) {
+                    <mat-checkbox class="-ml-1" [checked]="selected().has(row.index)" (change)="toggleSelected(row.index)"></mat-checkbox>
+                  } @else {
+                    <span class="grid h-7 w-7 place-items-center text-teal">
+                      <mat-icon class="icon-size-4 text-current" [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                    </span>
+                  }
+
+                  @if (editingIndex() === row.index) {
+                    <label class="flex h-8 items-center rounded-compact border border-line-strong bg-surface px-2 focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+                      <input
+                        type="number"
+                        min="1"
+                        [value]="row.item.quantity"
+                        (change)="updateQuantity(row.index, $any($event.target).value)"
+                        class="w-full border-0 bg-transparent text-center text-[13px] text-ink outline-none" />
+                    </label>
+                  } @else {
+                    <span class="text-center tabular-nums">{{ row.item.quantity }}</span>
+                  }
+
+                  <span class="flex min-w-0 items-center gap-2 truncate font-medium">
+                    <span class="truncate" [matTooltip]="row.item.name">{{ conceptFor(row.item) || row.item.name }}</span>
+                    @if (row.item.newArticle) {
+                      <mg-pill variant="teal" size="sm">Nuevo</mg-pill>
+                    }
+                    @if (row.item.mergedCount && row.item.mergedCount > 1) {
+                      <mg-pill variant="neutral" size="sm" [matTooltip]="'Combinado de ' + row.item.mergedCount + ' artículos'">×{{ row.item.mergedCount }}</mg-pill>
+                    }
+                    @if (row.item.hasDiscount) {
+                      <button
+                        type="button"
+                        class="flex-none"
+                        title="Con descuento (clic para quitar)"
+                        (click)="toggleDiscount(row.index)">
+                        <mg-pill variant="amber" size="sm">%</mg-pill>
+                      </button>
+                    } @else {
+                      <button
+                        type="button"
+                        class="grid h-[22px] w-[22px] flex-none place-items-center rounded-full text-[11px] font-semibold text-ink-3 opacity-0 transition-opacity hover:bg-amber-tint hover:text-amber group-hover:opacity-100"
+                        title="Marcar como descuento"
+                        (click)="toggleDiscount(row.index)">
+                        %
+                      </button>
+                    }
+                  </span>
+
+                  @if (editingIndex() === row.index) {
+                    <label class="flex h-8 items-center rounded-compact border border-line-strong bg-surface px-2 focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+                      <input
+                        type="number"
+                        step="0.01"
+                        [value]="row.item.unitPrice"
+                        (change)="updatePrice(row.index, $any($event.target).value)"
+                        class="w-full border-0 bg-transparent text-right text-[13px] text-ink outline-none" />
+                    </label>
+                    <mg-compact-select
+                      placeholder="Categoría"
+                      [options]="categoryOptions()"
+                      [ngModel]="row.item.categoryId ?? null"
+                      (ngModelChange)="updateCategory(row.index, $event)">
+                    </mg-compact-select>
+                    <mg-compact-select
+                      placeholder="Subcategoría"
+                      [options]="subcategoryOptionsFor(row.item)"
+                      [ngModel]="row.item.subcategoryId ?? null"
+                      [disabled]="!row.item.categoryId"
+                      (ngModelChange)="updateSubcategory(row.index, $event)">
+                    </mg-compact-select>
+                  } @else {
+                    <span class="text-right tabular-nums">{{ row.item.unitPrice | currency: 'MXN' : 'symbol-narrow' }}</span>
+                    <span class="min-w-0">
+                      @if (row.item.categoryId; as categoryId) {
+                        <mg-pill variant="tint" size="sm" [color]="categoryColor(row.item) || '#5F7386'">
+                          {{ categoryName(row.item) }}
+                        </mg-pill>
+                      } @else {
+                        <mg-compact-select
+                          placeholder="Categoría"
+                          [options]="categoryOptions()"
+                          [ngModel]="null"
+                          (ngModelChange)="updateCategory(row.index, $event)">
+                        </mg-compact-select>
+                      }
+                    </span>
+                    <span class="min-w-0">
+                      @if (subcategoryName(row.item); as subName) {
+                        <mg-pill variant="neutral" size="sm">{{ subName }}</mg-pill>
+                      } @else if (row.item.categoryId) {
+                        <mg-compact-select
+                          placeholder="Subcategoría"
+                          [options]="subcategoryOptionsFor(row.item)"
+                          [ngModel]="null"
+                          (ngModelChange)="updateSubcategory(row.index, $event)">
+                        </mg-compact-select>
+                      }
+                    </span>
+                  }
+
+                  <span class="text-right font-semibold tabular-nums">{{ subtotal(row.item) | currency: 'MXN' : 'symbol-narrow' }}</span>
+
+                  @if (editingIndex() === row.index) {
+                    <button
+                      type="button"
+                      class="editghost grid h-7 w-7 place-items-center rounded-lg text-brand"
+                      title="Listo"
+                      (click)="stopEditing()">
+                      <mat-icon class="icon-size-[15px] text-current" [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                    </button>
+                  } @else {
+                    <button
+                      type="button"
+                      class="editghost grid h-7 w-7 place-items-center rounded-lg text-ink-3"
+                      title="Editar renglón"
+                      (click)="startEditing(row.index)">
+                      <mat-icon class="icon-size-[15px] text-current" [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+                    </button>
+                  }
+                </div>
+
+                <div class="-mt-1 flex flex-wrap items-center gap-2 pb-2.5 pl-[56px] pr-5">
+                  @if (row.item.barcode || row.item.sku) {
+                    <label
+                      class="inline-flex cursor-pointer select-none items-center gap-[7px] whitespace-nowrap text-[12.5px] text-ink-2"
+                      matTooltip="Guardar el código en este artículo para reconocerlo en próximos recibos. Desactívalo para artículos genéricos.">
+                      <input
+                        type="checkbox"
+                        class="h-4 w-4 rounded-[5px] accent-[#2A4C3C]"
+                        [checked]="row.item.learnCode !== false"
+                        (change)="toggleLearnCode(row.index)">
+                      Guardar código
+                    </label>
+                    <span class="rounded-md border border-line bg-ink/5 px-[7px] py-0.5 font-mono text-[11.5px] tracking-[.03em] text-ink-3">
+                      {{ formatBarcode(row.item.barcode || row.item.sku) }}
+                    </span>
+                  }
+                  <span class="flex-1"></span>
+                  <button
+                    type="button"
+                    class="rounded-lg px-2 py-1.5 text-[12.5px] font-semibold text-ink-3 hover:bg-ink/5 hover:text-ink-2"
+                    (click)="searchArticle(row.index)">
+                    Cambiar
+                  </button>
+                  <button
+                    type="button"
+                    class="rounded-lg px-2 py-1.5 text-[12.5px] font-semibold text-ink-3 hover:bg-rose-tint hover:text-rose"
+                    (click)="clearSelection(row.index)">
+                    Quitar
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div mgModalInfo class="flex items-center gap-2.5">
+    <mg-pill variant="teal" size="sm">{{ resolvedCount() }} verificados</mg-pill>
+    <mg-pill variant="amber" size="sm">{{ skippedCount() }} pendientes</mg-pill>
+    <span class="ml-1.5 text-[16px] font-bold tabular-nums">{{ total() | currency: 'MXN' : 'symbol-narrow' }}</span>
+  </div>
+
+  <ng-container mgModalActions>
+    <button mat-stroked-button (click)="cancel()">Cancelar</button>
+    <button
+      mat-flat-button
+      [color]="'primary'"
+      [disabled]="saving() || resolvedRows().length === 0"
+      (click)="confirm()">
+      @if (saving()) {
+        <mat-progress-spinner [diameter]="20" [mode]="'indeterminate'"></mat-progress-spinner>
+      } @else {
+        Guardar borrador
+      }
+    </button>
+  </ng-container>
+</mg-modal-shell>

@@ -1,0 +1,226 @@
+<!-- A vs B bar -->
+<div class="bg-card rounded-card mb-5 flex w-full flex-wrap items-center gap-2.5 px-4 py-3.5">
+  <span class="h-[22px] w-2 flex-none rounded" [style.background]="SIDE_A_COLOR"></span>
+  <app-compare-select
+    class="w-full sm:w-[296px]"
+    [categories]="categories"
+    [selection]="selectionA"
+    (selectionChange)="selectionA = $event">
+  </app-compare-select>
+  <mat-form-field appearance="fill" class="w-[220px]" subscriptSizing="dynamic" [formGroup]="rangeA">
+    <mat-date-range-input [rangePicker]="pickerA">
+      <input matStartDate placeholder="Inicio" formControlName="start">
+      <input matEndDate placeholder="Fin" formControlName="end">
+    </mat-date-range-input>
+    <mat-datepicker-toggle matSuffix [for]="pickerA"></mat-datepicker-toggle>
+    <mat-date-range-picker #pickerA></mat-date-range-picker>
+  </mat-form-field>
+
+  <span class="grid h-[34px] w-[34px] flex-none place-items-center rounded-full bg-brand text-[11.5px] font-bold text-white">VS</span>
+
+  <span class="h-[22px] w-2 flex-none rounded" [style.background]="SIDE_B_COLOR"></span>
+  <app-compare-select
+    class="w-full sm:w-[296px]"
+    [categories]="categories"
+    [selection]="selectionB"
+    (selectionChange)="selectionB = $event">
+  </app-compare-select>
+  <mat-form-field appearance="fill" class="w-[220px]" subscriptSizing="dynamic" [formGroup]="rangeB">
+    <mat-date-range-input [rangePicker]="pickerB">
+      <input matStartDate placeholder="Inicio" formControlName="start">
+      <input matEndDate placeholder="Fin" formControlName="end">
+    </mat-date-range-input>
+    <mat-datepicker-toggle matSuffix [for]="pickerB"></mat-datepicker-toggle>
+    <mat-date-range-picker #pickerB></mat-date-range-picker>
+  </mat-form-field>
+
+  <span class="ml-auto"></span>
+  <button
+    mat-flat-button
+    color="primary"
+    class="!h-9 !min-h-9"
+    [disabled]="!canCompare || isComparing()"
+    (click)="runCompare()">
+    @if (isComparing()) {
+      <mat-progress-spinner [diameter]="18" [mode]="'indeterminate'"></mat-progress-spinner>
+    } @else {
+      Comparar
+    }
+  </button>
+</div>
+
+@if (resultA(); as resultA) {
+  @if (resultB(); as resultB) {
+    <!-- A, B and difference -->
+    <div class="mb-5 grid w-full grid-cols-1 gap-4 sm:grid-cols-3">
+      <div class="bg-card rounded-card px-5 py-[18px]">
+        <div class="mb-1 flex items-center gap-2">
+          <span class="h-4 w-2 flex-none rounded" [style.background]="SIDE_A_COLOR"></span>
+          <span class="truncate text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">{{ sideLabel(selectionA) }} · {{ periodLabel(rangeA) }}</span>
+        </div>
+        <div class="text-[22px] font-bold tabular-nums">{{ formatCurrency(resultA.total) }}</div>
+        <div class="mt-0.5 text-[12px] text-ink-3 tabular-nums">
+          {{ resultA.expenseCount }} gastos · promedio {{ formatCurrency(resultA.average) }}
+        </div>
+      </div>
+      <div class="bg-card rounded-card px-5 py-[18px]">
+        <div class="mb-1 flex items-center gap-2">
+          <span class="h-4 w-2 flex-none rounded" [style.background]="SIDE_B_COLOR"></span>
+          <span class="truncate text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">{{ sideLabel(selectionB) }} · {{ periodLabel(rangeB) }}</span>
+        </div>
+        <div class="text-[22px] font-bold tabular-nums">{{ formatCurrency(resultB.total) }}</div>
+        <div class="mt-0.5 text-[12px] text-ink-3 tabular-nums">
+          {{ resultB.expenseCount }} gastos · promedio {{ formatCurrency(resultB.average) }}
+        </div>
+      </div>
+      <div class="bg-card rounded-card px-5 py-[18px]">
+        <div class="mb-1 text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Diferencia</div>
+        <div
+          class="text-[22px] font-bold tabular-nums"
+          [class.text-rose]="diff > 0"
+          [class.text-teal]="diff < 0">
+          {{ diff > 0 ? '+' : '' }}{{ formatCurrency(diff) }}
+        </div>
+        <div class="mt-0.5 flex items-center gap-1.5 text-[12px] text-ink-3">
+          @if (diffPercent !== null) {
+            <mg-pill [variant]="diff > 0 ? 'rose' : 'teal'" size="sm">
+              {{ diff > 0 ? '+' : '' }}{{ diffPercent | number: '1.1-1' }}%
+            </mg-pill>
+          }
+          @if (diff !== 0) {
+            {{ shortPeriodLabel(rangeB) }} gastó {{ diff > 0 ? 'más' : 'menos' }}
+          } @else {
+            sin cambio
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Paired bars by subcategory -->
+    @if (pairedSubcategories.length) {
+      <div class="bg-card rounded-card mb-5 w-full">
+        <div class="flex items-center gap-2.5 px-5 pb-3 pt-4">
+          <h2 class="text-[15px] font-semibold text-ink">Por subcategoría</h2>
+          <span class="ml-auto flex items-center gap-4 text-[12.5px] text-ink-3">
+            <span class="flex items-center gap-1.5"><i class="inline-block h-2 w-2 rounded-[2px]" [style.background]="SIDE_A_COLOR"></i>{{ periodLabel(rangeA) }}</span>
+            <span class="flex items-center gap-1.5"><i class="inline-block h-2 w-2 rounded-[2px]" [style.background]="SIDE_B_COLOR"></i>{{ periodLabel(rangeB) }}</span>
+          </span>
+        </div>
+        <div class="flex flex-col gap-4 px-5 pb-[18px]">
+          @for (row of pairedSubcategories; track row.name) {
+            <div>
+              <div class="mb-1.5 flex justify-between text-[13px]">
+                <b class="font-semibold text-ink">{{ row.name }}</b>
+                <span class="flex gap-3.5 text-[12.5px] text-ink-2 tabular-nums">
+                  <span class="flex items-center gap-1.5"><i class="inline-block h-2 w-2 rounded-[2px]" [style.background]="SIDE_A_COLOR"></i>{{ formatCurrency(row.a) }}</span>
+                  <span class="flex items-center gap-1.5"><i class="inline-block h-2 w-2 rounded-[2px]" [style.background]="SIDE_B_COLOR"></i>{{ formatCurrency(row.b) }}</span>
+                </span>
+              </div>
+              <div class="mb-1 h-[7px] overflow-hidden rounded-full bg-ink/[.06]">
+                <div class="h-full rounded-full" [style.width.%]="(row.a / pairedMax) * 100" [style.background]="SIDE_A_COLOR"></div>
+              </div>
+              <div class="h-[7px] overflow-hidden rounded-full bg-ink/[.06]">
+                <div class="h-full rounded-full" [style.width.%]="(row.b / pairedMax) * 100" [style.background]="SIDE_B_COLOR"></div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Side-by-side detail -->
+    <div class="grid w-full grid-cols-1 items-start gap-4 lg:grid-cols-2">
+      <div class="bg-card rounded-card overflow-hidden">
+        <div class="flex items-center gap-2.5 px-5 pb-3 pt-4">
+          <span class="h-4 w-2 flex-none rounded" [style.background]="SIDE_A_COLOR"></span>
+          <h2 class="text-[15px] font-semibold text-ink">{{ periodLabel(rangeA) }}</h2>
+          <span class="ml-auto text-[12.5px] text-ink-3 tabular-nums">
+            {{ resultA.expenseCount }} gastos · <b class="font-semibold text-ink">{{ formatCurrency(resultA.total) }}</b>
+          </span>
+        </div>
+        <table class="w-full border-collapse">
+          <thead>
+            <tr>
+              <th class="w-[100px] border-b border-line px-3.5 py-2.5 pl-5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Folio</th>
+              <th class="w-[90px] border-b border-line px-3.5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Fecha</th>
+              <th class="border-b border-line px-3.5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Comercio</th>
+              <th class="w-[110px] border-b border-line px-3.5 py-2.5 pr-5 text-right text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Monto</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (expense of expandedA() ? resultA.expenses : resultA.expenses.slice(0, 5); track expense.id) {
+              <tr class="hover:bg-ink/[.025]">
+                <td class="border-b border-line px-3.5 py-3 pl-5 font-mono text-[12px] text-ink-3">INV-{{ expense.id }}</td>
+                <td class="border-b border-line px-3.5 py-3 text-[13.5px] text-ink-3 tabular-nums">{{ expense.expenseDate | date: 'dd MMM' }}</td>
+                <td class="border-b border-line px-3.5 py-3 text-[13.5px] text-ink">{{ expense.recipientName }}</td>
+                <td class="border-b border-line px-3.5 py-3 pr-5 text-right text-[13.5px] font-semibold tabular-nums">{{ formatCurrency(expense.total) }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="4" class="px-5 py-4 text-[13px] text-ink-3">Sin gastos en este período</td></tr>
+            }
+          </tbody>
+        </table>
+        @if (resultA.expenses.length > 5) {
+          <div class="px-5 py-2.5">
+            <button
+              type="button"
+              class="rounded-lg px-2 py-1.5 text-[12.5px] font-semibold text-brand hover:bg-brand-tint"
+              (click)="expandedA.set(!expandedA())">
+              {{ expandedA() ? 'Ver menos' : 'Ver los ' + resultA.expenses.length + ' gastos' }}
+            </button>
+          </div>
+        }
+      </div>
+
+      <div class="bg-card rounded-card overflow-hidden">
+        <div class="flex items-center gap-2.5 px-5 pb-3 pt-4">
+          <span class="h-4 w-2 flex-none rounded" [style.background]="SIDE_B_COLOR"></span>
+          <h2 class="text-[15px] font-semibold text-ink">{{ periodLabel(rangeB) }}</h2>
+          <span class="ml-auto text-[12.5px] text-ink-3 tabular-nums">
+            {{ resultB.expenseCount }} gastos · <b class="font-semibold text-ink">{{ formatCurrency(resultB.total) }}</b>
+          </span>
+        </div>
+        <table class="w-full border-collapse">
+          <thead>
+            <tr>
+              <th class="w-[100px] border-b border-line px-3.5 py-2.5 pl-5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Folio</th>
+              <th class="w-[90px] border-b border-line px-3.5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Fecha</th>
+              <th class="border-b border-line px-3.5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Comercio</th>
+              <th class="w-[110px] border-b border-line px-3.5 py-2.5 pr-5 text-right text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Monto</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (expense of expandedB() ? resultB.expenses : resultB.expenses.slice(0, 5); track expense.id) {
+              <tr class="hover:bg-ink/[.025]">
+                <td class="border-b border-line px-3.5 py-3 pl-5 font-mono text-[12px] text-ink-3">INV-{{ expense.id }}</td>
+                <td class="border-b border-line px-3.5 py-3 text-[13.5px] text-ink-3 tabular-nums">{{ expense.expenseDate | date: 'dd MMM' }}</td>
+                <td class="border-b border-line px-3.5 py-3 text-[13.5px] text-ink">{{ expense.recipientName }}</td>
+                <td class="border-b border-line px-3.5 py-3 pr-5 text-right text-[13.5px] font-semibold tabular-nums">{{ formatCurrency(expense.total) }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="4" class="px-5 py-4 text-[13px] text-ink-3">Sin gastos en este período</td></tr>
+            }
+          </tbody>
+        </table>
+        @if (resultB.expenses.length > 5) {
+          <div class="px-5 py-2.5">
+            <button
+              type="button"
+              class="rounded-lg px-2 py-1.5 text-[12.5px] font-semibold text-brand hover:bg-brand-tint"
+              (click)="expandedB.set(!expandedB())">
+              {{ expandedB() ? 'Ver menos' : 'Ver los ' + resultB.expenses.length + ' gastos' }}
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  }
+} @else {
+  <div class="bg-card rounded-card w-full">
+    <mg-empty-state
+      icon="heroicons_outline:arrows-right-left"
+      title="Elige qué comparar"
+      message="Selecciona categorías o subcategorías y un período en cada lado, y presiona Comparar.">
+    </mg-empty-state>
+  </div>
+}

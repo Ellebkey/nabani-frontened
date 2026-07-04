@@ -1,0 +1,34 @@
+@if (hasTagsWithExpenses) {
+  <div class="mb-1">
+    <div class="mb-2 text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Etiquetas</div>
+    <div class="flex flex-wrap items-center gap-2.5">
+      @for (summary of tagSummaries; track summary.id) {
+        @if (summary.expenseCount > 0) {
+          <button
+            type="button"
+            class="flex items-center gap-2.5 rounded-xl border px-3.5 py-2.5 text-left"
+            [class]="isSelected(summary.id)
+              ? 'border-brand bg-brand-tint ring-1 ring-inset ring-brand'
+              : 'border-line bg-surface hover:bg-brand-tint'"
+            (click)="onTagClick(summary.id)">
+            <span class="h-2 w-2 flex-none rounded-full" [style.background-color]="summary.color"></span>
+            <span>
+              <b class="block text-[14px] font-bold tabular-nums">
+                {{ summary.totalAmount | currency: 'MXN' : 'symbol-narrow' : '1.2-2' }}
+              </b>
+              <span class="text-[12px] text-ink-3">
+                {{ summary.name }} · {{ summary.expenseCount }} {{ summary.expenseCount === 1 ? 'gasto' : 'gastos' }}@if (isSelected(summary.id) && periodLabel(summary)) { · {{ periodLabel(summary) }}}
+              </span>
+            </span>
+            @if (isSelected(summary.id)) {
+              <span class="grid h-5 w-5 place-items-center rounded-md text-ink-3">
+                <mat-icon class="icon-size-[13px] text-current" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+              </span>
+            }
+          </button>
+        }
+      }
+      <span class="text-[12px] text-ink-3">Con etiqueta activa, el rango se expande a todo su historial</span>
+    </div>
+  </div>
+}

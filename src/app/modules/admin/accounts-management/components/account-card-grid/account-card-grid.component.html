@@ -1,0 +1,101 @@
+<!-- Active accounts -->
+@if (activeAccounts().length > 0) {
+  <div class="mb-8">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      @for (account of activeAccounts(); track account.id; let i = $index) {
+        <ng-container *ngTemplateOutlet="cardTemplate; context: { $implicit: account, index: i }"></ng-container>
+      }
+    </div>
+  </div>
+}
+
+<!-- Paused accounts -->
+@if (inactiveAccounts().length > 0) {
+  <div>
+    <div class="mb-3 text-[11px] font-bold uppercase tracking-[.07em] text-ink-3">Pausadas</div>
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      @for (account of inactiveAccounts(); track account.id; let i = $index) {
+        <ng-container *ngTemplateOutlet="cardTemplate; context: { $implicit: account, index: i }"></ng-container>
+      }
+    </div>
+  </div>
+}
+
+<!-- Empty state -->
+@if (accounts().length === 0) {
+  <div class="bg-card rounded-card">
+    <mg-empty-state
+      icon="heroicons_outline:squares-2x2"
+      title="No hay cuentas para mostrar"
+      message="Los resultados aparecerán aquí cuando agregues cuentas.">
+    </mg-empty-state>
+  </div>
+}
+
+<!-- Card -->
+<ng-template #cardTemplate let-account let-i="index">
+  <div
+    class="bg-card rounded-card flex cursor-pointer flex-col gap-3.5 px-5 py-[18px]"
+    [class.cursor-not-allowed]="account.disable"
+    (click)="!account.disable && editAccount.emit(account)">
+    <div class="flex items-center gap-3">
+      <mg-tile [color]="getCardColor(account)" [class.opacity-40]="account.disable">
+        <mat-icon class="text-current" [svgIcon]="'heroicons_outline:building-library'"></mat-icon>
+      </mg-tile>
+      <div class="min-w-0">
+        <div
+          class="truncate text-[14.5px] font-semibold"
+          [class.text-ink]="!account.disable"
+          [class.text-ink-3]="account.disable"
+          [matTooltip]="account.name">
+          {{ account.name }}
+        </div>
+        <div class="text-[12px] text-ink-3">Cuenta</div>
+      </div>
+      <span class="ml-auto"></span>
+      @if (account.disable) {
+        <mg-pill variant="neutral" size="sm">Pausada</mg-pill>
+      }
+      <div (click)="$event.stopPropagation()">
+        <button
+          type="button"
+          class="grid h-[30px] w-[30px] place-items-center rounded-lg text-ink-3 hover:bg-brand-tint hover:text-ink"
+          [matMenuTriggerFor]="cardMenu"
+          aria-label="Acciones">
+          <mat-icon class="icon-size-[17px] text-current" [svgIcon]="'heroicons_outline:ellipsis-horizontal'"></mat-icon>
+        </button>
+        <mat-menu #cardMenu="matMenu">
+          @if (!account.disable) {
+            <button mat-menu-item (click)="editAccount.emit(account)">
+              <mat-icon [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+              <span>Editar</span>
+            </button>
+          }
+          <button mat-menu-item (click)="toggleStatus.emit(account)">
+            <mat-icon [svgIcon]="account.disable ? 'heroicons_outline:play' : 'heroicons_outline:pause'"></mat-icon>
+            <span>{{ account.disable ? 'Activar' : 'Pausar' }}</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+
+    <div
+      class="text-[20px] font-bold tabular-nums"
+      [class.text-ink-3]="account.disable || !(account.currentAmount > 0)"
+      [class.text-ink]="!account.disable && account.currentAmount > 0">
+      {{ account.currentAmount | currency: 'MXN' : 'symbol-narrow' : '1.0-2' }}
+    </div>
+
+    <div class="flex items-center gap-2 text-[12.5px] text-ink-3">
+      <mg-dot [color]="getCardColor(account)"></mg-dot>
+      Saldo actual
+      @if (account.sectionsCount > 0) {
+        <span class="ml-auto inline-flex items-center gap-1.5 font-semibold text-brand tabular-nums">
+          <mat-icon class="icon-size-[14px] text-current" [svgIcon]="'heroicons_outline:inbox-stack'"></mat-icon>
+          {{ account.sectionsCount }} {{ account.sectionsCount === 1 ? 'apartado' : 'apartados' }} ·
+          {{ account.sectionsTotal | currency: 'MXN' : 'symbol-narrow' : '1.0-2' }}
+        </span>
+      }
+    </div>
+  </div>
+</ng-template>

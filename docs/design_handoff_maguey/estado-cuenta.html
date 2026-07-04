@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estado de Cuenta — Maguey 2.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/maguey.css">
+<style>
+  .filters{ display:grid; grid-template-columns:280px 240px; gap:10px; margin-bottom:20px; }
+  .hero{ display:grid; grid-template-columns:1fr auto; gap:24px; align-items:center; padding:24px; margin-bottom:20px; }
+  .hstats{ display:flex; gap:48px; }
+  .hstat .v{ font-size:20px; font-weight:700; font-variant-numeric:tabular-nums; margin-top:2px; }
+  /* CCARD — render dinámico de tarjeta (sin imágenes): usa el color del método de pago
+     tw: w-[210px] h-[130px] rounded-2xl p-4 text-white relative overflow-hidden
+     bg: linear-gradient(135deg, color 88%+blanco → color → color 72%+negro) */
+  .ccard{
+    width:210px; height:132px; border-radius:16px; position:relative; overflow:hidden;
+    --cc:#3B5F82; color:#fff; padding:16px; flex:none;
+    background:linear-gradient(135deg, color-mix(in srgb, var(--cc) 82%, #fff) 0%, var(--cc) 48%, color-mix(in srgb, var(--cc) 68%, #000) 100%);
+    display:flex; flex-direction:column;
+  }
+  .ccard::after{ /* brillo diagonal sutil */
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(115deg, rgb(255 255 255/.14) 0%, transparent 38%);
+  }
+  .ccard .chip{ width:30px; height:22px; border-radius:5px; background:linear-gradient(135deg,#E9D8AC,#C9A45C); opacity:.92; }
+  .ccard .num4{ margin-top:auto; font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:14px; letter-spacing:.14em; }
+  .ccard .nm{ display:flex; justify-content:space-between; align-items:baseline; font-size:10.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:rgb(255 255 255/.85); margin-top:6px; }
+  .payrow{ display:flex; align-items:center; gap:12px; padding:16px 20px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  .paylead{ display:flex; align-items:baseline; gap:10px; }
+  .idc{ font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:12px; color:var(--ink-3); }
+  .kebab{ width:30px; height:30px; border-radius:8px; display:grid; place-items:center; color:var(--ink-3); }
+  .kebab:hover{ background:var(--brand-tint); color:var(--ink); }
+  .kebab svg{ width:17px; height:17px; }
+
+  /* Encabezado de sección de conciliación — mismo patrón que Revisar Recibo */
+  .secrow{
+    display:flex; align-items:center; gap:7px; padding:14px 20px 8px;
+    font-size:11px; font-weight:700; letter-spacing:.07em; text-transform:uppercase;
+  }
+  .secrow svg{ width:14px; height:14px; }
+  .secrow.pend{ color:var(--amber); }
+  .secrow.ok{ color:var(--teal); border-top:1px solid var(--line); margin-top:4px; }
+  .secrow .n{ color:var(--ink-3); font-weight:600; }
+  .secrow .sum{ margin-left:auto; text-transform:none; letter-spacing:0; font-size:12.5px; font-weight:600; color:var(--ink-2); font-variant-numeric:tabular-nums; }
+  /* Acción masiva de la sección: confirmar todo / regresar todo */
+  .bulkbtn{
+    height:26px; padding:0 10px; border-radius:999px; display:inline-flex; align-items:center; gap:5px;
+    font-size:11.5px; font-weight:600; letter-spacing:.02em; text-transform:none;
+    border:1px solid var(--line-strong); background:var(--card); color:var(--ink-2);
+  }
+  .bulkbtn:hover{ background:var(--brand-tint); color:var(--ink); }
+  .bulkbtn svg{ width:13px; height:13px; }
+
+  /* Botón de confirmar por fila (flecha abajo) / regresar (flecha arriba) */
+  .confbtn{ width:30px; height:30px; border-radius:8px; display:grid; place-items:center; color:var(--ink-3); }
+  .confbtn svg{ width:16px; height:16px; }
+  .confbtn.down:hover{ background:var(--teal-tint); color:var(--teal); }
+  .confbtn.up:hover{ background:var(--amber-tint); color:var(--amber); }
+  .rowacts{ display:flex; align-items:center; gap:2px; justify-content:flex-end; }
+  tr.done td{ color:var(--ink-3); }
+  tr.done td.conc{ color:var(--ink-2); }
+</style>
+</head>
+<body class="depth-a">
+<div class="mg-shell">
+  <aside class="mg-side" data-shell="gastos"></aside>
+  <div class="mg-main">
+    <div data-topbar></div>
+    <div class="mg-page">
+
+      <div class="mg-pagehead">
+        <div>
+          <h1>Estado de cuenta</h1>
+          <div class="sub">Concilia tu estado de cuenta bancario con tus registros</div>
+        </div>
+      </div>
+
+      <div class="filters">
+        <label class="mg-field"><span class="pdot" style="--pc:#5F7386; width:8px; height:8px; border-radius:999px; background:var(--pc);"></span><input value="BBVA Platinum ·3465"><i data-i="chevD" class="chev"></i></label>
+        <label class="mg-field"><i data-i="cal"></i><input value="02 julio, 2026"></label>
+      </div>
+
+      <!-- Héroe -->
+      <div class="mg-card hero">
+        <div>
+          <span class="mg-kicker">BBVA Platinum · corte 02 jul 2026 · cuenta ligada BBVA</span>
+          <div class="mg-hero gold num" style="margin:4px 0 18px;">$17,690.40</div>
+          <div class="hstats">
+            <div class="hstat"><span class="mg-kicker">Saldo al corte</span><div class="v num">$17,690.40</div></div>
+            <div class="hstat"><span class="mg-kicker">Deuda total</span><div class="v num">$17,690.40</div></div>
+            <div class="hstat"><span class="mg-kicker">Conciliado</span><div class="v num amt-in">$4,331.30 · 8 de 32</div></div>
+          </div>
+        </div>
+        <div class="ccard" style="--cc:#3B5F82; width:210px; height:132px;">
+          <div class="chip"></div>
+          <div class="num4">•••• 3465</div>
+          <div class="nm"><span>BBVA Platinum</span><span>Crédito</span></div>
+        </div>
+      </div>
+
+      <!-- Conciliación -->
+      <div class="mg-card">
+        <div class="payrow">
+          <div class="paylead">
+            <span class="mg-kicker">Total a pagar</span>
+            <span class="num" style="font-size:18px; font-weight:700;">$0.00</span>
+          </div>
+          <span style="margin-left:auto"></span>
+          <span class="mg-kicker" style="letter-spacing:.04em;">Fecha y hora de pago</span>
+          <label class="mg-field" style="width:180px; height:36px;"><i data-i="cal"></i><input value="02 julio, 2026"></label>
+          <label class="mg-field" style="width:120px; height:36px;"><input value="08:33 AM"></label>
+          <button class="mg-btn primary" disabled><i data-i="cash"></i>Pagar</button>
+        </div>
+
+        <!-- POR CONCILIAR -->
+        <div class="secrow pend">
+          <i data-i="alert"></i>Por conciliar <span class="n">· 24</span>
+          <button class="bulkbtn" style="margin-left:10px;" title="Confirmar todos"><i data-i="chevRR" style="transform:rotate(90deg)"></i>Confirmar todo</button>
+          <span class="sum num">$13,359.10</span>
+        </div>
+
+        <table class="mg-table">
+          <thead>
+            <tr>
+              <th style="width:100px; padding-left:20px;">ID</th>
+              <th style="width:130px">Fecha</th>
+              <th>Concepto</th>
+              <th class="r" style="width:120px">Total</th>
+              <th class="r" style="width:110px"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="idc" style="padding-left:20px;">INV-10569</td><td class="num" style="color:var(--ink-3)">22 may 2026</td><td>Sushi Kiuri</td><td class="r num">$290.00</td>
+              <td><div class="rowacts"><button class="confbtn down" title="Confirmar"><i data-i="arrowD"></i></button><button class="kebab"><i data-i="dots"></i></button></div></td>
+            </tr>
+            <tr>
+              <td class="idc" style="padding-left:20px;">INV-10571</td><td class="num" style="color:var(--ink-3)">24 may 2026</td><td>Asadero Los Primos</td><td class="r num">$209.00</td>
+              <td><div class="rowacts"><button class="confbtn down" title="Confirmar"><i data-i="arrowD"></i></button><button class="kebab"><i data-i="dots"></i></button></div></td>
+            </tr>
+            <tr>
+              <td class="idc" style="padding-left:20px;">INV-10568</td><td class="num" style="color:var(--ink-3)">25 may 2026</td><td>Tacos Jaime</td><td class="r num">$260.00</td>
+              <td><div class="rowacts"><button class="confbtn down" title="Confirmar"><i data-i="arrowD"></i></button><button class="kebab"><i data-i="dots"></i></button></div></td>
+            </tr>
+            <tr>
+              <td class="idc" style="padding-left:20px;">INV-10577</td><td class="num" style="color:var(--ink-3)">29 may 2026</td><td>Casa Sai Veterinaria</td><td class="r num">$1,020.00</td>
+              <td><div class="rowacts"><button class="confbtn down" title="Confirmar"><i data-i="arrowD"></i></button><button class="kebab"><i data-i="dots"></i></button></div></td>
+            </tr>
+            <tr>
+              <td class="idc" style="padding-left:20px;">INV-10547</td><td class="num" style="color:var(--ink-3)">30 may 2026</td><td>Telcel Online</td><td class="r num">$200.00</td>
+              <td><div class="rowacts"><button class="confbtn down" title="Confirmar"><i data-i="arrowD"></i></button><button class="kebab"><i data-i="dots"></i></button></div></td>
+            </tr>
+            <tr>
+              <td class="idc" style="padding-left:20px;">INV-10576</td><td class="num" style="color:var(--ink-3)">30 may 2026</td><td>Oxxo Gas Batan</td><td class="r num">$599.80</td>
+              <td><div class="rowacts"><button class="confbtn down" title="Confirmar"><i data-i="arrowD"></i></button><button class="kebab"><i data-i="dots"></i></button></div></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- CONCILIADOS -->
+        <div class="secrow ok">
+          <i data-i="check"></i>Conciliados <span class="n">· 8</span>
+          <button class="bulkbtn" style="margin-left:10px;" title="Regresar todos"><i data-i="chevRR" style="transform:rotate(-90deg)"></i>Regresar todo</button>
+          <span class="sum num">$4,331.30</span>
+        </div>
+
+        <table class="mg-table">
+          <tbody>
+            <tr class="done">
+              <td class="idc" style="padding-left:20px; width:100px;">INV-10567</td><td class="num" style="width:130px;">31 may 2026</td><td class="conc">Restaurante Bap</td><td class="r num" style="width:120px;">$962.50</td>
+              <td class="r" style="width:110px;"><div class="rowacts"><button class="confbtn up" title="Regresar"><i data-i="chevU"></i></button><button class="kebab"><i data-i="dots"></i></button></div></td>
+            </tr>
+            <tr class="done">
+              <td class="idc" style="padding-left:20px;">INV-10560</td><td class="num">01 jun 2026</td><td class="conc">Digital Ocean</td><td class="r num">$248.00</td>
+              <td><div class="rowacts"><button class="confbtn up" title="Regresar"><i data-i="chevU"></i></button><button class="kebab"><i data-i="dots"></i></button></div></td>
+            </tr>
+            <tr class="done">
+              <td class="idc" style="padding-left:20px;">INV-10555</td><td class="num">02 jun 2026</td><td class="conc">Amazon MX</td><td class="r num">$1,240.80</td>
+              <td><div class="rowacts"><button class="confbtn up" title="Regresar"><i data-i="chevU"></i></button><button class="kebab"><i data-i="dots"></i></button></div></td>
+            </tr>
+            <tr class="done">
+              <td class="idc" style="padding-left:20px;">INV-10552</td><td class="num">03 jun 2026</td><td class="conc">Spotify</td><td class="r num">$129.00</td>
+              <td><div class="rowacts"><button class="confbtn up" title="Regresar"><i data-i="chevU"></i></button><button class="kebab"><i data-i="dots"></i></button></div></td>
+            </tr>
+            <tr class="done">
+              <td class="idc" style="padding-left:20px;">INV-10549</td><td class="num">04 jun 2026</td><td class="conc">Uber</td><td class="r num">$186.00</td>
+              <td><div class="rowacts"><button class="confbtn up" title="Regresar"><i data-i="chevU"></i></button><button class="kebab"><i data-i="dots"></i></button></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script src="shared/shell.js"></script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+@keyframes merge-flash {
+  0% {
+    box-shadow: inset 0 0 0 9999px rgba(13, 148, 136, 0.18);
+  }
+  100% {
+    box-shadow: inset 0 0 0 9999px rgba(13, 148, 136, 0);
+  }
+}
+
+.merge-flash {
+  animation: merge-flash 1.3s ease-out;
+}
+
+// Hover-to-edit affordance identical to the expense modal table
+// (color-mix con tokens: sin equivalente Tailwind)
+.item.hoverable:hover .artrow {
+  background: color-mix(in srgb, rgb(var(--maguey-brand)) 4%, rgb(var(--maguey-card)));
+}
+
+.item .editghost {
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+
+.item:hover .editghost,
+.item.editing .editghost {
+  opacity: 1;
+}
+
+// Sticky table header: opaque background mixed over the card
+.arthead {
+  background: color-mix(in srgb, rgb(var(--maguey-ink)) 2%, rgb(var(--maguey-card)));
+}

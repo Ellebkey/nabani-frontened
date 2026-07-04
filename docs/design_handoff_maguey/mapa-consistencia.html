@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maguey 2.0 — Mapa de consistencia</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/maguey.css">
+<style>
+  body{ background:var(--card); }
+  .doc{ max-width:880px; margin:0 auto; padding:48px 40px 80px; }
+  .doc h1{ font-size:28px; font-weight:700; letter-spacing:-.02em; }
+  .doc .lead{ font-size:14.5px; color:var(--ink-2); margin:8px 0 32px; max-width:640px; }
+  .scr{ border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin-bottom:14px; }
+  .scr h2{ font-size:15px; font-weight:700; display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .scr h2 .mg-pill{ margin-left:auto; }
+  .scr ul{ margin:0; padding-left:16px; font-size:13.5px; color:var(--ink-2); }
+  .scr li{ margin:5px 0; }
+  .scr li b{ color:var(--ink); font-weight:600; }
+</style>
+</head>
+<body>
+<div class="doc">
+  <span class="mg-kicker">Maguey · Maguey 2.0</span>
+  <h1>Mapa de consistencia</h1>
+  <p class="lead">Qué componente del sistema reemplaza a qué, pantalla por pantalla, para que el revamp aterrice uniforme. Los mockups cubren Gastos, Modal, Recibo, Dashboard y Familia; esto cubre el resto.</p>
+
+  <div class="scr">
+    <h2>Ingresos <span class="mg-pill amber sm">theme review pendiente</span></h2>
+    <ul>
+      <li>Tabla actual → <b>fila de transacción</b> (tile teal-neutral con ícono +, concepto Nómina/Freelance como meta, cuenta como dot+nombre, monto <b>+$ teal</b> a la derecha). Ya no es tabla: es la misma lista que Gastos.</li>
+      <li>Columna ID → fuera de la fila, visible en el detalle/edición.</li>
+      <li>Paginación gigante superior → <b>pager compacto</b> en el header de la card.</li>
+      <li>Filtros (fecha + cuenta) → misma fila de filtros de 40px que Gastos, chips de rango debajo.</li>
+      <li>Dot de cuenta rojo/naranja crudo → color muted del picker nuevo.</li>
+    </ul>
+  </div>
+
+  <div class="scr">
+    <h2>Reportes · Flujo de caja (Sankey)</h2>
+    <ul>
+      <li><b>Las etiquetas viven aquí</b> (se quitaron de Gastos): cards de resumen por etiqueta bajo los filtros. Al hacer clic, la etiqueta se vuelve la <b>fuente del Sankey</b> y el rango de fechas se expande automáticamente a todo el historial de la etiqueta (con banner de contexto y × para salir).</li>
+      <li>Rango de fechas + chips (Este mes … Todo) siempre presentes; funcionan igual con o sin etiqueta.</li>
+      <li>Drill-down conservado: clic en categoría → cards de subcategoría (con % del total, seleccionada con ring brand) → clic → tabla de gastos estándar.</li>
+      <li><b>Modo comparar</b>: barra A vs B (categoría/subcategoría/etiqueta + período cada lado), stats con diferencia (+% semaforizado), barras pareadas por comercio y detalle lado a lado.</li>
+      <li>Cards resumen → card estándar con kicker + monto; tabla drill-down → tabla estándar.</li>
+    </ul>
+  </div>
+
+  <div class="scr">
+    <h2>Inventario · Artículos y Comercios <span class="mg-pill amber sm">theme review pendiente</span></h2>
+    <ul>
+      <li>Tabla → <b>tabla estándar</b>; ID fuera (columna angosta gris está bien aquí por ser catálogo, 12px ink-3).</li>
+      <li>Toggle ámbar "Estado" → <b>mg-toggle verde marca</b> (el ámbar se reserva para warnings).</li>
+      <li>Search + paginación arriba → header de card: título izquierda, search compacto + pager derecha.</li>
+      <li>Bulk-select → checkboxes estándar (cbx 16px radio 5) + barra de acciones sticky inferior con botones sm.</li>
+    </ul>
+  </div>
+
+  <div class="scr">
+    <h2>Estado de Cuenta (TDC) — conciliación</h2>
+    <ul>
+      <li>Es el hermano mayor de Revisar Recibo: <b>mismo patrón de dos secciones</b> — "Por conciliar" (ámbar) arriba, "Conciliados" (teal) abajo, con conteo y suma por sección. Sin paginación: la lista es finita por corte.</li>
+      <li>Confirmar por fila → botón flecha-abajo (hover teal-tint); regresar → flecha-arriba (hover amber-tint). Acción masiva por sección → chip "Confirmar todo" / "Regresar todo" junto al título (doble flecha).</li>
+      <li>Filas conciliadas en ink-3 (atenuadas) para que la vista "se vacíe" visualmente conforme avanzas.</li>
+      <li>Kebab por fila: Editar / Eliminar (pendiente decidir si se queda).</li>
+      <li>Card héroe → kicker + monto héroe gold + stat "Conciliado: $x · n de m". Imagen de tarjeta se queda como ilustración derecha.</li>
+      <li>Botón "Buscar" verde → los filtros aplican al cambiar.</li>
+    </ul>
+  </div>
+
+  <div class="scr">
+    <h2>Admin · Categorías</h2>
+    <ul>
+      <li>Barrita lateral de color → <b>tile sm</b> con el color de la categoría + ícono tag.</li>
+      <li>Tier chips Free/Premium y F/P → <b>pill brand sm</b> (Premium) y <b>pill neutral sm</b> (Free), un solo tamaño.</li>
+      <li>Fila de subcategoría → fila estándar densa (34px tile, dot de color, kebab).</li>
+      <li>"Agregar subcategoría" → botón ghost sm con ícono plus.</li>
+      <li>Paleta por categoría → los 16 muted del sistema.</li>
+    </ul>
+  </div>
+
+  <div class="scr">
+    <h2>Admin · Métodos de pago y Cuentas</h2>
+    <ul>
+      <li>Header de color completo en la card → <b>tile 42px</b> + nombre + kebab; el resto de la card es blanca. El color sigue siendo del usuario, en dosis de 42px. El <b>dot del color</b> acompaña a la cuenta/método en TODAS las apariciones: filas de gastos, ledger, ingresos, selects, filtros.</li>
+      <li>Tarjetas de crédito → componente <b>ccard</b> (render CSS dinámico con el color del método: gradiente, chip, ····4 y nombre) — sin imágenes subidas. Ver Estado de Cuenta.</li>
+      <li>Montos verdes crudos (#00c853-ish) → <b>ink</b>; solo el héroe de la página (saldo total) usa gold.</li>
+      <li>Inactivas → misma card con tile desaturado (opacity .4) + pill neutral "Pausada"; no card gris completa.</li>
+      <li>Picker de 16 colores crudos → <b>picker de 16 muted</b> (mapa 1:1 en el spec).</li>
+      <li>Apartados/transfers → modal estándar; fila "Desde/Hacia" con la fila de cuenta estándar (tile + nombre + saldo).</li>
+    </ul>
+  </div>
+
+  <div class="scr">
+    <h2>Admin · Etiquetas</h2>
+    <ul>
+      <li>Strip superior de color + tile app-style → <b>un solo tile sm</b> con ícono tag en color muted; card estándar.</li>
+      <li>Grid → mismas cards que métodos de pago (anatomía única de "card de catálogo": tile · nombre · kebab).</li>
+    </ul>
+  </div>
+
+  <div class="scr">
+    <h2>Familia · Ajustes e invitación</h2>
+    <ul>
+      <li>Chips de categorías personales → <b>pill outline</b>; seleccionada = outline rose + candado (como hoy pero con la anatomía única). Los selectores de categoría familiar SIEMPRE eligen de la lista existente — sin opción "crear" (crear categorías es solo del administrador).</li>
+      <li>Card "Disolver hogar" con borde rose → card estándar + título ink + <b>botón danger</b>; el rojo vive en el botón, no en el contenedor.</li>
+      <li>Banner de invitación → card estándar con tile neutral + CTA primario sm, no banner gris propio.</li>
+      <li>Miembro → fila estándar (avatar iniciales 42px brand-tint, pill brand sm "Dueño").</li>
+    </ul>
+  </div>
+
+  <div class="scr">
+    <h2>Perfil y Auth</h2>
+    <ul>
+      <li>Chips de rol → pill brand sm.</li>
+      <li>Formularios → campos estándar 40px, labels 12.5/600, un primario por pantalla.</li>
+      <li>Auth: panel de imagen se queda; formulario adopta campos/botones del sistema; logo + overline arriba.</li>
+    </ul>
+  </div>
+
+  <div class="scr">
+    <h2>Transversal (todas las pantallas)</h2>
+    <ul>
+      <li>Restos pre-Maguey: <code>rounded-2xl</code> sueltos, <code>text-red-500/green-600</code> → tokens (<code>rose/teal</code>) según la tabla "What NOT to Use" de THEME.md.</li>
+      <li><code>bg-blue-50</code> de la fila en edición → <code>brand-tint + ring brand</code>.</li>
+      <li>Toda paginación → pager compacto en header de card, misma esquina siempre.</li>
+      <li>Todo monto → <code>tabular-nums</code>; signo explícito cuando es direccional.</li>
+      <li>Confirmaciones Fuse → mantener, pero ícono en círculo brand-tint/rose-tint según intención y botones del sistema.</li>
+    </ul>
+  </div>
+</div>
+<script src="shared/shell.js"></script>
+</body>
+</html>

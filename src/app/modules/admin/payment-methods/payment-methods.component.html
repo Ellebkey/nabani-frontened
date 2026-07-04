@@ -1,0 +1,76 @@
+<div class="flex flex-col flex-auto w-full">
+  <div class="flex flex-col w-full max-w-screen-xl mx-auto p-4 sm:p-6 md:p-8">
+
+    <!-- Page header -->
+    <div class="mb-5 flex w-full flex-col items-start gap-4 sm:flex-row">
+      <div>
+        <h1 class="text-[23px] font-bold leading-[30px] tracking-tight text-ink">Cuentas y métodos de pago</h1>
+        <div class="mt-0.5 text-[13px] text-ink-3 tabular-nums">{{ paymentMethods().length }} métodos de pago</div>
+      </div>
+      <div class="flex flex-wrap items-center gap-2.5 sm:ml-auto">
+        <div class="inline-flex gap-0.5 rounded-btn border border-line-strong bg-surface p-[3px]">
+          <a
+            routerLink="/admin/accounts"
+            class="flex h-8 items-center rounded-lg px-3.5 text-[13px] font-semibold text-ink-2 hover:bg-brand-tint">
+            Cuentas
+          </a>
+          <a
+            routerLink="/admin/payment-methods"
+            class="flex h-8 items-center rounded-lg bg-brand px-3.5 text-[13px] font-semibold text-white">
+            Métodos de pago
+          </a>
+        </div>
+        <button mat-flat-button [color]="'primary'" (click)="openCreateModal()">
+          <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+          <span class="ml-2">Nuevo método</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Content Section -->
+    <div class="w-full">
+      @if (isLoading()) {
+        <!-- Loading Skeleton -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          @for (item of [1,2,3,4,5,6,7,8]; track item) {
+            <div class="bg-card rounded-lg p-6 animate-pulse">
+              <div class="flex items-center space-x-4 mb-4">
+                <div class="w-12 h-12 bg-black/8 rounded-lg"></div>
+                <div class="flex-1 space-y-2">
+                  <div class="h-4 bg-black/8 rounded w-3/4"></div>
+                  <div class="h-6 bg-black/8 rounded w-1/2"></div>
+                </div>
+              </div>
+              <div class="space-y-2">
+                <div class="h-4 bg-black/8 rounded w-full"></div>
+                <div class="h-4 bg-black/8 rounded w-2/3"></div>
+                <div class="h-8 bg-black/8 rounded w-1/2 mt-4"></div>
+              </div>
+            </div>
+          }
+        </div>
+      } @else if (isEmpty()) {
+        <div class="bg-card rounded-card">
+          <mg-empty-state
+            icon="heroicons_outline:credit-card"
+            title="No hay métodos de pago registrados"
+            message="Comienza agregando tu primer método de pago.">
+            <button mat-stroked-button (click)="openCreateModal()">
+              <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+              <span class="ml-2">Crear primer método</span>
+            </button>
+          </mg-empty-state>
+        </div>
+      } @else {
+        <!-- Payment Methods Grid -->
+        <app-payment-method-card-grid
+          [paymentMethods]="paymentMethods()"
+          [loading]="false"
+          (edit)="openEditModal($event)"
+          (delete)="onDeletePaymentMethod($event)"
+          (toggleStatus)="onToggleStatus($event)">
+        </app-payment-method-card-grid>
+      }
+    </div>
+  </div>
+</div>

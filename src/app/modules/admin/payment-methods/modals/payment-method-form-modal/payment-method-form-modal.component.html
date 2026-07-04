@@ -1,0 +1,116 @@
+<mg-modal-shell [title]="modalTitle()" (closed)="onCancel()">
+  <form class="flex flex-col gap-3.5 p-5" [formGroup]="paymentForm" (ngSubmit)="onSubmit()">
+    <div class="grid grid-cols-2 gap-2.5">
+      <div>
+        <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Nombre *</label>
+        <label
+          class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+          <input formControlName="shortName" placeholder="Ej: Visa Principal, Efectivo…" class="w-full border-0 bg-transparent outline-none placeholder:text-ink-3" />
+        </label>
+      </div>
+      <div>
+        <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Tipo *</label>
+        <mg-compact-select size="field" placeholder="Elegir tipo" [options]="typeOptions" formControlName="method">
+        </mg-compact-select>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-2.5">
+      @if (isCardMethod()) {
+        <div>
+          <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Últimos 4 dígitos</label>
+          <label
+            class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+            <input
+              formControlName="cardNumber"
+              maxlength="4"
+              placeholder="3465"
+              class="w-full border-0 bg-transparent font-mono tracking-[.1em] outline-none placeholder:text-ink-3" />
+          </label>
+        </div>
+      }
+      @if (!isCreatingNewAccount()) {
+        <div [class.col-span-2]="!isCardMethod()">
+          <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Cuenta asociada *</label>
+          <mg-compact-select size="field" placeholder="Elegir cuenta" [options]="accountOptions" formControlName="accountId">
+          </mg-compact-select>
+        </div>
+      }
+    </div>
+
+    @if (isCreatingNewAccount()) {
+      <div class="grid grid-cols-[2fr_1fr] gap-2.5">
+        <div>
+          <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Cuenta nueva *</label>
+          <label
+            class="flex h-10 items-center gap-2 rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+            <mat-icon class="icon-size-4 text-ink-3" [svgIcon]="'heroicons_outline:building-library'"></mat-icon>
+            <input [formControl]="$any(newAccountForm.get('name'))" placeholder="Ej: Banorte, Efectivo…" class="w-full border-0 bg-transparent outline-none placeholder:text-ink-3" />
+          </label>
+        </div>
+        <div>
+          <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Saldo inicial</label>
+          <label
+            class="flex h-10 items-center gap-1 rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+            <span class="text-ink-3">$</span>
+            <input type="number" [formControl]="$any(newAccountForm.get('currentAmount'))" class="w-full border-0 bg-transparent text-right outline-none tabular-nums" />
+          </label>
+        </div>
+      </div>
+      @if (!noAccountsAvailable()) {
+        <button
+          type="button"
+          class="-mt-2 self-start rounded-md px-1.5 py-0.5 text-[12.5px] font-semibold text-brand hover:bg-brand-tint"
+          (click)="toggleAccountCreation()">
+          Usar cuenta existente
+        </button>
+      }
+    } @else {
+      <button
+        type="button"
+        class="-mt-2 self-start rounded-md px-1.5 py-0.5 text-[12.5px] font-semibold text-brand hover:bg-brand-tint"
+        (click)="toggleAccountCreation()">
+        <b class="font-bold">+</b> Crear cuenta nueva
+      </button>
+    }
+
+    <div>
+      <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Color *</label>
+      <mg-color-swatches [value]="selectedColor()" (valueChange)="selectColor($event)"></mg-color-swatches>
+    </div>
+
+    <!-- Preview: ccard only for cards, tile for the rest -->
+    <div class="flex flex-col gap-2.5 rounded-xl border border-dashed border-line-strong bg-ink/[.015] px-3.5 py-3">
+      <span class="text-[10.5px] font-bold uppercase tracking-[.07em] text-ink-3">Vista previa</span>
+      @if (isCardMethod()) {
+        <mg-ccard
+          [name]="previewName()"
+          [subtitle]="selectedMethodLabel()"
+          [lastDigits]="previewLastDigits()"
+          [color]="selectedColor()">
+        </mg-ccard>
+      } @else {
+        <div class="flex items-center gap-2.5">
+          <mg-tile size="sm" [color]="selectedColor()">
+            <mat-icon class="text-current" [svgIcon]="previewIcon()"></mat-icon>
+          </mg-tile>
+          <div class="min-w-0">
+            <div class="truncate text-[13.5px] font-semibold text-ink">{{ previewName() }}</div>
+            <div class="text-[12px] text-ink-3">{{ selectedMethodLabel() || 'Método de pago' }}</div>
+          </div>
+        </div>
+      }
+    </div>
+  </form>
+
+  <ng-container mgModalActions>
+    <button mat-stroked-button type="button" (click)="onCancel()">Cancelar</button>
+    <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="!canSubmit() || isSubmitting()">
+      @if (isSubmitting()) {
+        <mat-progress-spinner [diameter]="18" [mode]="'indeterminate'"></mat-progress-spinner>
+      } @else {
+        {{ isEditMode() ? 'Actualizar' : 'Crear' }}
+      }
+    </button>
+  </ng-container>
+</mg-modal-shell>

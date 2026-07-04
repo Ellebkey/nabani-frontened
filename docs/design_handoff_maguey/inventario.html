@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inventario · Artículos — Maguey 2.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/maguey.css">
+<style>
+  .listhead{ display:flex; align-items:center; gap:12px; padding:16px 20px 12px; border-bottom:1px solid var(--line); }
+  .listhead h2{ font-size:15px; font-weight:600; }
+  .cbx{ width:16px; height:16px; border-radius:5px; border:1.5px solid var(--line-strong); display:inline-grid; place-items:center; background:var(--card); }
+  .cbx.on{ background:var(--brand); border-color:var(--brand); color:#fff; }
+  .cbx.on svg{ width:11px; height:11px; }
+  .idc{ font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:12px; color:var(--ink-3); }
+  .kebab{ width:30px; height:30px; border-radius:8px; display:grid; place-items:center; color:var(--ink-3); }
+  .kebab:hover{ background:var(--brand-tint); color:var(--ink); }
+  .kebab svg{ width:17px; height:17px; }
+  .seg{ display:inline-flex; border:1px solid var(--line-strong); border-radius:10px; background:var(--card); padding:3px; gap:2px; }
+  .seg button{ height:32px; padding:0 14px; border-radius:8px; font-size:13px; font-weight:600; color:var(--ink-2); }
+  .seg button.on{ background:var(--brand); color:#fff; }
+  /* Barra de acciones bulk */
+  .bulk{ display:flex; align-items:center; gap:10px; padding:10px 20px; background:var(--brand-tint); border-bottom:1px solid var(--brand-tint-2); font-size:13px; }
+  .bulk b{ font-weight:600; }
+</style>
+</head>
+<body class="depth-a">
+<div class="mg-shell">
+  <aside class="mg-side" data-shell="inventario"></aside>
+  <div class="mg-main">
+    <div data-topbar></div>
+    <div class="mg-page">
+
+      <div class="mg-pagehead">
+        <div>
+          <h1>Inventario</h1>
+          <div class="sub">3,361 artículos · 214 comercios</div>
+        </div>
+        <div class="actions">
+          <div class="seg">
+            <button class="on">Artículos</button>
+            <button>Comercios</button>
+          </div>
+          <button class="mg-btn primary"><i data-i="plus"></i>Nuevo artículo</button>
+        </div>
+      </div>
+
+      <div class="mg-card">
+        <div class="listhead">
+          <h2>Listado de artículos</h2>
+          <span style="margin-left:auto"></span>
+          <label class="mg-field" style="width:240px; height:36px;"><i data-i="search"></i><input placeholder="Buscar por nombre"></label>
+          <div class="mg-pager">
+            <button><i data-i="chevLL"></i></button>
+            <button><i data-i="chevL"></i></button>
+            <button class="on">1</button><button>2</button><button>3</button><button>4</button><button>5</button>
+            <button><i data-i="chevR"></i></button>
+            <button><i data-i="chevRR"></i></button>
+            <span class="info"><b>1–25</b> de 3,361</span>
+          </div>
+        </div>
+
+        <!-- Barra bulk (aparece con selección) -->
+        <div class="bulk">
+          <span class="cbx on"><i data-i="check"></i></span>
+          <b>2 seleccionados</b>
+          <span style="margin-left:auto"></span>
+          <button class="mg-btn secondary sm">Desactivar</button>
+          <button class="mg-btn danger sm"><i data-i="trash"></i>Eliminar</button>
+        </div>
+
+        <table class="mg-table">
+          <thead>
+            <tr>
+              <th style="width:48px; padding-left:20px;"></th>
+              <th style="width:80px">ID</th>
+              <th>Nombre</th>
+              <th style="width:110px">Estado</th>
+              <th style="width:60px"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding-left:20px;"><span class="cbx on"><i data-i="check"></i></span></td>
+              <td class="idc">2259</td>
+              <td>AirBaker Paquete de 27 bolsas de almacenamiento al vacío</td>
+              <td><span class="mg-toggle on"></span></td>
+              <td><button class="kebab"><i data-i="dots"></i></button></td>
+            </tr>
+            <tr>
+              <td style="padding-left:20px;"><span class="cbx on"><i data-i="check"></i></span></td>
+              <td class="idc">1056</td>
+              <td>Arroz regular SOS 1kg</td>
+              <td><span class="mg-toggle on"></span></td>
+              <td><button class="kebab"><i data-i="dots"></i></button></td>
+            </tr>
+            <tr>
+              <td style="padding-left:20px;"><span class="cbx"></span></td>
+              <td class="idc">2943</td>
+              <td>Blason Orgánico Café Grano 1 kg</td>
+              <td><span class="mg-toggle on"></span></td>
+              <td><button class="kebab"><i data-i="dots"></i></button></td>
+            </tr>
+            <tr>
+              <td style="padding-left:20px;"><span class="cbx"></span></td>
+              <td class="idc">1581</td>
+              <td>Bolsa p/basura Grande - "Great Value" 14pzas</td>
+              <td><span class="mg-toggle on"></span></td>
+              <td><button class="kebab"><i data-i="dots"></i></button></td>
+            </tr>
+            <tr>
+              <td style="padding-left:20px;"><span class="cbx"></span></td>
+              <td class="idc">1290</td>
+              <td>Café molido - Santa Fe - Ed Especial Chiapas - 300g</td>
+              <td><span class="mg-toggle on"></span></td>
+              <td><button class="kebab"><i data-i="dots"></i></button></td>
+            </tr>
+            <tr>
+              <td style="padding-left:20px;"><span class="cbx"></span></td>
+              <td class="idc">1788</td>
+              <td>Caldo de Tomate - Knorr - 200gr (sobre)</td>
+              <td><span class="mg-toggle"></span></td>
+              <td><button class="kebab"><i data-i="dots"></i></button></td>
+            </tr>
+            <tr>
+              <td style="padding-left:20px;"><span class="cbx"></span></td>
+              <td class="idc">3176</td>
+              <td>Claude Code Max</td>
+              <td><span class="mg-toggle on"></span></td>
+              <td><button class="kebab"><i data-i="dots"></i></button></td>
+            </tr>
+            <tr>
+              <td style="padding-left:20px;"><span class="cbx"></span></td>
+              <td class="idc">1573</td>
+              <td>Coffee Mate - Chocolate - 400g</td>
+              <td><span class="mg-toggle on"></span></td>
+              <td><button class="kebab"><i data-i="dots"></i></button></td>
+            </tr>
+            <tr>
+              <td style="padding-left:20px;"><span class="cbx"></span></td>
+              <td class="idc">1063</td>
+              <td>Coffee Mate 640g</td>
+              <td><span class="mg-toggle"></span></td>
+              <td><button class="kebab"><i data-i="dots"></i></button></td>
+            </tr>
+            <tr>
+              <td style="padding-left:20px;"><span class="cbx"></span></td>
+              <td class="idc">2854</td>
+              <td>Consulta Dermatólogo</td>
+              <td><span class="mg-toggle on"></span></td>
+              <td><button class="kebab"><i data-i="dots"></i></button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script src="shared/shell.js"></script>
+</body>
+</html>

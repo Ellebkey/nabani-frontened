@@ -1,0 +1,43 @@
+<div class="flex flex-col flex-auto items-center sm:justify-center min-w-0 bg-canvas p-4 sm:p-8">
+    <div class="w-full max-w-[420px] bg-card rounded-card p-6 sm:p-8">
+        <!-- Logo -->
+        <div class="w-48">
+            <img src="assets/images/logo/maguey-banner.png" alt="maguey"/>
+        </div>
+
+        <!-- Title -->
+        <h1 class="mt-6 text-[23px] font-bold leading-[30px] tracking-tight text-ink">Verificar correo</h1>
+
+        <!-- Loading -->
+        @if (isLoading()) {
+            <div class="flex items-center justify-center mt-8">
+                <mat-progress-spinner
+                    [diameter]="48"
+                    [mode]="'indeterminate'"></mat-progress-spinner>
+            </div>
+            <div class="mt-4 text-center text-[13px] font-medium text-ink-2">Verificando tu correo electronico...</div>
+        }
+
+        <!-- Alert -->
+        @if (showAlert()) {
+            <mg-alert
+                class="mt-8"
+                [appearance]="'outline'"
+                [showIcon]="false"
+                [type]="alertConfig().type"
+                [@shake]="alertConfig().type === 'error'">
+                {{ alertConfig().message }}
+            </mg-alert>
+        }
+
+        <!-- Back to login -->
+        @if (!isLoading()) {
+            <div class="mt-6 text-center text-[13px] font-medium">
+                <a
+                    class="text-brand hover:underline"
+                    [routerLink]="['/authentication/login']">Ir a iniciar sesion
+                </a>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,91 @@
+<!-- Light popover (modal-buscar-crear.html): no green header -->
+<div class="flex w-full flex-col">
+  <div class="flex items-start gap-2.5 px-4 pt-3.5">
+    <div class="min-w-0">
+      <h3 class="text-[14px] font-semibold text-ink">Buscar artículo</h3>
+      @if (contextName) {
+        <div class="mt-px truncate text-[12px] text-ink-3">Para «{{ contextName }}»</div>
+      }
+    </div>
+    <button
+      type="button"
+      class="ml-auto grid h-7 w-7 flex-none place-items-center rounded-lg text-ink-3 hover:bg-ink/5 hover:text-ink"
+      aria-label="Cerrar"
+      (click)="cancel()">
+      <mat-icon class="icon-size-[15px] text-current" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+    </button>
+  </div>
+
+  <div class="px-4 pb-3 pt-3">
+    <label
+      class="flex h-10 items-center gap-2 rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+      <mat-icon class="icon-size-4 text-ink-3" [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+      <input
+        #searchInput
+        cdkFocusInitial
+        type="text"
+        [value]="searchText()"
+        (input)="onSearchInput($event)"
+        (keydown.arrowdown)="moveHighlight(1); $event.preventDefault()"
+        (keydown.arrowup)="moveHighlight(-1); $event.preventDefault()"
+        (keydown.enter)="selectHighlighted()"
+        placeholder="Escribe para buscar…"
+        class="w-full border-0 bg-transparent outline-none placeholder:text-ink-3"
+        />
+    </label>
+  </div>
+
+  @if (isLoading()) {
+    <div class="flex items-center justify-center border-t border-line py-8">
+      <mat-spinner diameter="28"></mat-spinner>
+    </div>
+  } @else if (results().length > 0) {
+    <div class="max-h-[296px] overflow-y-auto border-t border-line">
+      @for (article of results(); track article.id; let i = $index) {
+        <button
+          type="button"
+          class="flex w-full items-center gap-2.5 px-4 py-2.5 text-left [&+&]:border-t [&+&]:border-line"
+          [class.bg-brand-tint]="i === highlightedIndex()"
+          [class.hover:bg-brand-tint]="true"
+          (mouseenter)="highlightedIndex.set(i)"
+          (click)="selectArticle(article)">
+          <span class="min-w-0 truncate text-[13.5px] font-medium text-ink" [innerHTML]="highlightMatch(article.concept)"></span>
+          <span class="ml-auto whitespace-nowrap text-[12px] text-ink-3 tabular-nums">
+            @if (article.lastPrice !== null && article.lastPrice !== undefined) { últ. {{ article.lastPrice | currency: 'MXN' : 'symbol-narrow' }} }
+          </span>
+          @if (article.categoryName) {
+            <mg-pill class="flex-none" variant="tint" size="sm" [color]="mutedColor(article.categoryColor)">
+              {{ article.categoryName }}
+            </mg-pill>
+          }
+        </button>
+      }
+    </div>
+  } @else if (hasSearched()) {
+    <div class="border-t border-line px-4 py-8 text-center text-[13px] text-ink-3">
+      No se encontraron artículos para «{{ searchText() }}»
+    </div>
+  } @else {
+    <div class="border-t border-line px-4 py-8 text-center text-[13px] text-ink-3">
+      Escribe al menos 2 caracteres para buscar
+    </div>
+  }
+
+  <div class="flex items-center gap-2 border-t border-line px-4 py-2.5 text-[12.5px] text-ink-3">
+    @if (results().length) {
+      <span>
+        {{ results().length }} {{ results().length === 1 ? 'resultado' : 'resultados' }} ·
+        <kbd class="rounded border border-b-2 border-line-strong bg-surface px-1 text-[10.5px] font-semibold text-ink-2">↑↓</kbd> navegar ·
+        <kbd class="rounded border border-b-2 border-line-strong bg-surface px-1 text-[10.5px] font-semibold text-ink-2">Enter</kbd> vincular
+      </span>
+    }
+    <span class="ml-auto"></span>
+    <button
+      type="button"
+      class="inline-flex items-center gap-1 whitespace-nowrap rounded-[7px] px-2 py-1 font-semibold text-brand hover:bg-brand-tint"
+      (click)="createNew()">
+      <mat-icon class="icon-size-[14px] text-current" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+      Crear artículo
+    </button>
+  </div>
+</div>

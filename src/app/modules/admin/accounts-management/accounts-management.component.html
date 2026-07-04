@@ -1,0 +1,69 @@
+<div class="flex flex-col flex-auto w-full">
+  <div class="flex flex-col w-full max-w-screen-xl mx-auto p-4 sm:p-6 md:p-8">
+
+    <!-- Page header -->
+    <div class="mb-5 flex w-full flex-col items-start gap-4 sm:flex-row">
+      <div>
+        <h1 class="text-[23px] font-bold leading-[30px] tracking-tight text-ink">Cuentas y métodos de pago</h1>
+        <div class="mt-0.5 text-[13px] text-ink-3 tabular-nums">{{ accounts().length }} cuentas</div>
+      </div>
+      <div class="flex flex-wrap items-center gap-2.5 sm:ml-auto">
+        <div class="inline-flex gap-0.5 rounded-btn border border-line-strong bg-surface p-[3px]">
+          <a
+            routerLink="/admin/accounts"
+            class="flex h-8 items-center rounded-lg bg-brand px-3.5 text-[13px] font-semibold text-white">
+            Cuentas
+          </a>
+          <a
+            routerLink="/admin/payment-methods"
+            class="flex h-8 items-center rounded-lg px-3.5 text-[13px] font-semibold text-ink-2 hover:bg-brand-tint">
+            Métodos de pago
+          </a>
+        </div>
+        <button mat-flat-button [color]="'primary'" (click)="openCreateModal()">
+          <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+          <span class="ml-2">Nueva cuenta</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Content Section -->
+    <div class="w-full">
+      @if (isLoading()) {
+        <!-- Loading Skeleton -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          @for (item of accounts(); track item) {
+            <div class="bg-card rounded-lg p-6 animate-pulse">
+              <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 bg-black/8 rounded-lg"></div>
+                <div class="flex-1 space-y-2">
+                  <div class="h-4 bg-black/8 rounded w-3/4"></div>
+                  <div class="h-6 bg-black/8 rounded w-1/2"></div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      } @else if (isEmpty()) {
+        <div class="bg-card rounded-card">
+          <mg-empty-state
+            icon="heroicons_outline:building-library"
+            title="No hay cuentas registradas"
+            message="Comienza creando tu primera cuenta financiera.">
+            <button mat-stroked-button (click)="openCreateModal()">
+              <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+              <span class="ml-2">Crear primera cuenta</span>
+            </button>
+          </mg-empty-state>
+        </div>
+      } @else {
+        <!-- Account Grid -->
+        <app-account-card-grid
+          [accounts]="accounts()"
+          (editAccount)="openEditModal($event)"
+          (toggleStatus)="onToggleStatus($event)">
+        </app-account-card-grid>
+      }
+    </div>
+  </div>
+</div>

@@ -1,0 +1,37 @@
+<div class="flex flex-col flex-auto w-full">
+  <div class="flex flex-col items-center w-full max-w-screen-xl mx-auto p-6 md:p-8">
+
+    <div class="bg-card rounded-card mt-8 w-full max-w-lg p-8 text-center">
+      <div class="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-full bg-brand-tint text-brand">
+        <mat-icon class="icon-size-7 text-current" [svgIcon]="'heroicons_outline:envelope-open'"></mat-icon>
+      </div>
+
+      <h2 class="text-[20px] font-bold tracking-tight text-ink">Aceptar invitación</h2>
+      <p class="mb-6 mt-1 text-[13px] text-ink-3">
+        Al unirte, ambos verán los gastos del hogar de los dos: todas las categorías
+        excepto las personales. Tus gastos en categorías personales siguen siendo privados.
+      </p>
+
+      <mat-form-field class="w-full">
+        <mat-label>Código de invitación</mat-label>
+        <input matInput [formControl]="tokenControl" placeholder="Pega aquí el código del enlace">
+      </mat-form-field>
+
+      <button
+        class="w-full mt-2"
+        mat-flat-button
+        [color]="'primary'"
+        [disabled]="tokenControl.invalid || accepting()"
+        (click)="acceptInvite()">
+        @if (accepting()) {
+          <mat-progress-spinner [diameter]="20" [mode]="'indeterminate'"></mat-progress-spinner>
+        } @else {
+          <span class="inline-flex items-center">
+            <mat-icon class="icon-size-5 mr-2 text-current" [svgIcon]="'heroicons_outline:check'"></mat-icon>
+            Unirme al hogar
+          </span>
+        }
+      </button>
+    </div>
+  </div>
+</div>

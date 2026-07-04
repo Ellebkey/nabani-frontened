@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Familia · Nuestros gastos — Maguey 2.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/maguey.css">
+<style>
+  .monthnav{ display:flex; align-items:center; gap:4px; border:1px solid var(--line-strong); border-radius:10px; background:var(--card); height:40px; padding:0 4px; }
+  .monthnav b{ font-size:13.5px; font-weight:600; padding:0 14px; min-width:120px; text-align:center; }
+  .monthnav button{ width:32px; height:32px; border-radius:8px; display:grid; place-items:center; color:var(--ink-2); }
+  .monthnav button:hover{ background:var(--brand-tint); }
+  .monthnav svg{ width:15px; height:15px; }
+  .hero2{ display:flex; align-items:center; gap:16px; }
+  /* Movimientos manda: columna ancha izquierda; categorías = riel derecho */
+  .layout{ display:grid; grid-template-columns:1fr 380px; gap:20px; align-items:start; }
+  .listhead{ display:flex; align-items:center; gap:12px; padding:16px 20px 12px; border-bottom:1px solid var(--line); }
+  .listhead h2{ font-size:15px; font-weight:600; }
+  .expando{ margin:0 20px 14px 76px; border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  .expando .li{ display:grid; grid-template-columns: 1fr auto auto; gap:12px; align-items:center; padding:9px 14px; font-size:13px; }
+  .expando .li + .li{ border-top:1px solid var(--line); }
+  .expando .li .q{ color:var(--ink-3); font-size:12.5px; white-space:nowrap; }
+  .expando .li .st{ font-weight:600; min-width:70px; text-align:right; }
+  .expando .name{ display:flex; align-items:center; gap:8px; min-width:0; flex-wrap:wrap; }
+  .rowbtn{ width:30px; height:30px; border-radius:8px; display:grid; place-items:center; color:var(--ink-3); }
+  .rowbtn:hover{ background:var(--brand-tint); color:var(--ink); }
+  .rowbtn svg{ width:16px; height:16px; }
+</style>
+</head>
+<body class="depth-a">
+<script>
+  const m={a:'depth-a',b:'depth-b',c:'depth-c',dark:'depth-a dark'};
+  document.body.className = m[location.hash.slice(1)] || 'depth-a';
+</script>
+<div class="mg-shell">
+  <aside class="mg-side" data-shell="familia"></aside>
+  <div class="mg-main">
+    <div data-topbar></div>
+    <div class="mg-page">
+
+      <div class="mg-pagehead">
+        <div>
+          <h1>Nuestros gastos</h1>
+          <div class="sub">Gasto compartido del hogar en las categorías familiares</div>
+        </div>
+        <div class="actions">
+          <div class="monthnav">
+            <button><i data-i="chevL"></i></button><b>Junio 2026</b><button><i data-i="chevR"></i></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="mg-card mg-card-pad" style="margin-bottom:20px;">
+        <div class="hero2">
+          <div class="mg-tile neutral" style="width:48px; height:48px;"><i data-i="users"></i></div>
+          <div>
+            <span class="mg-kicker">Total compartido · Junio 2026</span>
+            <div class="mg-hero gold num">$98,618.08</div>
+          </div>
+          <span style="margin-left:auto"></span>
+          <div style="text-align:right;">
+            <span class="mg-kicker">Por liquidar</span>
+            <div class="num" style="font-size:18px; font-weight:700;">$1,240.00</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="layout">
+        <!-- MOVIMIENTOS: la sección protagonista -->
+        <div class="mg-card">
+          <div class="listhead">
+            <h2>Movimientos</h2>
+            <span style="margin-left:auto"></span>
+            <div class="mg-pager">
+              <button><i data-i="chevL"></i></button>
+              <button class="on">1</button><button>2</button><button>3</button>
+              <button><i data-i="chevR"></i></button>
+              <span class="info"><b>1–25</b> de 61</span>
+            </div>
+          </div>
+
+          <div class="mg-daterow"><span>Sáb — 27 de junio</span><span class="sum num">$900.00</span></div>
+          <div class="mg-rows">
+            <div class="mg-row">
+              <div class="mg-tile" style="--tc:#A64F4F"><i data-i="swap"></i></div>
+              <div>
+                <div class="tt">Karla Psicóloga</div>
+                <div class="ss">Salud · Joel · 21:59 <span class="mg-pill amber sm">Por liquidar</span></div>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div class="amt num">$900.00</div>
+                <button class="rowbtn"><i data-i="chevD"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="mg-daterow"><span>Jue — 25 de junio</span><span class="sum num">$8,400.00</span></div>
+          <div class="mg-rows">
+            <div class="mg-row">
+              <div class="mg-tile" style="--tc:#58939C"><i data-i="bank"></i></div>
+              <div>
+                <div class="tt">Alebrijes Huatulco</div>
+                <div class="ss">Viajes y Vacaciones · Joel · 15:00 <span class="mg-pill amber sm">Por liquidar</span></div>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div class="amt num">$7,600.00</div>
+                <button class="rowbtn"><i data-i="chevD"></i></button>
+              </div>
+            </div>
+            <div class="mg-row">
+              <div class="mg-tile" style="--tc:#33604A"><i data-i="bank"></i></div>
+              <div>
+                <div class="tt">Karen Limpieza</div>
+                <div class="ss">Vivienda · Joel · 13:00</div>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div class="amt num">$800.00</div>
+                <button class="rowbtn"><i data-i="chevD"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="mg-daterow"><span>Sáb — 20 de junio</span><span class="sum num">$4,775.05</span></div>
+          <div class="mg-rows">
+            <!-- Gasto con múltiples artículos, expandido -->
+            <div>
+              <div class="mg-row" style="background:color-mix(in srgb, var(--ink) 2.5%, var(--card));">
+                <div class="mg-tile" style="--tc:#C9A45C"><i data-i="card"></i></div>
+                <div>
+                  <div class="tt">Costco</div>
+                  <div class="ss">Comida · Adlai · 16:22 · 14 artículos</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <div class="amt num">$4,775.05</div>
+                  <button class="rowbtn"><i data-i="chevU"></i></button>
+                </div>
+              </div>
+              <div class="expando">
+                <div class="li">
+                  <div class="name"><span>Espárragos 1kg JMB</span><span class="mg-pill tint sm" style="--pc:#C9A45C"><span class="dot"></span>Comida · Abarrotes</span></div>
+                  <span class="q num">1 × $179.00</span><span class="st num">$179.00</span>
+                </div>
+                <div class="li">
+                  <div class="name"><span>Salmón</span><span class="mg-pill tint sm" style="--pc:#C9A45C"><span class="dot"></span>Comida · Abarrotes</span></div>
+                  <span class="q num">1 × $539.00</span><span class="st num">$539.00</span>
+                </div>
+                <div class="li">
+                  <div class="name"><span>Parmesano Rallado - Cello - 908g</span><span class="mg-pill tint sm" style="--pc:#C9A45C"><span class="dot"></span>Comida · Abarrotes Extras</span></div>
+                  <span class="q num">1 × $210.00</span><span class="st num">$210.00</span>
+                </div>
+                <div class="li" style="background:color-mix(in srgb, var(--ink) 2.5%, var(--card)); font-weight:600;">
+                  <div class="name" style="color:var(--ink-2)">14 artículos</div>
+                  <span></span><span class="st num">$4,775.05</span>
+                </div>
+              </div>
+            </div>
+            <div class="mg-row">
+              <div class="mg-tile" style="--tc:#5F7386"><i data-i="card"></i></div>
+              <div>
+                <div class="tt">Oxxo Gas Batan</div>
+                <div class="ss">Transporte · Adlai · 09:12</div>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div class="amt num">$599.80</div>
+                <button class="rowbtn"><i data-i="chevD"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="mg-daterow"><span>Vie — 12 de junio</span><span class="sum num">$1,300.00</span></div>
+          <div class="mg-rows">
+            <div class="mg-row">
+              <div class="mg-tile" style="--tc:#33604A"><i data-i="bank"></i></div>
+              <div>
+                <div class="tt">Karen Limpieza</div>
+                <div class="ss">Vivienda · Joel · 16:00</div>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div class="amt num">$1,300.00</div>
+                <button class="rowbtn"><i data-i="chevD"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Riel derecho: categorías resumidas -->
+        <div class="mg-card">
+          <div class="mg-cardhead" style="padding-bottom:14px;"><h2>Por categoría</h2><span class="right">Junio</span></div>
+          <div class="mg-card-pad mg-bars" style="padding-top:2px;">
+            <div class="mg-bar" style="--pc:#33604A"><div class="lbl"><span>Vivienda</span><b class="num">$35,804.02</b></div><div class="track"><div class="fill" style="width:100%"></div></div></div>
+            <div class="mg-bar" style="--pc:#5F7386"><div class="lbl"><span>Transporte</span><b class="num">$22,294.21</b></div><div class="track"><div class="fill" style="width:62%"></div></div></div>
+            <div class="mg-bar" style="--pc:#A64F4F"><div class="lbl"><span>Salud</span><b class="num">$8,985.00</b></div><div class="track"><div class="fill" style="width:25%"></div></div></div>
+            <div class="mg-bar" style="--pc:#C9A45C"><div class="lbl"><span>Comida</span><b class="num">$8,398.90</b></div><div class="track"><div class="fill" style="width:23%"></div></div></div>
+            <div class="mg-bar" style="--pc:#58939C"><div class="lbl"><span>Viajes y Vacaciones</span><b class="num">$7,685.00</b></div><div class="track"><div class="fill" style="width:21%"></div></div></div>
+            <div class="mg-bar" style="--pc:#A85D6E"><div class="lbl"><span>Familia</span><b class="num">$6,956.56</b></div><div class="track"><div class="fill" style="width:19%"></div></div></div>
+          </div>
+          <div style="padding:4px 20px 14px;">
+            <button class="mg-btn ghost sm">Ver las 14 categorías</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script src="shared/shell.js"></script>
+</body>
+</html>

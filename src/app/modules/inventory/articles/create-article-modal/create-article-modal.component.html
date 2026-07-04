@@ -1,0 +1,50 @@
+<mg-modal-shell [title]="title()" (closed)="closeDialog()">
+  <form class="flex flex-col p-5" [formGroup]="createArticleForm" (ngSubmit)="save()">
+    <mat-form-field class="w-full" subscriptSizing="dynamic">
+      <mat-label>Concepto</mat-label>
+      <input type="text" matInput [formControlName]="'concept'">
+    </mat-form-field>
+
+    @if (showPriceHistory()) {
+      <div class="mt-5">
+        <h3 class="mb-3 text-[15px] font-semibold text-ink">Historial de precios</h3>
+
+        <!-- Latest price -->
+        <div class="mb-3 rounded-xl bg-brand-tint px-4 py-3">
+          <div class="text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Último precio</div>
+          <div class="mt-0.5 text-[24px] font-bold text-brand tabular-nums">{{ formatPrice(latestPrice()) }}</div>
+        </div>
+
+        <!-- Price list -->
+        <div class="max-h-64 overflow-y-auto rounded-xl border border-line">
+          <div class="flex flex-col divide-y divide-line">
+            @for (item of priceHistory(); track item.date) {
+              <div class="flex items-center gap-3 px-3.5 py-2.5 text-[13px]">
+                <span class="text-ink-3 tabular-nums">{{ item.date }}</span>
+                <span class="ml-auto"></span>
+                @if (item.percentageChange !== undefined) {
+                  <mg-pill [variant]="item.isIncrease ? 'rose' : 'teal'" size="sm">
+                    {{ formatPercentage(item.percentageChange) }}
+                  </mg-pill>
+                }
+                <span class="min-w-[80px] text-right font-semibold tabular-nums">{{ formatPrice(item.price) }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+  </form>
+
+  <ng-container mgModalActions>
+    <button type="button" mat-stroked-button (click)="closeDialog()">Cancelar</button>
+    <button mat-flat-button [color]="'primary'" [disabled]="createArticleForm.disabled" (click)="save()">
+      @if (!createArticleForm.disabled) {
+        <span>Guardar</span>
+      } @else {
+        <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+      }
+    </button>
+  </ng-container>
+</mg-modal-shell>

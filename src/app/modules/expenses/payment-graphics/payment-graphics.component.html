@@ -1,0 +1,37 @@
+@if (paymentMethod === 'credit' || paymentMethod === 'debit') {
+  <svg
+    [attr.width]="width()"
+    [attr.height]="height()"
+    viewBox="0 0 60 40"
+    xmlns="http://www.w3.org/2000/svg">
+    <!-- Background -->
+    <rect x="0" y="0" width="60" height="40" rx="3" ry="3" [attr.fill]="background"/>
+
+    <!-- Card Number -->
+    <text x="4" y="16" font-family="Verdana" [attr.font-size]="fontSize()" fill="white">{{cardNumber}}</text>
+    @if (cardName !== '') {
+      <text x="40" y="16" font-family="Verdana" [attr.font-size]="fontSize()" fill="white">{{cardName}}</text>
+    }
+
+    <!-- VISA Logo -->
+    @if (cardType === 'visa') {
+      <g transform="translate(44, 32)">
+        <text x="-7" y="4" font-family="Verdana" font-size="7" font-weight="bold" [attr.fill]="isDarkColor(background) ? '#FFFFFF' : '#193076'">VISA</text>
+      </g>
+    }
+
+    <!-- Mastercard Logo -->
+    @if (cardType === 'mastercard') {
+      <g transform="translate(44, 32)">
+        <circle cx="3" cy="3" r="3" fill="#FF5F00"/>
+        <circle cx="9" cy="3" r="3" fill="#F5B600"/>
+      </g>
+    }
+  </svg>
+} @else if (paymentMethod === 'cash') {
+  <!-- Cash SVG -->
+  <img class="list-img" [src]="'assets/images/cash.png'" alt="">
+}  @else if (paymentMethod === 'transfer') {
+  <!-- Wire Transfer SVG -->
+  <img class="list-img" [src]="'assets/images/transfer.png'" alt="">
+}

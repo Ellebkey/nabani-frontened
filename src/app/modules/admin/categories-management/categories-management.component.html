@@ -1,0 +1,220 @@
+<div class="flex flex-col flex-auto w-full">
+  <div class="flex flex-col w-full max-w-screen-xl mx-auto p-4 sm:p-6 md:p-8">
+
+    <!-- Page header -->
+    <div class="mb-5 flex flex-col items-start gap-4 sm:flex-row">
+      <div>
+        <h1 class="text-[23px] font-bold leading-[30px] tracking-tight text-ink">Categorías</h1>
+        <div class="mt-0.5 text-[13px] text-ink-3 tabular-nums">
+          {{ categoryCount() }} categorías · {{ totalSubcategories() }} subcategorías
+        </div>
+      </div>
+      <div class="flex items-center gap-2.5 sm:ml-auto">
+        <button mat-flat-button [color]="'primary'" (click)="openCreateCategoryModal()">
+          <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+          <span class="ml-2">Nueva categoría</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="w-full">
+      @if (isLoading()) {
+        <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          @for (item of [1, 2, 3, 4]; track item) {
+            <div class="bg-card rounded-card p-5">
+              <div class="flex items-center gap-3">
+                <mg-skeleton class="h-[34px] w-[34px] !rounded-[10px]"></mg-skeleton>
+                <div class="flex grow flex-col gap-1.5">
+                  <mg-skeleton class="h-3 w-2/5"></mg-skeleton>
+                  <mg-skeleton class="h-2.5 w-1/4"></mg-skeleton>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      } @else if (isEmpty()) {
+        <div class="bg-card rounded-card">
+          <mg-empty-state
+            icon="heroicons_outline:squares-2x2"
+            title="No hay categorías registradas"
+            message="Organiza tus gastos creando categorías y subcategorías.">
+            <button mat-stroked-button (click)="openCreateCategoryModal()">
+              <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+              <span class="ml-2">Crear primera categoría</span>
+            </button>
+          </mg-empty-state>
+        </div>
+      } @else {
+        <div class="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
+          @for (category of categories(); track category.id) {
+            <div class="bg-card rounded-card overflow-visible">
+
+              <!-- Category header -->
+              <div
+                class="flex cursor-pointer items-center gap-3 px-5 py-4"
+                [class.border-b]="expandedCategoryId() === category.id"
+                [class.border-line]="expandedCategoryId() === category.id"
+                (click)="toggleExpanded(category.id)">
+                <div class="relative" (click)="$event.stopPropagation()">
+                  <button
+                    type="button"
+                    matTooltip="Cambiar color"
+                    (click)="toggleColorPicker(category.id, $event)">
+                    <mg-tile size="sm" [color]="category.colorPalette || '#5F7386'">
+                      <mat-icon class="text-current" [svgIcon]="'heroicons_outline:tag'"></mat-icon>
+                    </mg-tile>
+                  </button>
+                  @if (colorPickerCategoryId() === category.id) {
+                    <div class="bg-card absolute left-[calc(100%+8px)] top-1/2 z-10 grid w-max -translate-y-1/2 grid-cols-4 gap-1.5 rounded-[10px] !border-line p-2 shadow-overlay">
+                      @for (color of paletteColors; track color) {
+                        <button
+                          class="h-6 w-6 rounded-full border-2"
+                          [style.background-color]="color"
+                          [class.border-ink]="category.colorPalette === color"
+                          [class.border-transparent]="category.colorPalette !== color"
+                          (click)="updateColor(category, color)">
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+
+                <div class="min-w-0">
+                  @if (editingCategoryId() === category.id) {
+                    <input
+                      class="border-b-2 border-brand bg-transparent text-[14.5px] font-semibold text-ink outline-none"
+                      [value]="editingName()"
+                      (input)="editingName.set($any($event.target).value)"
+                      (blur)="saveName(category)"
+                      (keydown)="onNameKeydown($event, category)"
+                      (click)="$event.stopPropagation()"
+                      id="nameInput">
+                  } @else {
+                    <div
+                      class="cursor-text truncate text-[14.5px] font-semibold text-ink hover:text-brand"
+                      (click)="startEditingName(category, $event)">
+                      {{ category.name }}
+                    </div>
+                  }
+                  <div class="text-[12px] text-ink-3">{{ category.subcategories.length }} subcategorías</div>
+                </div>
+
+                <span class="ml-auto"></span>
+                <div class="flex items-center gap-1" (click)="$event.stopPropagation()">
+                  <button
+                    type="button"
+                    class="inline-flex h-5 items-center rounded-full px-2 text-[11px] font-semibold"
+                    [class]="(category.enabledTiers || []).includes('free')
+                      ? 'bg-ink/[.07] text-ink-2'
+                      : 'border border-line text-ink-3 opacity-60'"
+                    (click)="toggleTier(category, 'free')"
+                    matTooltip="Visible para usuarios Free">
+                    Free
+                  </button>
+                  <button
+                    type="button"
+                    class="inline-flex h-5 items-center rounded-full px-2 text-[11px] font-semibold"
+                    [class]="(category.enabledTiers || []).includes('premium')
+                      ? 'bg-brand-tint text-brand'
+                      : 'border border-line text-ink-3 opacity-60'"
+                    (click)="toggleTier(category, 'premium')"
+                    matTooltip="Visible para usuarios Premium">
+                    Premium
+                  </button>
+                </div>
+                <div (click)="$event.stopPropagation()">
+                  <button
+                    type="button"
+                    class="grid h-[30px] w-[30px] place-items-center rounded-lg text-ink-3 hover:bg-brand-tint hover:text-ink"
+                    [matMenuTriggerFor]="categoryMenu"
+                    aria-label="Acciones">
+                    <mat-icon class="icon-size-[17px] text-current" [svgIcon]="'heroicons_outline:ellipsis-horizontal'"></mat-icon>
+                  </button>
+                  <mat-menu #categoryMenu="matMenu">
+                    <button mat-menu-item (click)="openCreateSubcategoryModal(category)">
+                      <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                      <span>Agregar subcategoría</span>
+                    </button>
+                    <mat-divider></mat-divider>
+                    <button mat-menu-item (click)="deleteCategory(category)">
+                      <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                      <span>Eliminar</span>
+                    </button>
+                  </mat-menu>
+                </div>
+              </div>
+
+              <!-- Subcategories -->
+              @if (expandedCategoryId() === category.id) {
+                <div>
+                  @if (category.subcategories && category.subcategories.length > 0) {
+                    <div class="flex flex-col divide-y divide-line">
+                      @for (sub of category.subcategories; track sub.id) {
+                        <div class="group flex items-center gap-2.5 px-5 py-[9px] text-[13.5px]">
+                          <mg-dot [color]="category.colorPalette || '#5F7386'"></mg-dot>
+                          @if (editingSubcategoryId() === sub.id) {
+                            <input
+                              class="border-b-2 border-brand bg-transparent text-[13.5px] text-ink outline-none"
+                              [value]="editingSubName()"
+                              (input)="editingSubName.set($any($event.target).value)"
+                              (blur)="saveSubName(category, sub)"
+                              (keydown)="onSubNameKeydown($event, category, sub)"
+                              id="subNameInput">
+                          } @else {
+                            <span class="cursor-text text-ink hover:text-brand" (click)="startEditingSubName(sub, $event)">
+                              {{ sub.name }}
+                            </span>
+                          }
+                          <span class="ml-auto"></span>
+                          <button
+                            type="button"
+                            class="inline-flex h-5 items-center rounded-full px-2 text-[11px] font-semibold"
+                            [class]="(sub.enabledTiers || []).includes('free')
+                              ? 'bg-ink/[.07] text-ink-2'
+                              : 'border border-line text-ink-3 opacity-60'"
+                            (click)="toggleSubcategoryTier(category, sub, 'free')"
+                            matTooltip="Visible para usuarios Free">
+                            Free
+                          </button>
+                          <button
+                            type="button"
+                            class="inline-flex h-5 items-center rounded-full px-2 text-[11px] font-semibold"
+                            [class]="(sub.enabledTiers || []).includes('premium')
+                              ? 'bg-brand-tint text-brand'
+                              : 'border border-line text-ink-3 opacity-60'"
+                            (click)="toggleSubcategoryTier(category, sub, 'premium')"
+                            matTooltip="Visible para usuarios Premium">
+                            Premium
+                          </button>
+                          <button
+                            type="button"
+                            class="grid h-[26px] w-[26px] place-items-center rounded-lg text-ink-3 opacity-0 hover:bg-rose-tint hover:text-rose group-hover:opacity-100"
+                            matTooltip="Eliminar"
+                            (click)="deleteSubcategory(category, sub)">
+                            <mat-icon class="icon-size-[15px] text-current" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                          </button>
+                        </div>
+                      }
+                    </div>
+                  } @else {
+                    <div class="px-5 py-2.5 text-[13px] italic text-ink-3">Sin subcategorías</div>
+                  }
+
+                  <div class="px-3 pb-3 pt-2">
+                    <button
+                      type="button"
+                      class="inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-[13px] font-semibold text-brand hover:bg-brand-tint"
+                      (click)="openCreateSubcategoryModal(category)">
+                      <mat-icon class="icon-size-4 text-current" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                      Agregar subcategoría
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

@@ -1,0 +1,19 @@
+<mg-modal-shell [title]="title()" (closed)="closeDialog()">
+  <form class="flex flex-col p-5" [formGroup]="createMerchantForm" (ngSubmit)="save()">
+    <mat-form-field class="w-full" subscriptSizing="dynamic">
+      <mat-label>Nombre</mat-label>
+      <input type="text" matInput [formControlName]="'name'">
+    </mat-form-field>
+  </form>
+
+  <ng-container mgModalActions>
+    <button type="button" mat-stroked-button (click)="closeDialog()">Cancelar</button>
+    <button mat-flat-button [color]="'primary'" [disabled]="createMerchantForm.disabled" (click)="save()">
+      @if (!createMerchantForm.disabled) {
+        <span>Guardar</span>
+      } @else {
+        <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+      }
+    </button>
+  </ng-container>
+</mg-modal-shell>

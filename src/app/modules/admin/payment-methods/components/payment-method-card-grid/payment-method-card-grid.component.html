@@ -1,0 +1,118 @@
+<!-- Active methods -->
+@if (activeMethods().length > 0) {
+  <div class="mb-8">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      @for (method of activeMethods(); track method.id; let i = $index) {
+        <ng-container *ngTemplateOutlet="cardTemplate; context: { $implicit: method, index: i }"></ng-container>
+      }
+    </div>
+  </div>
+}
+
+<!-- Paused methods -->
+@if (inactiveMethods().length > 0) {
+  <div>
+    <div class="mb-3 text-[11px] font-bold uppercase tracking-[.07em] text-ink-3">Pausados</div>
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      @for (method of inactiveMethods(); track method.id; let i = $index) {
+        <ng-container *ngTemplateOutlet="cardTemplate; context: { $implicit: method, index: i }"></ng-container>
+      }
+    </div>
+  </div>
+}
+
+<!-- Loading -->
+@if (loading()) {
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    @for (skeleton of [1, 2, 3]; track skeleton) {
+      <div class="bg-card rounded-card flex flex-col gap-3.5 px-5 py-[18px]">
+        <mg-skeleton class="h-3.5 w-2/5"></mg-skeleton>
+        <mg-skeleton class="h-[132px] w-[210px] !rounded-2xl"></mg-skeleton>
+        <mg-skeleton class="h-3 w-1/2"></mg-skeleton>
+      </div>
+    }
+  </div>
+}
+
+<!-- Card -->
+<ng-template #cardTemplate let-method let-i="index">
+  <div
+    class="bg-card rounded-card flex cursor-pointer flex-col gap-3.5 px-5 py-[18px]"
+    [class.cursor-not-allowed]="!method.isActive"
+    (click)="method.isActive && onEdit(method)">
+    <div class="flex items-center gap-3">
+      @if (!isCardMethod(method)) {
+        <mg-tile [color]="getCardColor(method)" [class.opacity-40]="!method.isActive">
+          <mat-icon class="text-current" [svgIcon]="getMethodIcon(method.method)"></mat-icon>
+        </mg-tile>
+      }
+      <div class="min-w-0">
+        <div
+          class="truncate text-[14.5px] font-semibold"
+          [class.text-ink]="method.isActive"
+          [class.text-ink-3]="!method.isActive">
+          {{ method.shortName }}
+        </div>
+        <div class="truncate text-[12px] text-ink-3">
+          {{ getMethodDisplayName(method.method) }}@if (method.accountName) { · liga a {{ method.accountName }}}
+        </div>
+      </div>
+      <span class="ml-auto"></span>
+      @if (!method.isActive) {
+        <mg-pill variant="neutral" size="sm">Pausado</mg-pill>
+      }
+      @if (isCardExpired(method.cardExpiry)) {
+        <mg-pill variant="rose" size="sm">Expirada</mg-pill>
+      } @else if (isCardExpiringSoon(method.cardExpiry)) {
+        <mg-pill variant="amber" size="sm">Expira pronto</mg-pill>
+      }
+      <div (click)="$event.stopPropagation()">
+        <button
+          type="button"
+          class="grid h-[30px] w-[30px] place-items-center rounded-lg text-ink-3 hover:bg-brand-tint hover:text-ink"
+          [matMenuTriggerFor]="cardMenu"
+          aria-label="Acciones">
+          <mat-icon class="icon-size-[17px] text-current" [svgIcon]="'heroicons_outline:ellipsis-horizontal'"></mat-icon>
+        </button>
+        <mat-menu #cardMenu="matMenu">
+          @if (method.isActive) {
+            <button mat-menu-item (click)="onEdit(method)">
+              <mat-icon [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+              <span>Editar</span>
+            </button>
+          }
+          <button mat-menu-item (click)="onToggleStatus(method)">
+            <mat-icon [svgIcon]="method.isActive ? 'heroicons_outline:pause' : 'heroicons_outline:play'"></mat-icon>
+            <span>{{ method.isActive ? 'Pausar' : 'Activar' }}</span>
+          </button>
+          @if (!method.isActive) {
+            <mat-divider></mat-divider>
+            <button mat-menu-item (click)="onDelete(method)">
+              <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+              <span>Eliminar</span>
+            </button>
+          }
+        </mat-menu>
+      </div>
+    </div>
+
+    @if (isCardMethod(method)) {
+      <mg-ccard
+        [class.opacity-50]="!method.isActive"
+        [name]="method.shortName"
+        [subtitle]="getMethodDisplayName(method.method)"
+        [lastDigits]="method.cardNumber ? method.cardNumber.slice(-4) : null"
+        [color]="getCardColor(method)">
+      </mg-ccard>
+    }
+
+    <div class="flex items-center gap-2 text-[12.5px] text-ink-3">
+      <mg-dot [color]="getCardColor(method)"></mg-dot>
+      @if (method.cutOffDay) {
+        Corte día {{ method.cutOffDay }}
+      } @else {
+        {{ method.accountName || 'Sin cuenta ligada' }}
+      }
+    </div>
+  </div>
+</ng-template>

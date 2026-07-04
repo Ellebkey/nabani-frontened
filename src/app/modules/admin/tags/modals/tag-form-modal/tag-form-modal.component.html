@@ -1,0 +1,60 @@
+<mg-modal-shell [title]="modalTitle()" (closed)="onCancel()">
+  <form class="flex flex-col gap-3.5 p-5" [formGroup]="tagForm" (ngSubmit)="onSubmit()">
+    <div>
+      <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Nombre *</label>
+      <label
+        class="flex h-10 items-center gap-2 rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+        <mat-icon class="icon-size-4 text-ink-3" [svgIcon]="'heroicons_outline:tag'"></mat-icon>
+        <input formControlName="name" placeholder="Ej: Viaje Navidad 2025, Cumpleaños…" class="w-full border-0 bg-transparent outline-none placeholder:text-ink-3" />
+      </label>
+      @if (showNameError()) {
+        <div class="mt-1 text-[12.5px] text-rose">
+          {{ nameErrorMessage() }}
+        </div>
+      }
+    </div>
+
+    <div>
+      <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Descripción</label>
+      <label
+        class="flex rounded-field border border-line-strong bg-surface px-3 py-2.5 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+        <textarea
+          formControlName="description"
+          rows="2"
+          placeholder="Opcional"
+          class="w-full resize-none border-0 bg-transparent outline-none placeholder:text-ink-3"></textarea>
+      </label>
+    </div>
+
+    <div>
+      <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Color *</label>
+      <mg-color-swatches [value]="selectedColor()" (valueChange)="selectColor($event)"></mg-color-swatches>
+    </div>
+
+    <!-- Preview -->
+    <div class="flex flex-col gap-2.5 rounded-xl border border-dashed border-line-strong bg-ink/[.015] px-3.5 py-3">
+      <span class="text-[10.5px] font-bold uppercase tracking-[.07em] text-ink-3">Vista previa</span>
+      <div class="flex items-center gap-2.5">
+        <mg-tile size="sm" [color]="selectedColor()">
+          <mat-icon class="text-current" [svgIcon]="'heroicons_outline:tag'"></mat-icon>
+        </mg-tile>
+        <div class="truncate text-[13.5px] font-semibold text-ink">{{ nameValue() || 'Nombre de la etiqueta' }}</div>
+        <span class="ml-auto"></span>
+        <mg-pill variant="tint" size="sm" [color]="selectedColor()">
+          {{ nameValue() || 'Etiqueta' }}
+        </mg-pill>
+      </div>
+    </div>
+  </form>
+
+  <ng-container mgModalActions>
+    <button mat-stroked-button type="button" (click)="onCancel()">Cancelar</button>
+    <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="formInvalid() || isSubmitting()">
+      @if (isSubmitting()) {
+        <mat-progress-spinner [diameter]="18" [mode]="'indeterminate'"></mat-progress-spinner>
+      } @else {
+        {{ isEditMode() ? 'Actualizar' : 'Crear' }}
+      }
+    </button>
+  </ng-container>
+</mg-modal-shell>

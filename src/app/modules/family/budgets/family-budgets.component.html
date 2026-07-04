@@ -1,0 +1,159 @@
+<div class="flex flex-col flex-auto w-full">
+  <div class="flex flex-col w-full max-w-screen-xl mx-auto p-4 sm:p-6 md:p-8">
+
+    @if (!familyState.loaded()) {
+      <div class="bg-card rounded-card w-full">
+        @for (i of [1, 2, 3]; track i) {
+          <mg-row-skeleton></mg-row-skeleton>
+        }
+      </div>
+    } @else if (!familyState.hasPartnership()) {
+      <div class="w-full">
+        <app-no-partnership></app-no-partnership>
+      </div>
+    } @else {
+      <!-- Page header -->
+      <div class="mb-5 flex flex-col items-start gap-4 sm:flex-row">
+        <div>
+          <h1 class="text-[23px] font-bold leading-[30px] tracking-tight text-ink">Presupuestos del hogar</h1>
+          <div class="mt-0.5 text-[13px] text-ink-3">Presupuestos mensuales por categoría, sumando el gasto de ambos</div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2.5 sm:ml-auto">
+          <div class="flex h-10 items-center gap-1 rounded-btn border border-line-strong bg-surface px-1">
+            <button
+              type="button"
+              class="grid h-8 w-8 place-items-center rounded-lg text-ink-2 hover:bg-brand-tint"
+              aria-label="Mes anterior"
+              (click)="previousMonth()">
+              <mat-icon class="icon-size-[15px] text-current" [svgIcon]="'heroicons_outline:chevron-left'"></mat-icon>
+            </button>
+            <b class="min-w-[120px] px-3.5 text-center text-[13.5px] font-semibold">{{ monthLabel() }}</b>
+            <button
+              type="button"
+              class="grid h-8 w-8 place-items-center rounded-lg text-ink-2 hover:bg-brand-tint"
+              aria-label="Mes siguiente"
+              (click)="nextMonth()">
+              <mat-icon class="icon-size-[15px] text-current" [svgIcon]="'heroicons_outline:chevron-right'"></mat-icon>
+            </button>
+          </div>
+
+          @if (isPremium) {
+            <button
+              mat-flat-button
+              [color]="'primary'"
+              [disabled]="availableCategories().length === 0"
+              [matTooltip]="availableCategories().length === 0 ? 'Todas las categorías del hogar ya tienen presupuesto este mes' : ''"
+              (click)="openCreateModal()">
+              <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+              <span class="ml-2">Nuevo presupuesto</span>
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="mb-5 grid w-full grid-cols-1 gap-4 sm:grid-cols-3" [class.opacity-50]="loading()">
+        <div class="bg-card rounded-card px-5 py-[18px]">
+          <div class="text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Presupuestado</div>
+          <div class="mt-0.5 text-[22px] font-bold tabular-nums">{{ status().totalBudgeted | currency: 'MXN' : 'symbol-narrow' }}</div>
+        </div>
+        <div class="bg-card rounded-card px-5 py-[18px]">
+          <div class="text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Gastado</div>
+          <div class="mt-0.5 text-[22px] font-bold tabular-nums">{{ status().totalSpent | currency: 'MXN' : 'symbol-narrow' }}</div>
+        </div>
+        <div class="bg-card rounded-card px-5 py-[18px]">
+          <div class="text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Disponible</div>
+          <div
+            class="mt-0.5 text-[22px] font-bold tabular-nums"
+            [class.text-teal]="totalRemaining() >= 0"
+            [class.text-rose]="totalRemaining() < 0">
+            {{ totalRemaining() >= 0 ? '+' : '' }}{{ totalRemaining() | currency: 'MXN' : 'symbol-narrow' }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Budgets -->
+      <div class="grid w-full grid-cols-1 gap-4 md:grid-cols-2" [class.opacity-50]="loading()">
+        @for (row of status().rows; track row.categoryId) {
+          <div class="bg-card rounded-card px-5 py-[18px]">
+            <div class="mb-3.5 flex items-center gap-2.5">
+              <mg-tile size="sm" [color]="row.colorPalette || '#5F7386'">
+                <mat-icon class="text-current" [svgIcon]="'heroicons_outline:banknotes'"></mat-icon>
+              </mg-tile>
+              <div>
+                <div class="text-[14px] font-semibold text-ink">{{ row.categoryName }}</div>
+                <div class="text-[12px] text-ink-3">Presupuesto mensual</div>
+              </div>
+              @if (isPremium) {
+                <button
+                  type="button"
+                  class="ml-auto grid h-[30px] w-[30px] place-items-center rounded-lg text-ink-3 hover:bg-brand-tint hover:text-ink"
+                  [matMenuTriggerFor]="budgetMenu"
+                  (menuOpened)="menuRow = row"
+                  aria-label="Acciones">
+                  <mat-icon class="icon-size-[17px] text-current" [svgIcon]="'heroicons_outline:ellipsis-horizontal'"></mat-icon>
+                </button>
+              }
+            </div>
+            <div class="mb-2 h-2 overflow-hidden rounded-full bg-ink/[.06]">
+              <div
+                class="h-full rounded-full"
+                [style.background-color]="budgetFillColor(row)"
+                [style.width.%]="spentPercent(row)"></div>
+            </div>
+            <div class="flex justify-between text-[12.5px] text-ink-3">
+              <span>
+                <b class="font-semibold text-ink tabular-nums">{{ row.spent | currency: 'MXN' : 'symbol-narrow' }}</b>
+                de {{ row.budgeted | currency: 'MXN' : 'symbol-narrow' }}
+              </span>
+              <span
+                class="tabular-nums"
+                [class.font-semibold]="rawPercent(row) >= 80"
+                [class.text-amber]="rawPercent(row) >= 80 && row.remaining >= 0"
+                [class.text-rose]="row.remaining < 0">
+                {{ rawPercent(row) | number: '1.0-0' }}%
+              </span>
+            </div>
+          </div>
+        }
+
+        <!-- Budget another category -->
+        @if (isPremium && availableCategories().length > 0) {
+          <div class="bg-card rounded-card">
+            <mg-empty-state
+              class="!py-9"
+              icon="heroicons_outline:chart-pie"
+              title="Presupuesta otra categoría"
+              message="Elige una de las categorías del hogar existentes. Solo el administrador puede crear categorías nuevas.">
+              <button mat-stroked-button (click)="openCreateModal()">
+                <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                <span class="ml-2">Crear presupuesto</span>
+              </button>
+            </mg-empty-state>
+          </div>
+        } @else if (status().rows.length === 0) {
+          <div class="bg-card rounded-card md:col-span-2">
+            <mg-empty-state
+              icon="heroicons_outline:chart-pie"
+              [title]="'Sin presupuestos para ' + monthLabel()"
+              [message]="isPremium
+                ? 'Crea un presupuesto para una categoría del hogar.'
+                : 'El dueño del hogar (Premium) puede crear presupuestos; tú podrás verlos aquí.'">
+            </mg-empty-state>
+          </div>
+        }
+      </div>
+
+      <mat-menu #budgetMenu="matMenu">
+        <button mat-menu-item (click)="openEditModal(menuRow)">
+          <mat-icon [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+          <span>Editar monto</span>
+        </button>
+        <button mat-menu-item (click)="confirmDelete(menuRow)">
+          <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+          <span>Eliminar</span>
+        </button>
+      </mat-menu>
+    }
+  </div>
+</div>

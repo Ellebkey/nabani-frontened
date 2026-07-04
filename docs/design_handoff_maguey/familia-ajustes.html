@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Familia · Ajustes — Maguey 2.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/maguey.css">
+<style>
+  .layout{ display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start; }
+  .col{ display:flex; flex-direction:column; gap:20px; }
+  .avatar{
+    width:42px; height:42px; border-radius:999px; background:var(--brand-tint); color:var(--brand);
+    display:grid; place-items:center; font-size:14px; font-weight:700; flex:none;
+  }
+  .member{ display:flex; align-items:center; gap:12px; padding:13px 20px; }
+  .member + .member{ border-top:1px solid var(--line); }
+  .member .nm{ font-size:14px; font-weight:600; }
+  .member .em{ font-size:12.5px; color:var(--ink-3); }
+  .kebab{ width:30px; height:30px; border-radius:8px; display:grid; place-items:center; color:var(--ink-3); }
+  .kebab:hover{ background:var(--brand-tint); color:var(--ink); }
+  .kebab svg{ width:17px; height:17px; }
+  .invrow{ display:flex; gap:10px; padding:16px 20px; border-top:1px solid var(--line); }
+  .catwrap{ display:flex; gap:8px; flex-wrap:wrap; padding:4px 20px 18px; }
+  /* pill outline seleccionable; bloqueada (personal) = rose + candado */
+  .catpill{
+    height:30px; padding:0 13px; border-radius:999px; font-size:13px; font-weight:500;
+    border:1px solid var(--line-strong); background:var(--card); color:var(--ink-2);
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  .catpill .dot{ width:7px; height:7px; border-radius:999px; background:var(--pc); }
+  .catpill:hover{ background:var(--brand-tint); }
+  .catpill.on{ border-color:var(--brand); color:var(--brand); background:var(--brand-tint); font-weight:600; }
+  .catpill.locked{ border-color:var(--rose); color:var(--rose); background:var(--rose-tint); font-weight:600; }
+  .catpill svg{ width:13px; height:13px; }
+  .hint{ font-size:12px; color:var(--ink-3); padding:0 20px 16px; }
+  .danger{ display:flex; align-items:center; gap:14px; padding:18px 20px; }
+  .danger p{ font-size:12.5px; color:var(--ink-3); margin:2px 0 0; }
+  .danger h3{ font-size:14px; font-weight:600; }
+</style>
+</head>
+<body class="depth-a">
+<div class="mg-shell">
+  <aside class="mg-side" data-shell="familia"></aside>
+  <div class="mg-main">
+    <div data-topbar></div>
+    <div class="mg-page">
+
+      <div class="mg-pagehead">
+        <div>
+          <h1>Ajustes del hogar</h1>
+          <div class="sub">Hogar Barranco · 2 miembros</div>
+        </div>
+      </div>
+
+      <div class="layout">
+        <div class="col">
+          <!-- Miembros -->
+          <div class="mg-card">
+            <div class="mg-cardhead" style="padding-bottom:12px;"><h2>Miembros</h2></div>
+            <div style="border-top:1px solid var(--line);">
+              <div class="member">
+                <span class="avatar">JB</span>
+                <div><div class="nm">Joel Barranco</div><div class="em">hello@joelbarranco.io</div></div>
+                <span style="margin-left:auto"></span>
+                <span class="mg-pill brand sm">Dueño</span>
+                <button class="kebab"><i data-i="dots"></i></button>
+              </div>
+              <div class="member">
+                <span class="avatar">AD</span>
+                <div><div class="nm">Adlai Barranco</div><div class="em">adlai@correo.com</div></div>
+                <span style="margin-left:auto"></span>
+                <span class="mg-pill neutral sm">Miembro</span>
+                <button class="kebab"><i data-i="dots"></i></button>
+              </div>
+              <!-- Invitación pendiente: misma fila, atenuada -->
+              <div class="member" style="opacity:.75;">
+                <span class="avatar" style="background:var(--amber-tint); color:var(--amber);"><i data-i="mail" style="width:18px;height:18px;"></i></span>
+                <div><div class="nm" style="color:var(--ink-2);">mama@correo.com</div><div class="em">Invitación enviada · hace 2 días</div></div>
+                <span style="margin-left:auto"></span>
+                <span class="mg-pill amber sm">Pendiente</span>
+                <button class="kebab"><i data-i="dots"></i></button>
+              </div>
+            </div>
+            <div class="invrow">
+              <label class="mg-field" style="flex:1;"><i data-i="mail"></i><input placeholder="correo@ejemplo.com"></label>
+              <button class="mg-btn primary"><i data-i="plus"></i>Invitar</button>
+            </div>
+          </div>
+
+          <!-- Zona de peligro: el rojo vive en el botón, no en la card -->
+          <div class="mg-card danger">
+            <div>
+              <h3>Disolver hogar</h3>
+              <p>Los miembros conservan sus datos personales; se elimina lo compartido.</p>
+            </div>
+            <span style="margin-left:auto"></span>
+            <button class="mg-btn danger"><i data-i="trash"></i>Disolver</button>
+          </div>
+        </div>
+
+        <div class="col">
+          <!-- Categorías compartidas: SOLO de la lista existente -->
+          <div class="mg-card">
+            <div class="mg-cardhead" style="padding-bottom:12px;">
+              <div>
+                <h2>Categorías compartidas</h2>
+                <div class="sub">Se eligen de las categorías existentes · crear nuevas es solo del administrador</div>
+              </div>
+            </div>
+            <div class="catwrap">
+              <button class="catpill on" style="--pc:#33604A"><span class="dot"></span>Vivienda</button>
+              <button class="catpill on" style="--pc:#C9A45C"><span class="dot"></span>Comida</button>
+              <button class="catpill on" style="--pc:#5F7386"><span class="dot"></span>Transporte</button>
+              <button class="catpill on" style="--pc:#A64F4F"><span class="dot"></span>Salud</button>
+              <button class="catpill on" style="--pc:#A85D6E"><span class="dot"></span>Familia</button>
+              <button class="catpill" style="--pc:#7D6A85"><span class="dot"></span>Entretenimiento</button>
+              <button class="catpill" style="--pc:#8A8A4E"><span class="dot"></span>Servicios y Recibos</button>
+              <button class="catpill" style="--pc:#58939C"><span class="dot"></span>Viajes y Vacaciones</button>
+              <button class="catpill" style="--pc:#B0806A"><span class="dot"></span>Artículos del Hogar</button>
+              <button class="catpill locked" style="--pc:#8FA98C"><i data-i="lock"></i>Personal</button>
+              <button class="catpill locked" style="--pc:#56698F"><i data-i="lock"></i>Electrónica Personal</button>
+            </div>
+            <div class="hint">Las categorías con candado son personales de un miembro y no pueden compartirse</div>
+          </div>
+
+          <!-- Mi privacidad -->
+          <div class="mg-card">
+            <div class="mg-cardhead" style="padding-bottom:12px;">
+              <div>
+                <h2>Mi privacidad</h2>
+                <div class="sub">Qué ve tu pareja de tus gastos en categorías compartidas</div>
+              </div>
+            </div>
+            <div style="border-top:1px solid var(--line);">
+              <div class="member">
+                <div><div class="nm" style="font-size:13.5px;">Mostrar el detalle de artículos</div><div class="em">Si está apagado, solo ve el total del gasto</div></div>
+                <span style="margin-left:auto"></span>
+                <span class="mg-toggle on"></span>
+              </div>
+              <div class="member">
+                <div><div class="nm" style="font-size:13.5px;">Mostrar método de pago</div><div class="em">Oculta con qué cuenta pagaste</div></div>
+                <span style="margin-left:auto"></span>
+                <span class="mg-toggle"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script src="shared/shell.js"></script>
+</body>
+</html>

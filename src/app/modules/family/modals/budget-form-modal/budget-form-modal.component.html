@@ -1,0 +1,31 @@
+<mg-modal-shell [title]="shellTitle()" (closed)="onCancel()">
+  <form class="flex flex-col gap-4 p-5" [formGroup]="form" (ngSubmit)="onSubmit()">
+    @if (isEditMode()) {
+      <div class="text-ink-2">
+        Categoría: <span class="font-semibold text-ink">{{ data.budget?.categoryName }}</span>
+      </div>
+    } @else {
+      <mat-form-field class="w-full" subscriptSizing="dynamic">
+        <mat-label>Categoría compartida</mat-label>
+        <mat-select formControlName="categoryId">
+          @for (category of data.availableCategories; track category.categoryId) {
+            <mat-option [value]="category.categoryId">{{ category.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+
+    <mat-form-field class="w-full" subscriptSizing="dynamic">
+      <mat-label>Monto mensual</mat-label>
+      <input matInput type="number" min="1" formControlName="amount" placeholder="600">
+      <span matTextPrefix>$&nbsp;</span>
+    </mat-form-field>
+  </form>
+
+  <ng-container mgModalActions>
+    <button mat-stroked-button type="button" (click)="onCancel()">Cancelar</button>
+    <button mat-flat-button color="primary" [disabled]="formInvalid()" (click)="onSubmit()">
+      {{ isEditMode() ? 'Actualizar' : 'Crear' }}
+    </button>
+  </ng-container>
+</mg-modal-shell>

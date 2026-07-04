@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin · Métodos de pago — Maguey 2.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/maguey.css">
+<style>
+  .seg{ display:inline-flex; border:1px solid var(--line-strong); border-radius:10px; background:var(--card); padding:3px; gap:2px; }
+  .seg button{ height:32px; padding:0 14px; border-radius:8px; font-size:13px; font-weight:600; color:var(--ink-2); }
+  .seg button.on{ background:var(--brand); color:#fff; }
+  .grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .acc{ padding:18px 20px; display:flex; flex-direction:column; gap:14px; }
+  .acc .top{ display:flex; align-items:center; gap:12px; }
+  .acc .nm{ font-size:14.5px; font-weight:600; }
+  .acc .ty{ font-size:12px; color:var(--ink-3); }
+  .acc .foot{ display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--ink-3); }
+  .kebab{ width:30px; height:30px; border-radius:8px; display:grid; place-items:center; color:var(--ink-3); margin-left:auto; }
+  .kebab:hover{ background:var(--brand-tint); color:var(--ink); }
+  .kebab svg{ width:17px; height:17px; }
+
+  /* CCARD — proporción real de tarjeta (1.586:1), tamaño FIJO, nunca estirada
+     tw: w-[210px] h-[132px] rounded-2xl relative overflow-hidden shrink-0 */
+  .ccard{
+    width:210px; height:132px; border-radius:14px; position:relative; overflow:hidden;
+    --cc:#3B5F82; color:#fff; padding:14px 16px; display:flex; flex-direction:column; flex:none;
+    background:linear-gradient(135deg, color-mix(in srgb, var(--cc) 82%, #fff) 0%, var(--cc) 48%, color-mix(in srgb, var(--cc) 68%, #000) 100%);
+  }
+  .ccard::after{ content:""; position:absolute; inset:0; background:linear-gradient(115deg, rgb(255 255 255/.14) 0%, transparent 38%); }
+  .ccard .chip{ width:28px; height:20px; border-radius:5px; background:linear-gradient(135deg,#E9D8AC,#C9A45C); opacity:.92; }
+  .ccard .num4{ margin-top:auto; font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:13px; letter-spacing:.14em; }
+  .ccard .nm2{ display:flex; justify-content:space-between; align-items:baseline; font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:rgb(255 255 255/.85); margin-top:5px; }
+</style>
+</head>
+<body class="depth-a">
+<div class="mg-shell">
+  <aside class="mg-side" data-shell="admin"></aside>
+  <div class="mg-main">
+    <div data-topbar></div>
+    <div class="mg-page">
+
+      <div class="mg-pagehead">
+        <div>
+          <h1>Cuentas y métodos de pago</h1>
+          <div class="sub">9 métodos de pago</div>
+        </div>
+        <div class="actions">
+          <div class="seg">
+            <button>Cuentas</button>
+            <button class="on">Métodos de pago</button>
+          </div>
+          <button class="mg-btn primary"><i data-i="plus"></i>Nuevo método</button>
+        </div>
+      </div>
+
+      <div class="grid">
+        <!-- Tarjetas: ccard con el color del método, tamaño fijo -->
+        <div class="mg-card acc">
+          <div class="top">
+            <div><div class="nm">BBVA Platinum</div><div class="ty">Tarjeta de crédito · liga a BBVA</div></div>
+            <button class="kebab"><i data-i="dots"></i></button>
+          </div>
+          <div class="ccard" style="--cc:#3B5F82;">
+            <div class="chip"></div>
+            <div class="num4">•••• 3465</div>
+            <div class="nm2"><span>BBVA Platinum</span><span>Crédito</span></div>
+          </div>
+          <div class="foot"><span class="pdot" style="width:7px;height:7px;border-radius:999px;background:#3B5F82;"></span>Marino · corte día 02</div>
+        </div>
+
+        <div class="mg-card acc">
+          <div class="top">
+            <div><div class="nm">BBVA Débito</div><div class="ty">Tarjeta de débito · liga a BBVA</div></div>
+            <button class="kebab"><i data-i="dots"></i></button>
+          </div>
+          <div class="ccard" style="--cc:#3B5F82;">
+            <div class="chip"></div>
+            <div class="num4">•••• 5695</div>
+            <div class="nm2"><span>BBVA Débito</span><span>Débito</span></div>
+          </div>
+          <div class="foot"><span class="pdot" style="width:7px;height:7px;border-radius:999px;background:#3B5F82;"></span>Marino · 1,204 movimientos</div>
+        </div>
+
+        <div class="mg-card acc">
+          <div class="top">
+            <div><div class="nm">Nu</div><div class="ty">Tarjeta de crédito · liga a Nu</div></div>
+            <button class="kebab"><i data-i="dots"></i></button>
+          </div>
+          <div class="ccard" style="--cc:#6A5A8C;">
+            <div class="chip"></div>
+            <div class="num4">•••• 8102</div>
+            <div class="nm2"><span>Nu</span><span>Crédito</span></div>
+          </div>
+          <div class="foot"><span class="pdot" style="width:7px;height:7px;border-radius:999px;background:#6A5A8C;"></span>Ciruela · corte día 15</div>
+        </div>
+
+        <div class="mg-card acc">
+          <div class="top">
+            <div><div class="nm">Invex</div><div class="ty">Tarjeta de crédito · liga a BBVA</div></div>
+            <button class="kebab"><i data-i="dots"></i></button>
+          </div>
+          <div class="ccard" style="--cc:#2E3A46;">
+            <div class="chip"></div>
+            <div class="num4">•••• 0233</div>
+            <div class="nm2"><span>Invex</span><span>Crédito</span></div>
+          </div>
+          <div class="foot"><span class="pdot" style="width:7px;height:7px;border-radius:999px;background:#2E3A46;"></span>Grafito · corte día 21</div>
+        </div>
+
+        <!-- Métodos sin tarjeta física: tile, no ccard -->
+        <div class="mg-card acc">
+          <div class="top">
+            <div class="mg-tile" style="--tc:#3B5F82"><i data-i="swap"></i></div>
+            <div><div class="nm">Transferencia BBVA</div><div class="ty">Transferencia · liga a BBVA</div></div>
+            <button class="kebab"><i data-i="dots"></i></button>
+          </div>
+          <div class="foot"><span class="pdot" style="width:7px;height:7px;border-radius:999px;background:#3B5F82;"></span>Marino · 486 movimientos</div>
+        </div>
+
+        <div class="mg-card acc">
+          <div class="top">
+            <div class="mg-tile" style="--tc:#4E8A6A"><i data-i="cash"></i></div>
+            <div><div class="nm">Efectivo</div><div class="ty">Efectivo · liga a Efectivo</div></div>
+            <button class="kebab"><i data-i="dots"></i></button>
+          </div>
+          <div class="foot"><span class="pdot" style="width:7px;height:7px;border-radius:999px;background:#4E8A6A;"></span>Bosque · 512 movimientos</div>
+        </div>
+
+        <div class="mg-card acc">
+          <div class="top">
+            <div class="mg-tile" style="--tc:#C08A4E"><i data-i="card"></i></div>
+            <div><div class="nm">Vales de Despensa</div><div class="ty">Monedero · liga a Vales</div></div>
+            <button class="kebab"><i data-i="dots"></i></button>
+          </div>
+          <div class="foot"><span class="pdot" style="width:7px;height:7px;border-radius:999px;background:#C08A4E;"></span>Ámbar · 64 movimientos</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script src="shared/shell.js"></script>
+</body>
+</html>

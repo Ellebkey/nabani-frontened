@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reportes · Flujo de caja — Maguey 2.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/maguey.css">
+<style>
+  .stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin:20px 0; }
+  .stat{ padding:18px 20px; display:flex; align-items:center; gap:14px; }
+  .stat .v{ font-size:22px; font-weight:700; font-variant-numeric:tabular-nums; margin-top:2px; }
+  .sankeywrap{ padding:10px 20px 20px; }
+
+  /* Etiquetas: las cards SON el filtro (resumen + selección en un solo elemento) */
+  .tagsec{ margin-bottom:4px; }
+  .tagsec .mg-kicker{ display:block; margin-bottom:8px; }
+  .tags{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .tagcard{
+    display:flex; align-items:center; gap:10px; padding:10px 14px; text-align:left;
+    background:var(--card); border:1px solid var(--line); border-radius:12px;
+  }
+  .tagcard .dot{ width:8px; height:8px; border-radius:999px; background:var(--pc); flex:none; }
+  .tagcard b{ font-size:14px; font-variant-numeric:tabular-nums; display:block; }
+  .tagcard .l{ font-size:12px; color:var(--ink-3); }
+  .tagcard:hover{ background:var(--brand-tint); }
+  .tagcard.on{ border-color:var(--brand); box-shadow:inset 0 0 0 1px var(--brand); background:var(--brand-tint); }
+  .tagcard.on .x{ width:20px; height:20px; border-radius:6px; display:grid; place-items:center; color:var(--ink-3); }
+  .tagcard.on .x:hover{ color:var(--ink); }
+  .tagcard .x svg{ width:13px; height:13px; }
+  .taghint{ font-size:12px; color:var(--ink-3); }
+
+  /* Drill-down: cards de subcategoría */
+  .subcards{ display:flex; gap:10px; flex-wrap:wrap; padding:4px 20px 12px; }
+  .subcard{
+    min-width:160px; text-align:left; padding:12px 14px;
+    background:var(--card); border:1px solid var(--line); border-radius:12px;
+  }
+  .subcard:hover{ background:var(--brand-tint); }
+  .subcard.on{ border-color:var(--brand); box-shadow:inset 0 0 0 1px var(--brand); background:var(--brand-tint); }
+  .subcard .n{ font-size:12.5px; font-weight:600; margin-bottom:4px; }
+  .subcard b{ font-size:15px; font-variant-numeric:tabular-nums; display:block; }
+  .subcard .p{ font-size:11.5px; color:var(--ink-3); margin-top:2px; }
+  .hint{ font-size:12px; color:var(--ink-3); padding:0 20px 16px; }
+  .panelhead{ display:flex; align-items:center; gap:10px; padding:16px 20px 10px; }
+  .panelhead h2{ font-size:15px; font-weight:600; }
+  .panelhead .x{ margin-left:auto; width:30px; height:30px; border-radius:8px; display:grid; place-items:center; color:var(--ink-3); }
+  .panelhead .x:hover{ background:color-mix(in srgb, var(--ink) 5%, var(--card)); color:var(--ink); }
+  .panelhead .x svg{ width:16px; height:16px; }
+  .idc{ font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:12px; color:var(--ink-3); }
+</style>
+</head>
+<body class="depth-a">
+<div class="mg-shell">
+  <aside class="mg-side" data-shell="reportes"></aside>
+  <div class="mg-main">
+    <div data-topbar></div>
+    <div class="mg-page">
+
+      <div class="mg-pagehead">
+        <div>
+          <h1>Flujo de caja</h1>
+          <div class="sub">Distribución y desglose de gastos</div>
+        </div>
+        <div class="actions">
+          <label class="mg-field" style="width:250px;"><i data-i="cal"></i><input value="Todo el historial"><i data-i="chevD" class="chev"></i></label>
+          <button class="mg-btn secondary"><i data-i="swap"></i>Comparar</button>
+        </div>
+      </div>
+
+      <div class="mg-chiprow" style="margin-bottom:20px;">
+        <button class="mg-chip">Este mes</button>
+        <button class="mg-chip">3 meses</button>
+        <button class="mg-chip">6 meses</button>
+        <button class="mg-chip">Este año</button>
+        <button class="mg-chip">1 año</button>
+        <button class="mg-chip on">Todo</button>
+      </div>
+
+      <!-- Etiquetas: la card ES el filtro — clic activa, × sale. Sin select duplicado ni banner. -->
+      <div class="tagsec">
+        <span class="mg-kicker">Etiquetas</span>
+        <div class="tags">
+          <button class="tagcard on" style="--pc:#4E8A6A">
+            <span class="dot"></span>
+            <span><b class="num">$48,236.40</b><span class="l">Japón · 23 gastos · nov 2024 – jun 2026</span></span>
+            <span class="x"><i data-i="x"></i></span>
+          </button>
+          <button class="tagcard" style="--pc:#A64F4F">
+            <span class="dot"></span>
+            <span><b class="num">$313.00</b><span class="l">Ginger · 1 gasto</span></span>
+          </button>
+          <button class="tagcard" style="--pc:#56698F">
+            <span class="dot"></span>
+            <span><b class="num">$12,480.00</b><span class="l">Remodelación · 9 gastos</span></span>
+          </button>
+          <span class="taghint">Con etiqueta activa, el rango se expande a todo su historial</span>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="mg-card stat">
+          <div class="mg-tile neutral"><i data-i="tag"></i></div>
+          <div><span class="mg-kicker">Total etiqueta</span><div class="v num">$48,236.40</div></div>
+        </div>
+        <div class="mg-card stat">
+          <div class="mg-tile neutral"><i data-i="doc"></i></div>
+          <div><span class="mg-kicker">Gastos</span><div class="v num">23</div></div>
+        </div>
+        <div class="mg-card stat">
+          <div class="mg-tile neutral"><i data-i="cal"></i></div>
+          <div><span class="mg-kicker">Período</span><div class="v num" style="font-size:17px;">nov 2024 – jun 2026</div></div>
+        </div>
+      </div>
+
+      <!-- Sankey: la etiqueta es la fuente -->
+      <div class="mg-card" style="margin-bottom:20px;">
+        <div class="mg-cardhead" style="padding-bottom:0;">
+          <div>
+            <h2>Flujo · Etiqueta: Japón</h2>
+            <div class="sub">Haz clic en una categoría para ver el desglose por subcategoría · sin etiqueta, la fuente es Total Gastos</div>
+          </div>
+        </div>
+        <div class="sankeywrap">
+          <svg id="sankey" width="100%" viewBox="0 0 1100 380" style="display:block;"></svg>
+        </div>
+      </div>
+
+      <!-- Drill-down nivel 1: subcategorías de la categoría clicada -->
+      <div class="mg-card" style="margin-bottom:20px;">
+        <div class="panelhead">
+          <span class="pdot" style="width:9px;height:9px;border-radius:3px;background:#58939C;"></span>
+          <div>
+            <h2>Viajes y Vacaciones</h2>
+            <div style="font-size:12px;color:var(--ink-3)">Total: <b class="num" style="color:var(--ink-2)">$32,450.00</b> · 67.3% de la etiqueta</div>
+          </div>
+          <button class="x"><i data-i="x"></i></button>
+        </div>
+        <div class="subcards">
+          <button class="subcard"><span class="n">Vuelos</span><b class="num">$14,890.00</b><span class="p">45.9% del total</span></button>
+          <button class="subcard"><span class="n">Hospedaje</span><b class="num">$9,860.00</b><span class="p">30.4% del total</span></button>
+          <button class="subcard on"><span class="n">Parques</span><b class="num">$5,200.00</b><span class="p">16.0% del total</span></button>
+          <button class="subcard"><span class="n">Tours</span><b class="num">$2,500.00</b><span class="p">7.7% del total</span></button>
+        </div>
+        <div class="hint">Haz clic en una subcategoría para ver los gastos</div>
+      </div>
+
+      <!-- Drill-down nivel 2: tabla de gastos de la subcategoría -->
+      <div class="mg-card">
+        <div class="panelhead">
+          <span class="pdot" style="width:9px;height:9px;border-radius:3px;background:#58939C;"></span>
+          <div>
+            <h2>Parques</h2>
+            <div style="font-size:12px;color:var(--ink-3)">4 gastos · Total: <b class="num" style="color:var(--ink-2)">$5,200.00</b></div>
+          </div>
+          <button class="x"><i data-i="x"></i></button>
+        </div>
+        <table class="mg-table">
+          <thead>
+            <tr>
+              <th style="width:110px; padding-left:20px;">Folio</th>
+              <th style="width:160px">Fecha</th>
+              <th style="width:200px">Comercio</th>
+              <th>Concepto</th>
+              <th style="width:230px">Categoría / Subcategoría</th>
+              <th class="r" style="width:120px">Monto</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="idc" style="padding-left:20px;">INV-10102</td><td class="num" style="color:var(--ink-3)">18 ene 2026 · 10:15am</td><td>Tokyo Disney Resort</td><td>Boletos 2 días · 2 personas</td>
+              <td><span class="mg-pill tint sm" style="--pc:#58939C"><span class="dot"></span>Viajes · Parques</span></td><td class="r num">$2,600.00</td>
+            </tr>
+            <tr>
+              <td class="idc" style="padding-left:20px;">INV-10103</td><td class="num" style="color:var(--ink-3)">18 ene 2026 · 10:22am</td><td>Universal Studios Japan</td><td>Express Pass · Osaka</td>
+              <td><span class="mg-pill tint sm" style="--pc:#58939C"><span class="dot"></span>Viajes · Parques</span></td><td class="r num">$1,800.00</td>
+            </tr>
+            <tr>
+              <td class="idc" style="padding-left:20px;">INV-09871</td><td class="num" style="color:var(--ink-3)">02 dic 2025 · 08:40pm</td><td>teamLab Planets</td><td>Entradas Tokio</td>
+              <td><span class="mg-pill tint sm" style="--pc:#58939C"><span class="dot"></span>Viajes · Parques</span></td><td class="r num">$520.00</td>
+            </tr>
+            <tr>
+              <td class="idc" style="padding-left:20px;">INV-09644</td><td class="num" style="color:var(--ink-3)">14 nov 2025 · 09:10am</td><td>Shibuya Sky</td><td>Mirador · 2 personas</td>
+              <td><span class="mg-pill tint sm" style="--pc:#58939C"><span class="dot"></span>Viajes · Parques</span></td><td class="r num">$280.00</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="shared/shell.js"></script>
+<script>
+// Sankey 1 nivel: fuente (etiqueta o Total Gastos) → categorías
+const DST = [
+  {n:'Viajes y Vacaciones', v:32450, c:'#58939C'},
+  {n:'Comida',              v:8420,  c:'#C9A45C'},
+  {n:'Transporte',          v:4180,  c:'#5F7386'},
+  {n:'Entretenimiento',     v:2120,  c:'#7D6A85'},
+  {n:'Personal',            v:1066,  c:'#8FA98C'},
+];
+const W=1100, H=380, NW=14, PAD=14, X0=170, X1=W-300;
+const total = DST.reduce((a,b)=>a+b.v,0);
+const scale = (H - PAD*(DST.length-1) - 20) / total;
+let y=10, srcY=10, el='';
+DST.forEach(it=>{
+  const h=Math.max(it.v*scale, 4);
+  el += `<path d="M ${X0+NW} ${srcY} C ${X0+260} ${srcY}, ${X1-260} ${y}, ${X1} ${y}
+         L ${X1} ${y+h} C ${X1-260} ${y+h}, ${X0+260} ${srcY+h}, ${X0+NW} ${srcY+h} Z"
+         fill="${it.c}" opacity=".32"></path>`;
+  el += `<rect x="${X1}" y="${y}" width="${NW}" height="${h}" rx="4" fill="${it.c}"></rect>`;
+  if(h > 26){ // banda alta: nombre + monto apilados
+    el += `<text x="${X1+NW+10}" y="${y+h/2-1}" font-size="13" font-weight="600" fill="#17201B" font-family="Inter">${it.n}</text>`;
+    el += `<text x="${X1+NW+10}" y="${y+h/2+15}" font-size="11.5" fill="#7C8680" font-family="Inter">$${it.v.toLocaleString()}</text>`;
+  } else { // banda delgada: una sola línea para no encimarse
+    el += `<text x="${X1+NW+10}" y="${y+h/2+4}" font-size="13" font-weight="600" fill="#17201B" font-family="Inter">${it.n} <tspan font-size="11.5" font-weight="400" fill="#7C8680">$${it.v.toLocaleString()}</tspan></text>`;
+  }
+  y += h+PAD; srcY += h;
+});
+el = `<rect x="${X0}" y="10" width="${NW}" height="${total*scale}" rx="4" fill="#4E8A6A"></rect>
+<text x="${X0-10}" y="${10+total*scale/2-2}" text-anchor="end" font-size="13" font-weight="600" fill="#17201B" font-family="Inter">Japón</text>
+<text x="${X0-10}" y="${10+total*scale/2+14}" text-anchor="end" font-size="11.5" fill="#7C8680" font-family="Inter">$${total.toLocaleString()}</text>` + el;
+document.getElementById('sankey').innerHTML = el;
+</script>
+</body>
+</html>

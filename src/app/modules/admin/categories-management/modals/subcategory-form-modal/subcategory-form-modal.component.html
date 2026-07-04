@@ -1,0 +1,24 @@
+<mg-modal-shell [title]="modalTitle()" (closed)="onCancel()">
+  <form class="flex flex-col gap-3.5 p-5" [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div>
+      <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Nombre *</label>
+      <label
+        class="flex h-10 items-center gap-2 rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+        <input formControlName="name" placeholder="Nombre de la subcategoría" class="w-full border-0 bg-transparent outline-none placeholder:text-ink-3" />
+      </label>
+      @if (showNameRequiredError()) {
+        <div class="mt-1 text-[12.5px] text-rose">El nombre es requerido</div>
+      }
+      @if (showNameMinlengthError()) {
+        <div class="mt-1 text-[12.5px] text-rose">Mínimo 2 caracteres</div>
+      }
+    </div>
+  </form>
+
+  <ng-container mgModalActions>
+    <button mat-stroked-button type="button" (click)="onCancel()">Cancelar</button>
+    <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="formInvalid()">
+      {{ isEditMode() ? 'Actualizar' : 'Crear' }}
+    </button>
+  </ng-container>
+</mg-modal-shell>

@@ -1,0 +1,151 @@
+/* Maguey theme sidebar styling — clean minimal */
+:host ::ng-deep mg-vertical-navigation {
+  background-color: var(--sidebar-bg, #2a4c3c) !important;
+
+  .mg-vertical-navigation-wrapper {
+    background-color: var(--sidebar-bg, #2a4c3c) !important;
+    box-shadow: none !important;
+  }
+
+  /* The sidebar is theme-independent: nothing may paint plates
+     over the header/logo or the content in dark */
+  .mg-vertical-navigation-header,
+  .mg-vertical-navigation-content-header,
+  .mg-vertical-navigation-content,
+  .mg-vertical-navigation-content-header > div {
+    background-color: transparent !important;
+  }
+
+  /* Navigation items — hover */
+  .mg-vertical-navigation-item {
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.06) !important;
+    }
+
+    &.mg-vertical-navigation-item-active,
+    &.mg-vertical-navigation-item-active-forced {
+      background-color: rgba(255, 255, 255, 0.10) !important;
+    }
+  }
+
+  /* Icons and text — white (slightly transparent for inactive) */
+  .mg-vertical-navigation-item-icon,
+  .mg-vertical-navigation-item-title {
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+
+  /* Active menu item — gold */
+  .mg-vertical-navigation-item-active,
+  .mg-vertical-navigation-item.mg-vertical-navigation-item-active {
+    .mg-vertical-navigation-item-icon,
+    .mg-vertical-navigation-item-title,
+    .mg-vertical-navigation-item-title span,
+    mat-icon,
+    mat-icon svg {
+      color: var(--sidebar-active, #e1b66b) !important;
+      stroke: currentColor !important;
+    }
+  }
+
+  /* Aside items (main menu with icon) active state */
+  mg-vertical-navigation-aside-item {
+    .mg-vertical-navigation-item.mg-vertical-navigation-item-active {
+      .mg-vertical-navigation-item-icon,
+      .mg-vertical-navigation-item-title,
+      mat-icon {
+        color: var(--sidebar-active, #e1b66b) !important;
+      }
+
+      mat-icon svg {
+        color: var(--sidebar-active, #e1b66b) !important;
+        stroke: var(--sidebar-active, #e1b66b) !important;
+      }
+    }
+  }
+
+  /* Submenu/Children items */
+  .mg-vertical-navigation-item-children {
+    background-color: transparent !important;
+
+    mg-vertical-navigation-basic-item,
+    .mg-vertical-navigation-item-wrapper {
+      .mg-vertical-navigation-item {
+        background-color: transparent !important;
+
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.06) !important;
+        }
+
+        &.mg-vertical-navigation-item-active {
+          background-color: transparent !important;
+        }
+
+        /* White text for submenu items */
+        mat-icon,
+        mat-icon.mg-vertical-navigation-item-icon,
+        .mg-vertical-navigation-item-icon,
+        .mg-vertical-navigation-item-title,
+        .mg-vertical-navigation-item-title-wrapper,
+        .mg-vertical-navigation-item-title-wrapper .mg-vertical-navigation-item-title,
+        .mg-vertical-navigation-item-title-wrapper .mg-vertical-navigation-item-title span {
+          color: rgba(255, 255, 255, 0.7) !important;
+        }
+
+        /* SVG icons */
+        mat-icon svg,
+        .mg-vertical-navigation-item-icon svg {
+          color: rgba(255, 255, 255, 0.7) !important;
+          fill: currentColor !important;
+          stroke: currentColor !important;
+        }
+
+        &.mg-vertical-navigation-item-active {
+          mat-icon,
+          mat-icon.mg-vertical-navigation-item-icon,
+          .mg-vertical-navigation-item-icon,
+          .mg-vertical-navigation-item-title,
+          .mg-vertical-navigation-item-title-wrapper,
+          .mg-vertical-navigation-item-title-wrapper .mg-vertical-navigation-item-title,
+          .mg-vertical-navigation-item-title-wrapper .mg-vertical-navigation-item-title span {
+            color: var(--sidebar-active, #e1b66b) !important;
+          }
+
+          mat-icon svg,
+          .mg-vertical-navigation-item-icon svg {
+            color: var(--sidebar-active, #e1b66b) !important;
+            stroke: currentColor !important;
+          }
+        }
+      }
+    }
+  }
+
+  /* Submenu/Aside items (side panel) */
+  .mg-vertical-navigation-aside-wrapper {
+    background-color: transparent !important;
+    border-left: 2px solid var(--sidebar-active, #e1b66b) !important;
+
+    .mg-vertical-navigation-item {
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.06) !important;
+      }
+
+      &.mg-vertical-navigation-item-active {
+        background-color: transparent !important;
+      }
+    }
+
+    /* White text for aside menu items */
+    .mg-vertical-navigation-item-icon,
+    .mg-vertical-navigation-item-title {
+      color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    .mg-vertical-navigation-item-active {
+      .mg-vertical-navigation-item-icon,
+      .mg-vertical-navigation-item-title {
+        color: var(--sidebar-active, #e1b66b) !important;
+      }
+    }
+  }
+}

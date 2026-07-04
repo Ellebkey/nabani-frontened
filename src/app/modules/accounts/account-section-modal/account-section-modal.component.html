@@ -1,0 +1,220 @@
+<mg-modal-shell
+  title="Apartados"
+  [subtitle]="account().name + ' · aparta dinero sin moverlo de la cuenta'"
+  (closed)="closeDialog()">
+
+  <!-- Balance / Set aside / Available -->
+  <div class="border-b border-line px-5 py-4">
+    <div class="mb-3 flex gap-10">
+      <div>
+        <span class="text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Saldo</span>
+        <b class="mt-0.5 block text-[18px] font-bold tabular-nums">{{ saldoTotal() | currency: 'MXN' : 'symbol-narrow' }}</b>
+      </div>
+      <div>
+        <span class="text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Apartado</span>
+        <b class="mt-0.5 block text-[18px] font-bold text-brand tabular-nums">{{ apartadoTotal() | currency: 'MXN' : 'symbol-narrow' }}</b>
+      </div>
+      <div>
+        <span class="text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Disponible</span>
+        <b class="mt-0.5 block text-[18px] font-bold text-teal tabular-nums">{{ disponible() | currency: 'MXN' : 'symbol-narrow' }}</b>
+      </div>
+    </div>
+    <div class="flex h-2.5 overflow-hidden rounded-full bg-ink/[.06]">
+      @for (segment of splitSegments(); track $index) {
+        <i class="h-full" [style.width.%]="segment.width" [style.background]="segment.color"></i>
+      }
+    </div>
+  </div>
+
+  <!-- Sections list -->
+  <div class="flex items-baseline gap-2 px-5 pb-1.5 pt-3.5 text-[11px] font-bold uppercase tracking-[.07em] text-ink-3">
+    <span>{{ sections().length }} apartados</span>
+    <span class="ml-auto text-[12px] font-semibold normal-case tracking-normal tabular-nums">{{ apartadoTotal() | currency: 'MXN' : 'symbol-narrow' }}</span>
+  </div>
+
+  @if (isLoading()) {
+    @for (i of [1, 2, 3]; track i) {
+      <mg-row-skeleton></mg-row-skeleton>
+    }
+  } @else if (sections().length === 0) {
+    <mg-empty-state
+      icon="heroicons_outline:inbox-stack"
+      title="Sin apartados"
+      message="Crea un apartado para separar dinero sin moverlo de la cuenta.">
+    </mg-empty-state>
+  } @else {
+    <div class="flex flex-col divide-y divide-line">
+      @for (section of sections(); track section.id) {
+        <div>
+          <div class="flex items-center gap-3 px-5 py-3">
+            <mg-tile size="sm" [neutral]="true">
+              <mat-icon class="text-current" [svgIcon]="'heroicons_outline:inbox-stack'"></mat-icon>
+            </mg-tile>
+            <div class="min-w-0">
+              <div class="truncate text-[14px] font-semibold text-ink">{{ section.name }}</div>
+              @if (progressPercent(section) !== null) {
+                <div class="mt-1.5 h-[5px] w-[170px] overflow-hidden rounded-full bg-ink/[.06]">
+                  <div class="h-full rounded-full bg-brand" [style.width.%]="progressPercent(section)"></div>
+                </div>
+              }
+              <div class="mt-0.5 text-[12.5px] text-ink-3 tabular-nums">{{ progressMeta(section) }}</div>
+            </div>
+            <div class="ml-auto text-right text-[14.5px] font-bold tabular-nums">
+              {{ section.currentAmount | currency: 'MXN' : 'symbol-narrow' }}
+            </div>
+            <div class="flex gap-0.5">
+              <button
+                type="button"
+                title="Depositar / retirar"
+                class="grid h-[30px] w-[30px] place-items-center rounded-lg"
+                [class]="adjustingId() === section.id ? 'bg-brand text-white' : 'text-ink-3 hover:bg-brand-tint hover:text-brand'"
+                (click)="toggleAdjust(section)">
+                <mat-icon class="icon-size-4 text-current" [svgIcon]="'heroicons_outline:arrows-right-left'"></mat-icon>
+              </button>
+              <button
+                type="button"
+                title="Editar"
+                class="grid h-[30px] w-[30px] place-items-center rounded-lg"
+                [class]="editingId() === section.id ? 'bg-brand text-white' : 'text-ink-3 hover:bg-brand-tint hover:text-brand'"
+                (click)="toggleEdit(section)">
+                <mat-icon class="icon-size-4 text-current" [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+              </button>
+              <button
+                type="button"
+                title="Eliminar"
+                class="grid h-[30px] w-[30px] place-items-center rounded-lg text-ink-3 hover:bg-rose-tint hover:text-rose"
+                (click)="deleteSection(section)">
+                <mat-icon class="icon-size-4 text-current" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <!-- Inline panel: deposit / withdraw -->
+          @if (adjustingId() === section.id) {
+            <div class="mx-5 mb-3.5 flex flex-wrap items-center gap-2.5 rounded-xl border border-brand-tint-2 bg-brand-tint px-3.5 py-3" [formGroup]="adjustForm">
+              <div class="inline-flex gap-0.5 rounded-[9px] border border-brand-tint-2 bg-surface p-0.5">
+                <button
+                  type="button"
+                  class="h-7 rounded-[7px] px-3 text-[12.5px] font-semibold"
+                  [class]="adjustValue().movementType === 'deposit' ? 'bg-brand text-white' : 'text-ink-2'"
+                  (click)="setAdjustType('deposit')">
+                  Depositar
+                </button>
+                <button
+                  type="button"
+                  class="h-7 rounded-[7px] px-3 text-[12.5px] font-semibold"
+                  [class]="adjustValue().movementType === 'withdrawal' ? 'bg-brand text-white' : 'text-ink-2'"
+                  (click)="setAdjustType('withdrawal')">
+                  Retirar
+                </button>
+              </div>
+              <label class="flex h-[34px] w-[130px] items-center rounded-field border border-line-strong bg-surface px-2.5 focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+                <input
+                  type="number"
+                  formControlName="amount"
+                  placeholder="$0.00"
+                  class="w-full border-0 bg-transparent text-right text-[13px] text-ink outline-none tabular-nums placeholder:text-ink-3" />
+              </label>
+              <button
+                mat-flat-button
+                color="primary"
+                class="!h-[34px] !min-h-[34px] !px-3.5 !text-[13px]"
+                [disabled]="adjustInvalid() || adjustExceeds(section) || isSaving()"
+                (click)="confirmAdjust(section)">
+                Confirmar
+              </button>
+              @if ((adjustValue().amount ?? 0) > 0 && !adjustExceeds(section)) {
+                <span class="ml-auto text-[12px] text-ink-2 tabular-nums">
+                  {{ section.currentAmount | currency: 'MXN' : 'symbol-narrow' }} →
+                  <b class="font-semibold">{{ adjustPreview(section) | currency: 'MXN' : 'symbol-narrow' }}</b>
+                </span>
+              } @else if (adjustExceeds(section)) {
+                <span class="ml-auto text-[12px] font-semibold text-rose tabular-nums">
+                  Máximo {{ adjustMax(section) | currency: 'MXN' : 'symbol-narrow' }}
+                </span>
+              }
+              <span class="basis-full text-[12px] text-ink-2">
+                El depósito sale del <b>disponible</b> de {{ account().name }} ({{ disponible() | currency: 'MXN' : 'symbol-narrow' }}); retirar lo regresa
+              </span>
+            </div>
+          }
+
+          <!-- Inline panel: edit name and goal -->
+          @if (editingId() === section.id) {
+            <div class="mx-5 mb-3.5 flex flex-wrap items-end gap-2.5 rounded-xl border border-brand-tint-2 bg-brand-tint px-3.5 py-3" [formGroup]="editForm">
+              <div class="min-w-0 flex-1">
+                <label class="mb-1 block text-[11.5px] font-semibold text-ink-2">Nombre</label>
+                <label class="flex h-[34px] items-center rounded-field border border-line-strong bg-surface px-2.5 focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+                  <input formControlName="name" class="w-full border-0 bg-transparent text-[13px] text-ink outline-none" />
+                </label>
+              </div>
+              <div class="w-[130px]">
+                <label class="mb-1 block text-[11.5px] font-semibold text-ink-2">Objetivo</label>
+                <label class="flex h-[34px] items-center rounded-field border border-line-strong bg-surface px-2.5 focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+                  <input
+                    type="number"
+                    formControlName="targetAmount"
+                    placeholder="Sin objetivo"
+                    class="w-full border-0 bg-transparent text-right text-[13px] text-ink outline-none tabular-nums placeholder:text-ink-3" />
+                </label>
+              </div>
+              <button
+                mat-flat-button
+                color="primary"
+                class="!h-[34px] !min-h-[34px] !px-3.5 !text-[13px]"
+                [disabled]="editForm.invalid || isSaving()"
+                (click)="saveEdit(section)">
+                Guardar
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Create section -->
+  <form
+    class="flex items-end gap-2.5 border-t border-line bg-ink/[.015] px-5 py-3.5"
+    [formGroup]="createForm"
+    (ngSubmit)="createSection()">
+    <div class="min-w-0 flex-1">
+      <label class="mb-1 block text-[11.5px] font-semibold text-ink-2">Nuevo apartado</label>
+      <label class="flex h-9 items-center rounded-field border border-line-strong bg-surface px-2.5 focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+        <input formControlName="name" placeholder="Nombre" class="w-full border-0 bg-transparent text-[13px] text-ink outline-none placeholder:text-ink-3" />
+      </label>
+    </div>
+    <div class="w-[120px]">
+      <label class="mb-1 block text-[11.5px] font-semibold text-ink-2">Objetivo</label>
+      <label class="flex h-9 items-center rounded-field border border-line-strong bg-surface px-2.5 focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+        <input
+          type="number"
+          formControlName="targetAmount"
+          placeholder="$0.00"
+          class="w-full border-0 bg-transparent text-right text-[13px] text-ink outline-none tabular-nums placeholder:text-ink-3" />
+      </label>
+    </div>
+    <div class="w-[120px]">
+      <label class="mb-1 block text-[11.5px] font-semibold text-ink-2">Depósito inicial</label>
+      <label class="flex h-9 items-center rounded-field border border-line-strong bg-surface px-2.5 focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+        <input
+          type="number"
+          formControlName="initialDeposit"
+          placeholder="$0.00"
+          class="w-full border-0 bg-transparent text-right text-[13px] text-ink outline-none tabular-nums placeholder:text-ink-3" />
+      </label>
+    </div>
+    <button mat-flat-button color="primary" type="submit" class="!h-9 !min-h-9" [disabled]="createForm.invalid || isSaving()">
+      <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+      <span class="ml-1.5">Crear</span>
+    </button>
+  </form>
+
+  <div mgModalInfo>
+    <div class="text-[12.5px] text-ink-3">⇄ depositar/retirar · ✎ editar nombre y objetivo · eliminar regresa el saldo al disponible</div>
+  </div>
+
+  <ng-container mgModalActions>
+    <button mat-stroked-button type="button" (click)="closeDialog()">Cerrar</button>
+  </ng-container>
+</mg-modal-shell>

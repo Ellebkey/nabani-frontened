@@ -1,0 +1,17 @@
+<div class="grid grid-cols-8 gap-2" style="grid-template-columns: repeat(8, 30px);">
+  @for (color of colors(); track color) {
+    <button
+      type="button"
+      class="grid h-[30px] w-[30px] place-items-center rounded-[9px] text-white transition-transform hover:scale-[1.12]"
+      [style.background]="color"
+      [style.outline]="isSelected(color) ? '2px solid ' + color : 'none'"
+      [style.outline-offset.px]="2"
+      [attr.aria-label]="'Color ' + color"
+      [attr.aria-pressed]="isSelected(color)"
+      (click)="valueChange.emit(color)">
+      @if (isSelected(color)) {
+        <mat-icon class="icon-size-[14px] text-current" [svgIcon]="'heroicons_outline:check'"></mat-icon>
+      }
+    </button>
+  }
+</div>

@@ -1,0 +1,62 @@
+<button
+  #trigger
+  type="button"
+  cdkOverlayOrigin
+  #origin="cdkOverlayOrigin"
+  role="combobox"
+  [attr.aria-expanded]="open()"
+  [disabled]="disabled()"
+  class="inline-flex w-full items-center gap-1.5 border border-line-strong bg-surface px-[9px] text-left text-[13px] text-ink focus:border-brand focus:outline-none focus:ring-[3px] focus:ring-brand/15 disabled:cursor-not-allowed disabled:opacity-45"
+  [class]="size() === 'field' ? 'h-10 rounded-field !px-3 !text-[14px]' : size() === 'lg' ? 'h-9 rounded-[9px]' : 'h-8 rounded-compact'"
+  (click)="toggle()"
+  (keydown)="onTriggerKeydown($event)">
+  @if (selected(); as option) {
+    @if (option.color) {
+      <mg-dot [color]="option.color"></mg-dot>
+    }
+    <span class="truncate">{{ option.label }}</span>
+  } @else {
+    <span class="truncate text-ink-3">{{ placeholder() }}</span>
+  }
+  <mat-icon
+    class="ml-auto icon-size-[14px] text-ink-3"
+    svgIcon="heroicons_outline:chevron-down"></mat-icon>
+</button>
+
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="origin"
+  [cdkConnectedOverlayOpen]="open()"
+  [cdkConnectedOverlayMinWidth]="triggerWidth"
+  [cdkConnectedOverlayHasBackdrop]="true"
+  cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+  (backdropClick)="close()"
+  (detach)="close()">
+  <div
+    role="listbox"
+    class="max-h-64 overflow-auto rounded-[10px] border border-line bg-surface py-1 shadow-overlay">
+    @for (option of optionsSignal(); track option.value; let i = $index) {
+      <button
+        type="button"
+        role="option"
+        [attr.aria-selected]="option.value === value()"
+        class="flex h-8 w-full items-center gap-1.5 px-2.5 text-left text-[13px] text-ink"
+        [class.bg-brand-tint]="i === activeIndex()"
+        [class.font-semibold]="option.value === value()"
+        (mouseenter)="activeIndex.set(i)"
+        (click)="select(option)">
+        @if (option.color) {
+          <mg-dot [color]="option.color"></mg-dot>
+        }
+        <span class="truncate">{{ option.label }}</span>
+        @if (option.value === value()) {
+          <mat-icon
+            class="ml-auto icon-size-[14px] text-brand"
+            svgIcon="heroicons_outline:check"></mat-icon>
+        }
+      </button>
+    } @empty {
+      <div class="px-2.5 py-2 text-[12.5px] text-ink-3">Sin opciones</div>
+    }
+  </div>
+</ng-template>

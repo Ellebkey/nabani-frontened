@@ -1,0 +1,31 @@
+<ng-container [formGroup]="dateForm">
+  <div class="flex items-center gap-4">
+    <mat-form-field appearance="fill" class="w-full" subscriptSizing="dynamic">
+      <mat-date-range-input [rangePicker]="picker">
+        <input matStartDate placeholder="Fecha inicial" formControlName="startDate">
+        <input matEndDate placeholder="– final" formControlName="endDate" (dateChange)="onDateChange()">
+      </mat-date-range-input>
+      @if (hasDates) {
+        <button matSuffix mat-icon-button (click)="clearDates()">
+          <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+        </button>
+      }
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-date-range-picker #picker></mat-date-range-picker>
+    </mat-form-field>
+    <ng-content></ng-content>
+  </div>
+  <div class="col-span-full flex flex-wrap gap-2">
+    @for (preset of presets; track preset.key) {
+      <button
+        type="button"
+        class="h-7 rounded-full border px-3 text-[12.5px] transition-colors"
+        [class]="activePreset === preset.key
+          ? 'border-brand bg-brand font-semibold text-white'
+          : 'border-line-strong bg-surface font-medium text-ink-2 hover:bg-brand-tint'"
+        (click)="applyPreset(preset.key)">
+        {{ preset.label }}
+      </button>
+    }
+  </div>
+</ng-container>

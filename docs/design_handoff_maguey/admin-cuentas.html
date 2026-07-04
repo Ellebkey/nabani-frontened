@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin · Cuentas — Maguey 2.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/maguey.css">
+<style>
+  .seg{ display:inline-flex; border:1px solid var(--line-strong); border-radius:10px; background:var(--card); padding:3px; gap:2px; }
+  .seg button{ height:32px; padding:0 14px; border-radius:8px; font-size:13px; font-weight:600; color:var(--ink-2); }
+  .seg button.on{ background:var(--brand); color:#fff; }
+  .grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .acc{ padding:18px 20px; display:flex; flex-direction:column; gap:14px; }
+  .acc .top{ display:flex; align-items:center; gap:12px; }
+  .acc .nm{ font-size:14.5px; font-weight:600; }
+  .acc .ty{ font-size:12px; color:var(--ink-3); }
+  .acc .bal{ font-size:20px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .acc .balz{ color:var(--ink-3); }
+  .acc .foot{ display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--ink-3); }
+  .kebab{ width:30px; height:30px; border-radius:8px; display:grid; place-items:center; color:var(--ink-3); margin-left:auto; }
+  .kebab:hover{ background:var(--brand-tint); color:var(--ink); }
+  .kebab svg{ width:17px; height:17px; }
+  .acc.paused .mg-tile{ opacity:.4; }
+  .acc.paused .nm, .acc.paused .bal{ color:var(--ink-3); }
+</style>
+</head>
+<body class="depth-a">
+<div class="mg-shell">
+  <aside class="mg-side" data-shell="admin"></aside>
+  <div class="mg-main">
+    <div data-topbar></div>
+    <div class="mg-page">
+
+      <div class="mg-pagehead">
+        <div>
+          <h1>Cuentas y métodos de pago</h1>
+          <div class="sub">6 cuentas</div>
+        </div>
+        <div class="actions">
+          <div class="seg">
+            <button class="on">Cuentas</button>
+            <button>Métodos de pago</button>
+          </div>
+          <button class="mg-btn secondary"><i data-i="swap"></i>Transferir</button>
+          <button class="mg-btn primary"><i data-i="plus"></i>Nueva cuenta</button>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="mg-card acc">
+          <div class="top">
+            <div class="mg-tile" style="--tc:#3B5F82"><i data-i="bank"></i></div>
+            <div><div class="nm">BBVA</div><div class="ty">Cuenta bancaria</div></div>
+            <button class="kebab"><i data-i="dots"></i></button>
+          </div>
+          <div class="bal num">$11,397.43</div>
+          <div class="foot"><span class="pdot" style="width:7px;height:7px;border-radius:999px;background:#3B5F82;"></span>Marino · 389 movimientos
+            <button style="margin-left:auto; font-size:12.5px; font-weight:600; color:var(--brand); display:inline-flex; align-items:center; gap:5px;"><i data-i="cube" style="width:14px;height:14px;"></i>3 apartados · $5,700</button>
+          </div>
+        </div>
+
+        <div class="mg-card acc">
+          <div class="top">
+            <div class="mg-tile" style="--tc:#4E8A6A"><i data-i="cash"></i></div>
+            <div><div class="nm">Efectivo</div><div class="ty">Efectivo</div></div>
+            <button class="kebab"><i data-i="dots"></i></button>
+          </div>
+          <div class="bal num">$8,829.00</div>
+          <div class="foot"><span class="pdot" style="width:7px;height:7px;border-radius:999px;background:#4E8A6A;"></span>Bosque · 512 movimientos</div>
+        </div>
+
+        <div class="mg-card acc">
+          <div class="top">
+            <div class="mg-tile" style="--tc:#C08A4E"><i data-i="card"></i></div>
+            <div><div class="nm">Vales de Despensa</div><div class="ty">Monedero</div></div>
+            <button class="kebab"><i data-i="dots"></i></button>
+          </div>
+          <div class="bal num">$2,167.14</div>
+          <div class="foot"><span class="pdot" style="width:7px;height:7px;border-radius:999px;background:#C08A4E;"></span>Ámbar · 64 movimientos</div>
+        </div>
+
+        <div class="mg-card acc">
+          <div class="top">
+            <div class="mg-tile" style="--tc:#58939C"><i data-i="bank"></i></div>
+            <div><div class="nm">Mercado Libre</div><div class="ty">Cuenta digital</div></div>
+            <button class="kebab"><i data-i="dots"></i></button>
+          </div>
+          <div class="bal num balz">$0.00</div>
+          <div class="foot"><span class="pdot" style="width:7px;height:7px;border-radius:999px;background:#58939C;"></span>Laguna · 27 movimientos</div>
+        </div>
+
+        <div class="mg-card acc">
+          <div class="top">
+            <div class="mg-tile" style="--tc:#6A5A8C"><i data-i="bank"></i></div>
+            <div><div class="nm">Nu</div><div class="ty">Cuenta digital</div></div>
+            <button class="kebab"><i data-i="dots"></i></button>
+          </div>
+          <div class="bal num balz">$0.00</div>
+          <div class="foot"><span class="pdot" style="width:7px;height:7px;border-radius:999px;background:#6A5A8C;"></span>Ciruela · 41 movimientos</div>
+        </div>
+
+        <div class="mg-card acc paused">
+          <div class="top">
+            <div class="mg-tile" style="--tc:#A64F4F"><i data-i="bank"></i></div>
+            <div><div class="nm">Scotiabank</div><div class="ty">Cuenta bancaria</div></div>
+            <span class="mg-pill neutral sm" style="margin-left:auto;">Pausada</span>
+            <button class="kebab" style="margin-left:6px;"><i data-i="dots"></i></button>
+          </div>
+          <div class="bal num balz">$0.00</div>
+          <div class="foot"><span class="pdot" style="width:7px;height:7px;border-radius:999px;background:#A64F4F; opacity:.4;"></span>Teja · 121 movimientos</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script src="shared/shell.js"></script>
+</body>
+</html>

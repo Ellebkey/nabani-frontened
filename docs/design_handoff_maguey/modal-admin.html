@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modales de administración — Maguey 2.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/maguey.css">
+<style>
+  body{ overflow:hidden; background:var(--canvas); }
+  .stage{ min-height:100vh; display:flex; align-items:flex-start; justify-content:center; gap:32px; padding:40px; background:rgb(23 32 27/.45); flex-wrap:wrap; }
+  .slot{ display:flex; flex-direction:column; gap:10px; }
+  .slot > .cap{ font-size:11px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:#fff; opacity:.85; }
+  .form{ padding:20px; display:flex; flex-direction:column; gap:14px; }
+
+  /* ===== SWATCH PICKER — un solo componente para las 4 entidades =====
+     16 muted del sistema · 30px · radio 9 · seleccionado = check blanco + ring
+     tw: w-[30px] h-[30px] rounded-[9px] grid place-items-center */
+  .swatches{ display:grid; grid-template-columns:repeat(8, 30px); gap:8px; }
+  .sw{ width:30px; height:30px; border-radius:9px; background:var(--sc); display:grid; place-items:center; color:#fff; position:relative; }
+  .sw:hover{ transform:scale(1.12); }
+  .sw svg{ width:14px; height:14px; opacity:0; }
+  .sw.on svg{ opacity:1; }
+  .sw.on::after{ content:""; position:absolute; inset:-4px; border-radius:12px; border:2px solid var(--sc); }
+
+  /* Vista previa = los componentes REALES donde vive el color, no un banner */
+  .preview{
+    border:1px dashed var(--line-strong); border-radius:12px; padding:12px 14px;
+    background:color-mix(in srgb, var(--ink) 1.5%, var(--card));
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .preview .plbl{ font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-3); }
+  .prow{ display:flex; align-items:center; gap:10px; }
+  .prow .nm{ font-size:13.5px; font-weight:600; }
+  .prow .ty{ font-size:12px; color:var(--ink-3); }
+  .prow .amt{ margin-left:auto; font-size:13.5px; font-weight:700; font-variant-numeric:tabular-nums; }
+
+  .ccard{
+    width:200px; height:126px; border-radius:14px; position:relative; overflow:hidden;
+    --cc:#3B5F82; color:#fff; padding:13px 15px; display:flex; flex-direction:column; flex:none;
+    background:linear-gradient(135deg, color-mix(in srgb, var(--cc) 82%, #fff) 0%, var(--cc) 48%, color-mix(in srgb, var(--cc) 68%, #000) 100%);
+  }
+  .ccard::after{ content:""; position:absolute; inset:0; background:linear-gradient(115deg, rgb(255 255 255/.14) 0%, transparent 38%); }
+  .ccard .chip{ width:26px; height:19px; border-radius:5px; background:linear-gradient(135deg,#E9D8AC,#C9A45C); opacity:.92; }
+  .ccard .num4{ margin-top:auto; font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:12.5px; letter-spacing:.14em; }
+  .ccard .nm2{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; font-size:9.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:rgb(255 255 255/.85); margin-top:5px; }
+  .ccard .nm2 span{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  .frow2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .linknew{ font-size:12.5px; font-weight:600; color:var(--brand); align-self:flex-start; padding:2px 6px; border-radius:6px; margin-top:-8px; }
+  .linknew:hover{ background:var(--brand-tint); }
+</style>
+</head>
+<body class="depth-a">
+
+<div class="stage">
+
+  <!-- NUEVA CATEGORÍA -->
+  <div class="slot">
+    <span class="cap">Nueva categoría · solo admin</span>
+    <div class="mg-modal" style="width:420px;">
+      <div class="mg-modalhead">
+        <div><div class="t">Nueva categoría</div></div>
+        <button class="x"><i data-i="x"></i></button>
+      </div>
+      <div class="form">
+        <div><label class="mg-label">Nombre *</label><label class="mg-field"><input placeholder="Nombre de la categoría"></label></div>
+        <div>
+          <label class="mg-label">Color *</label>
+          <div class="swatches">
+            <button class="sw" style="--sc:#3B5F82"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#A64F4F"><i data-i="check"></i></button>
+            <button class="sw on" style="--sc:#4E8A6A"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#6A5A8C"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#C08A4E"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#58939C"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#A85D6E"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#5F7386"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#8A8A4E"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#B0806A"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#C9A45C"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#8FA98C"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#7D6A85"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#56698F"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#3E7C74"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#2E3A46"><i data-i="check"></i></button>
+          </div>
+        </div>
+        <div class="preview">
+          <span class="plbl">Vista previa</span>
+          <div class="prow">
+            <div class="mg-tile sm" style="--tc:#4E8A6A"><i data-i="tag"></i></div>
+            <div><div class="nm">Emprendimiento</div><div class="ty">0 subcategorías</div></div>
+            <span style="margin-left:auto"></span>
+            <span class="mg-pill tint sm" style="--pc:#4E8A6A"><span class="dot"></span>Emprendimiento</span>
+          </div>
+        </div>
+      </div>
+      <div class="mg-modalfoot">
+        <div class="actions" style="width:100%; justify-content:flex-end;">
+          <button class="mg-btn secondary">Cancelar</button>
+          <button class="mg-btn primary">Crear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDITAR ETIQUETA -->
+  <div class="slot">
+    <span class="cap">Editar etiqueta</span>
+    <div class="mg-modal" style="width:420px;">
+      <div class="mg-modalhead">
+        <div><div class="t">Editar etiqueta</div></div>
+        <button class="x"><i data-i="x"></i></button>
+      </div>
+      <div class="form">
+        <div><label class="mg-label">Nombre *</label><label class="mg-field"><i data-i="tag"></i><input value="Boda Iker"></label></div>
+        <div><label class="mg-label">Descripción</label>
+          <label class="mg-field" style="height:auto;"><textarea rows="2" style="border:0; outline:0; background:none; font:inherit; color:inherit; width:100%; resize:none; padding:10px 0;" placeholder="Opcional"></textarea></label>
+        </div>
+        <div>
+          <label class="mg-label">Color *</label>
+          <div class="swatches">
+            <button class="sw" style="--sc:#3B5F82"><i data-i="check"></i></button>
+            <button class="sw on" style="--sc:#A64F4F"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#4E8A6A"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#6A5A8C"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#C08A4E"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#58939C"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#A85D6E"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#5F7386"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#8A8A4E"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#B0806A"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#C9A45C"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#8FA98C"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#7D6A85"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#56698F"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#3E7C74"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#2E3A46"><i data-i="check"></i></button>
+          </div>
+        </div>
+        <div class="preview">
+          <span class="plbl">Vista previa</span>
+          <div class="prow">
+            <div class="mg-tile sm" style="--tc:#A64F4F"><i data-i="tag"></i></div>
+            <div class="nm">Boda Iker</div>
+            <span style="margin-left:auto"></span>
+            <span class="mg-pill tint sm" style="--pc:#A64F4F"><span class="dot"></span>Boda Iker</span>
+          </div>
+        </div>
+      </div>
+      <div class="mg-modalfoot">
+        <div class="actions" style="width:100%; justify-content:flex-end;">
+          <button class="mg-btn secondary">Cancelar</button>
+          <button class="mg-btn primary">Actualizar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NUEVA CUENTA -->
+  <div class="slot">
+    <span class="cap">Nueva cuenta</span>
+    <div class="mg-modal" style="width:420px;">
+      <div class="mg-modalhead">
+        <div><div class="t">Nueva cuenta</div></div>
+        <button class="x"><i data-i="x"></i></button>
+      </div>
+      <div class="form">
+        <div class="frow2">
+          <div><label class="mg-label">Nombre *</label><label class="mg-field"><i data-i="bank"></i><input placeholder="Nombre de la cuenta"></label></div>
+          <div><label class="mg-label">Saldo inicial *</label><label class="mg-field"><input value="$0.00" style="text-align:right;"></label></div>
+        </div>
+        <div>
+          <label class="mg-label">Color *</label>
+          <div class="swatches">
+            <button class="sw on" style="--sc:#3B5F82"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#A64F4F"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#4E8A6A"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#6A5A8C"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#C08A4E"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#58939C"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#A85D6E"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#5F7386"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#8A8A4E"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#B0806A"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#C9A45C"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#8FA98C"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#7D6A85"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#56698F"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#3E7C74"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#2E3A46"><i data-i="check"></i></button>
+          </div>
+        </div>
+        <div class="preview">
+          <span class="plbl">Vista previa</span>
+          <div class="prow">
+            <div class="mg-tile sm" style="--tc:#3B5F82"><i data-i="bank"></i></div>
+            <div><div class="nm">Nombre de la cuenta</div><div class="ty">Cuenta</div></div>
+            <div class="amt num">$0.00</div>
+          </div>
+        </div>
+      </div>
+      <div class="mg-modalfoot">
+        <div class="actions" style="width:100%; justify-content:flex-end;">
+          <button class="mg-btn secondary">Cancelar</button>
+          <button class="mg-btn primary" disabled>Crear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NUEVO MÉTODO DE PAGO -->
+  <div class="slot">
+    <span class="cap">Nuevo método de pago · preview = ccard solo si es tarjeta</span>
+    <div class="mg-modal" style="width:460px;">
+      <div class="mg-modalhead">
+        <div><div class="t">Nuevo método de pago</div></div>
+        <button class="x"><i data-i="x"></i></button>
+      </div>
+      <div class="form">
+        <div class="frow2">
+          <div><label class="mg-label">Nombre *</label><label class="mg-field"><input value="Citi Costco"></label></div>
+          <div><label class="mg-label">Tipo *</label><label class="mg-field"><i data-i="card"></i><input value="Tarjeta de crédito"><i data-i="chevD" class="chev"></i></label></div>
+        </div>
+        <div class="frow2">
+          <div><label class="mg-label">Últimos 4 dígitos</label><label class="mg-field"><input value="5197" style="font-family:ui-monospace,Menlo,monospace; letter-spacing:.1em;"></label></div>
+          <div><label class="mg-label">Cuenta asociada *</label>
+            <label class="mg-field"><span class="pdot" style="width:8px;height:8px;border-radius:999px;background:#3B5F82;"></span><input value="BBVA"><i data-i="chevD" class="chev"></i></label>
+          </div>
+        </div>
+        <button class="linknew"><span style="font-weight:700;">+</span> Crear cuenta nueva</button>
+        <div>
+          <label class="mg-label">Color *</label>
+          <div class="swatches">
+            <button class="sw" style="--sc:#3B5F82"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#A64F4F"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#4E8A6A"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#6A5A8C"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#C08A4E"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#58939C"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#A85D6E"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#5F7386"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#8A8A4E"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#B0806A"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#C9A45C"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#8FA98C"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#7D6A85"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#56698F"><i data-i="check"></i></button>
+            <button class="sw" style="--sc:#3E7C74"><i data-i="check"></i></button>
+            <button class="sw on" style="--sc:#2E3A46"><i data-i="check"></i></button>
+          </div>
+        </div>
+        <div class="preview">
+          <span class="plbl">Vista previa</span>
+          <div style="display:flex; align-items:center; gap:16px;">
+            <div class="ccard" style="--cc:#2E3A46;">
+              <div class="chip"></div>
+              <div class="num4">•••• 5197</div>
+              <div class="nm2"><span>Citi Costco</span><span>Crédito</span></div>
+            </div>
+            <div style="font-size:12px; color:var(--ink-3); max-width:150px;">Si el tipo no es tarjeta, la vista previa es el tile con ícono, no la ccard</div>
+          </div>
+        </div>
+      </div>
+      <div class="mg-modalfoot">
+        <div class="actions" style="width:100%; justify-content:flex-end;">
+          <button class="mg-btn secondary">Cancelar</button>
+          <button class="mg-btn primary">Crear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script src="shared/shell.js"></script>
+</body>
+</html>

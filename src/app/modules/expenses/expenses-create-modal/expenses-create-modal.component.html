@@ -1,0 +1,171 @@
+<mg-modal-shell class="h-[calc(100%+3rem)]" [title]="title()" (closed)="closeDialog()">
+  <div class="grid h-full min-h-0 grid-cols-1 md:grid-cols-[320px_1fr]">
+    <!-- Form column -->
+    <div class="flex flex-col gap-3.5 overflow-y-auto border-r border-line p-5">
+      <form [formGroup]="expenseForm" class="flex flex-col gap-3.5">
+        <div class="grid grid-cols-2 gap-2.5">
+          <mat-form-field appearance="fill" subscriptSizing="dynamic">
+            <mat-label>Fecha</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="expenseDate">
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" subscriptSizing="dynamic">
+            <mat-label>Hora</mat-label>
+            <input matInput type="time" formControlName="expenseTime">
+          </mat-form-field>
+        </div>
+
+        <div>
+          <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Beneficiario *</label>
+          <ng-select
+            [items]="merchants()"
+            bindLabel="name"
+            bindValue="id"
+            formControlName="recipientId"
+            [virtualScroll]="true"
+            [appendTo]="'body'"
+            [addTag]="addMerchantOnTheFly"
+            addTagText="Crear beneficiario"
+            notFoundText="Escribe para crear un nuevo beneficiario"
+          ></ng-select>
+        </div>
+
+        <div>
+          <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Método de pago *</label>
+          <ng-select
+            #paymentMethodSelect
+            [items]="payments()"
+            bindLabel="name"
+            bindValue="id"
+            formControlName="paymentMethodId"
+            [virtualScroll]="true"
+            [appendTo]="'body'"
+            notFoundText="Sin resultados"
+            (change)="onPaymentSelect($event)">
+            <ng-template ng-label-tmp let-item="item">
+              <span class="inline-flex items-center gap-1.5">
+                <mg-dot [color]="item.backgroundColor"></mg-dot>
+                {{ item.name }}
+              </span>
+            </ng-template>
+            <ng-template ng-option-tmp let-item="item">
+              <span class="inline-flex items-center gap-1.5">
+                <mg-dot [color]="item.backgroundColor"></mg-dot>
+                {{ item.name }}
+              </span>
+            </ng-template>
+            <ng-template ng-footer-tmp>
+              <div class="border-t border-line p-2">
+                <button type="button"
+                  class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-[13px] font-semibold text-brand hover:bg-brand-tint"
+                  (click)="openCreatePaymentMethod()">
+                  <mat-icon class="icon-size-4 text-current" [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+                  Crear método de pago
+                </button>
+              </div>
+            </ng-template>
+          </ng-select>
+        </div>
+
+        <div>
+          <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Etiquetas</label>
+          <ng-select
+            [items]="tags()"
+            bindLabel="name"
+            bindValue="id"
+            formControlName="tagIds"
+            [multiple]="true"
+            [clearable]="true"
+            [virtualScroll]="true"
+            [appendTo]="'body'"
+            [addTag]="addTagOnTheFly"
+            addTagText="Crear etiqueta"
+            notFoundText="Escribe para crear una nueva etiqueta"
+            placeholder="Agregar etiquetas">
+            <ng-template ng-label-tmp let-item="item" let-clear="clear">
+              <span class="ng-value-icon left" (click)="clear(item)" aria-hidden="true">×</span>
+              <span class="ng-value-label inline-flex items-center gap-1.5">
+                <mg-dot [color]="item.color"></mg-dot>
+                {{ item.name }}
+              </span>
+            </ng-template>
+            <ng-template ng-option-tmp let-item="item">
+              <span class="inline-flex items-center gap-1.5">
+                <mg-dot [color]="item.color"></mg-dot>
+                {{ item.name }}
+              </span>
+            </ng-template>
+          </ng-select>
+        </div>
+
+        @if (!expense().isPayout) {
+          <mat-slide-toggle formControlName="isMonths">
+            <span class="text-[13.5px] font-medium text-ink">¿Es a meses?</span>
+          </mat-slide-toggle>
+
+          @if (formValue().isMonths) {
+            <mat-form-field appearance="fill" subscriptSizing="dynamic">
+              <mat-label>Número de meses</mat-label>
+              <input type="number" matInput formControlName="totalMonths">
+            </mat-form-field>
+          }
+        }
+
+        <mat-form-field class="hidden sm:flex" appearance="fill" subscriptSizing="dynamic">
+          <mat-label>Comentarios</mat-label>
+          <textarea matInput formControlName="comment" rows="3" placeholder="Notas del gasto"></textarea>
+        </mat-form-field>
+
+        <mat-slide-toggle class="hidden pt-0.5 sm:inline-block" [(ngModel)]="costcoMode" [ngModelOptions]="{standalone: true}">
+          <span class="text-[13.5px] font-medium text-ink">Modo Costco</span>
+        </mat-slide-toggle>
+      </form>
+    </div>
+
+    <!-- Articles column -->
+    <div class="overflow-y-auto p-5">
+      <app-article-list-manager
+        [articles]="articles()"
+        [categories]="categories()"
+        [costcoMode]="costcoMode()"
+        [expenseArticles]="expense().articles"
+        (articlesChange)="onArticlesChange($event)"
+        (totalAmountChange)="onTotalAmountChange($event)"
+        (editingStateChange)="onEditingStateChange($event)">
+      </app-article-list-manager>
+    </div>
+  </div>
+
+  <div mgModalInfo>
+    <div class="text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Total</div>
+    <div class="text-[24px] font-bold tracking-tight text-ink tabular-nums">
+      {{ expense().totalAmount | currency: 'MXN' : 'symbol-narrow' }}
+    </div>
+  </div>
+
+  <ng-container mgModalActions>
+    @if (hasArticlesWithoutCategory() && expense().articles.length > 0) {
+      <span class="flex items-center gap-1 text-[12.5px] text-rose">
+        <mat-icon class="icon-size-4 text-current" [svgIcon]="'heroicons_outline:exclamation-triangle'"></mat-icon>
+        Hay artículos sin categoría asignada
+      </span>
+    }
+
+    <button mat-stroked-button type="button" (click)="closeDialog()">
+      Cancelar
+    </button>
+    <button
+      mat-flat-button
+      color="primary"
+      (click)="save()"
+      [disabled]="formInvalid() || expense().articles.length === 0 || formDisabled() || isEditingArticle() || hasArticlesWithoutCategory()">
+      @if (!formDisabled()) {
+        <span>{{ isEditMode() ? 'Actualizar' : 'Guardar' }}</span>
+      } @else {
+        <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+      }
+    </button>
+  </ng-container>
+</mg-modal-shell>

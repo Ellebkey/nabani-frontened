@@ -1,0 +1,143 @@
+<div class="flex flex-col flex-auto w-full">
+  <div class="flex flex-col w-full max-w-screen-xl mx-auto p-4 sm:p-6 md:p-8">
+    <!-- Page header -->
+    <div class="mb-5 flex flex-col items-start gap-4 sm:flex-row">
+      <div>
+        <h1 class="text-[23px] font-bold leading-[30px] tracking-tight text-ink">Inventario</h1>
+        <div class="mt-0.5 text-[13px] text-ink-3 tabular-nums">{{ pagination().count | number }} artículos</div>
+      </div>
+      <div class="flex flex-wrap items-center gap-2.5 sm:ml-auto">
+        <div class="inline-flex gap-0.5 rounded-btn border border-line-strong bg-surface p-[3px]">
+          <a
+            routerLink="/inventory/articles"
+            class="flex h-8 items-center rounded-lg bg-brand px-3.5 text-[13px] font-semibold text-white">
+            Artículos
+          </a>
+          <a
+            routerLink="/inventory/merchants"
+            class="flex h-8 items-center rounded-lg px-3.5 text-[13px] font-semibold text-ink-2 hover:bg-brand-tint">
+            Comercios
+          </a>
+        </div>
+        <button mat-flat-button [color]="'primary'" (click)="openCreateArticle()">
+          <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+          <span class="ml-2">Nuevo artículo</span>
+        </button>
+      </div>
+    </div>
+
+    @if (pagination().count === 0 && !selectedCount() && !pagination().searchText) {
+      <div class="bg-card rounded-card mt-4 w-full">
+        <mg-empty-state
+          icon="heroicons_outline:cube"
+          title="No hay artículos registrados"
+          message="Los artículos aparecerán aquí cuando los registres.">
+          <button mat-stroked-button (click)="openCreateArticle()">
+            <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+            <span class="ml-2">Crear primer artículo</span>
+          </button>
+        </mg-empty-state>
+      </div>
+    } @else {
+      <div class="bg-card rounded-card w-full overflow-hidden">
+        <div class="flex flex-wrap items-center gap-3 border-b border-line px-5 pb-3 pt-4">
+          <h2 class="text-[15px] font-semibold text-ink">Listado de artículos</h2>
+          <span class="ml-auto"></span>
+          <label
+            class="flex h-9 w-60 items-center gap-2 rounded-[9px] border border-line-strong bg-surface px-3 text-[13px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+            <mat-icon class="icon-size-4 text-ink-3" [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+            <input
+              class="w-full border-0 bg-transparent outline-none placeholder:text-ink-3"
+              placeholder="Buscar por nombre"
+              [formControl]="searchControl" />
+          </label>
+          <mg-pager
+            [limit]="pagination().limit"
+            [offset]="pagination().offset"
+            [count]="pagination().count"
+            (pageChange)="onPageChange($event)">
+          </mg-pager>
+        </div>
+
+        <!-- Pending changes bar -->
+        @if (selectedCount() > 0) {
+          <div class="flex items-center gap-2.5 border-b border-brand-tint-2 bg-brand-tint px-5 py-2.5 text-[13px]">
+            <mat-icon class="icon-size-4 text-brand" [svgIcon]="'heroicons_outline:check-circle'"></mat-icon>
+            <b class="font-semibold">
+              {{ selectedCount() }}
+              {{ selectedCount() === 1 ? 'cambio pendiente' : 'cambios pendientes' }}
+            </b>
+            <span class="ml-auto"></span>
+            <button mat-stroked-button class="!h-8 !min-h-8 !px-3 !text-[13px]" (click)="clearSelection()">
+              Descartar
+            </button>
+            <button mat-flat-button [color]="'primary'" class="!h-8 !min-h-8 !px-3 !text-[13px]" (click)="submitChanges()">
+              <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:check'"></mat-icon>
+              <span class="ml-1.5">Guardar</span>
+            </button>
+          </div>
+        }
+
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse">
+            <thead>
+              <tr>
+                <th class="w-20 border-b border-line px-3.5 py-2.5 pl-5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">ID</th>
+                <th class="border-b border-line px-3.5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Nombre</th>
+                <th class="w-[110px] border-b border-line px-3.5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Estado</th>
+                <th class="w-[60px] border-b border-line px-3.5 py-2.5"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (article of articles(); track article.id) {
+                <tr class="hover:bg-ink/[.025]">
+                  <td class="border-b border-line px-3.5 py-3 pl-5 font-mono text-[12px] text-ink-3">{{ article.id }}</td>
+                  <td class="border-b border-line px-3.5 py-3 text-[13.5px] text-ink">{{ article.concept }}</td>
+                  <td class="border-b border-line px-3.5 py-3">
+                    <mat-slide-toggle
+                      [checked]="article.isEnabled"
+                      (change)="toggleStatus($event.checked, article)">
+                    </mat-slide-toggle>
+                  </td>
+                  <td class="border-b border-line px-3.5 py-3">
+                    <button
+                      type="button"
+                      class="grid h-[30px] w-[30px] place-items-center rounded-lg text-ink-3 hover:bg-brand-tint hover:text-ink"
+                      [matMenuTriggerFor]="articleMenu"
+                      (menuOpened)="menuArticle.set(article)"
+                      aria-label="Acciones">
+                      <mat-icon class="icon-size-[17px] text-current" [svgIcon]="'heroicons_outline:ellipsis-horizontal'"></mat-icon>
+                    </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="4">
+                    <mg-empty-state
+                      icon="heroicons_outline:cube"
+                      title="Sin resultados"
+                      message="Ajusta la búsqueda para encontrar artículos.">
+                    </mg-empty-state>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <mat-menu #articleMenu="matMenu">
+          @if (menuArticle(); as article) {
+            <button mat-menu-item (click)="editDetailsArticle(article)">
+              <mat-icon [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+              <span>Editar</span>
+            </button>
+            <button mat-menu-item (click)="deleteArticle(article)">
+              <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+              <span>Eliminar</span>
+            </button>
+          }
+        </mat-menu>
+      </div>
+    }
+  </div>
+</div>

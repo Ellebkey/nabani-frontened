@@ -1,0 +1,237 @@
+<!-- Add-article form -->
+<form
+  [formGroup]="articleForm"
+  class="mb-[18px] rounded-xl border border-dashed border-line-strong bg-ink/[.015] p-3.5">
+  <div class="grid grid-cols-[2fr_.7fr_.9fr_1.1fr] items-end gap-2 lg:grid-cols-[2.2fr_.7fr_.8fr_1fr_1.2fr_1.2fr_auto]">
+    <div class="min-w-0">
+      <label class="mb-1 block text-[11.5px] font-semibold text-ink-2">Artículo *</label>
+      <ng-select
+        class="ng-select-36"
+        [items]="articles"
+        bindLabel="concept"
+        bindValue="id"
+        formControlName="articleId"
+        [virtualScroll]="true"
+        [appendTo]="'body'"
+        [addTag]="addArticleOnTheFly"
+        addTagText="Crear artículo"
+        notFoundText="Escribe para crear un nuevo artículo"
+      ></ng-select>
+    </div>
+
+    <div class="min-w-0">
+      <label class="mb-1 block text-[11.5px] font-semibold text-ink-2">Cant. *</label>
+      <input
+        type="number"
+        formControlName="quantity"
+        class="h-9 w-full rounded-[9px] border border-line-strong bg-surface px-2.5 text-center text-[13px] text-ink outline-none focus:border-brand focus:ring-[3px] focus:ring-brand/15" />
+    </div>
+
+    <div class="min-w-0">
+      <label class="mb-1 block text-[11.5px] font-semibold text-ink-2">Unidad</label>
+      <mg-compact-select size="lg" [options]="unitOptions()" formControlName="units"></mg-compact-select>
+    </div>
+
+    <div class="min-w-0">
+      <label class="mb-1 block text-[11.5px] font-semibold text-ink-2">Precio *</label>
+      <input
+        type="number"
+        formControlName="price"
+        placeholder="$0.00"
+        class="h-9 w-full rounded-[9px] border border-line-strong bg-surface px-2.5 text-right text-[13px] text-ink outline-none placeholder:text-ink-3 focus:border-brand focus:ring-[3px] focus:ring-brand/15" />
+    </div>
+
+    <div class="col-span-2 min-w-0 lg:col-span-1">
+      <label class="mb-1 block text-[11.5px] font-semibold text-ink-2">Categoría *</label>
+      <mg-compact-select
+        size="lg"
+        placeholder="Elegir"
+        [options]="categoryOptions()"
+        formControlName="category"
+        (valueChange)="onCategorySelect($event)">
+      </mg-compact-select>
+    </div>
+
+    <div class="col-span-2 min-w-0 lg:col-span-1">
+      <label class="mb-1 block text-[11.5px] font-semibold text-ink-2">Subcategoría *</label>
+      <mg-compact-select
+        size="lg"
+        placeholder="Elegir"
+        [options]="subcategoryOptions()"
+        formControlName="subcategory">
+      </mg-compact-select>
+    </div>
+
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      class="col-span-full !h-9 !min-h-9 justify-self-end lg:col-span-1 lg:justify-self-auto"
+      (click)="addArticle()"
+      [disabled]="articleFormInvalid()">
+      <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+      <span class="ml-1.5">Agregar</span>
+    </button>
+  </div>
+
+  <div class="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2">
+    <mat-slide-toggle formControlName="onDiscount">
+      <span class="text-[13px] text-ink-2">¿Descuento?</span>
+    </mat-slide-toggle>
+
+    @if (costcoMode) {
+      <div class="flex items-center gap-2">
+        <label class="text-[13px] text-ink-2">Descuento Costco</label>
+        <input
+          type="number"
+          formControlName="costcoDiscount"
+          class="h-8 w-24 rounded-compact border border-line-strong bg-surface px-2 text-right text-[13px] text-ink outline-none focus:border-brand focus:ring-[3px] focus:ring-brand/15" />
+      </div>
+      <mat-slide-toggle formControlName="costcoIVA">
+        <span class="text-[13px] text-ink-2">¿IVA?</span>
+      </mat-slide-toggle>
+    }
+  </div>
+</form>
+
+<!-- Articles table — FIXED 54px row height in read and edit -->
+@if (expenseArticles.length > 0) {
+  <div class="article-table overflow-x-auto rounded-xl border border-line">
+    <div class="min-w-[640px]">
+      <div
+        class="grid h-[38px] grid-cols-[36px_56px_minmax(0,1fr)_100px_148px_148px_92px_36px] items-center gap-2 border-b border-line bg-ink/[.02] px-2.5 text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">
+        <span></span>
+        <span>Cant</span>
+        <span>Artículo</span>
+        <span class="text-right">Precio</span>
+        <span>Categoría</span>
+        <span>Subcategoría</span>
+        <span class="text-right">Subtotal</span>
+        <span></span>
+      </div>
+
+      <div class="divide-y divide-line">
+        @for (item of expenseArticles; track $index; let i = $index) {
+          <div
+            class="art-row group relative grid h-[54px] grid-cols-[36px_56px_minmax(0,1fr)_100px_148px_148px_92px_36px] items-center gap-2 px-2.5 text-[13.5px]"
+            [class.editing]="editingIndex() === i"
+            (mouseenter)="onRowMouseEnter(i)"
+            (mouseleave)="onRowMouseLeave()"
+            (keydown.enter)="saveEdit()"
+            (keydown.escape)="cancelEdit()">
+            <button
+              type="button"
+              matTooltip="Eliminar"
+              class="grid h-7 w-7 place-items-center rounded-lg text-ink-3 hover:bg-rose-tint hover:text-rose"
+              (click)="deleteArticle(i)">
+              <mat-icon class="icon-size-[15px] text-current" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+            </button>
+
+            @if (editingIndex() === i) {
+              <label class="flex h-8 items-center rounded-compact border border-line-strong bg-surface px-2 focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+                <input
+                  type="number"
+                  [formControl]="$any(editForm.get('quantity'))"
+                  class="w-full border-0 bg-transparent text-center text-[13px] text-ink outline-none" />
+              </label>
+              <span class="flex min-w-0 items-center gap-2 truncate font-medium">
+                <span class="truncate">{{ item.articleName }}</span>
+                @if (editFormValue().onDiscount) {
+                  <button type="button" class="flex-none" title="Quitar descuento" (click)="toggleEditDiscount()">
+                    <mg-pill variant="amber" size="sm">%</mg-pill>
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    class="grid h-[22px] w-[22px] flex-none place-items-center rounded-full text-[11px] font-semibold text-ink-3 hover:bg-amber-tint hover:text-amber"
+                    title="Aplicar descuento"
+                    (click)="toggleEditDiscount()">
+                    %
+                  </button>
+                }
+              </span>
+              <label class="flex h-8 items-center rounded-compact border border-line-strong bg-surface px-2 focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+                <input
+                  type="number"
+                  [formControl]="$any(editForm.get('price'))"
+                  class="w-full border-0 bg-transparent text-right text-[13px] text-ink outline-none" />
+              </label>
+              <mg-compact-select
+                placeholder="Elegir"
+                [options]="categoryOptions()"
+                [formControl]="$any(editForm.get('category'))"
+                (valueChange)="onEditCategorySelect($event)"
+                (opened)="onEditSelectOpened($event)">
+              </mg-compact-select>
+              <mg-compact-select
+                placeholder="Elegir"
+                [options]="editSubcategoryOptions()"
+                [formControl]="$any(editForm.get('subcategory'))"
+                (opened)="onEditSelectOpened($event)">
+              </mg-compact-select>
+              <label class="flex h-8 items-center rounded-compact border border-line-strong bg-surface px-2 focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+                <input
+                  type="number"
+                  [value]="item.subtotal"
+                  (input)="updateSubtotal($event, i)"
+                  class="w-full border-0 bg-transparent text-right text-[13px] font-semibold text-ink outline-none" />
+              </label>
+              <button
+                type="button"
+                class="grid h-7 w-7 place-items-center rounded-lg text-brand"
+                title="Guardar cambios"
+                (click)="saveEdit()">
+                <mat-icon class="icon-size-[15px] text-current" [svgIcon]="'heroicons_outline:check'"></mat-icon>
+              </button>
+            } @else {
+              <span class="tabular-nums">{{ item.quantity }}</span>
+              <span class="flex min-w-0 items-center gap-2 truncate font-medium">
+                <span class="truncate">{{ item.articleName }}</span>
+                @if (item.onDiscount) {
+                  <mg-pill variant="amber" size="sm">%</mg-pill>
+                }
+              </span>
+              <span class="text-right tabular-nums">{{ item.price | currency: 'MXN' : 'symbol-narrow' }}</span>
+              <span class="min-w-0">
+                <mg-pill variant="tint" size="sm" [color]="getCategoryColor(item.categoryId) || '#5F7386'">
+                  {{ item.categoryName }}
+                </mg-pill>
+              </span>
+              <span class="min-w-0">
+                @if (item.subcategoryName) {
+                  <mg-pill variant="neutral" size="sm">{{ item.subcategoryName }}</mg-pill>
+                }
+              </span>
+              <span class="text-right font-semibold tabular-nums">{{ item.subtotal | currency: 'MXN' : 'symbol-narrow' }}</span>
+              <button
+                type="button"
+                class="grid h-7 w-7 place-items-center rounded-lg text-ink-3 opacity-0 transition-opacity duration-100 group-hover:opacity-100"
+                title="Editar artículo"
+                (click)="clickEdit(i)">
+                <mat-icon class="icon-size-[15px] text-current" [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+              </button>
+            }
+          </div>
+        }
+
+        <div
+          class="grid h-[46px] grid-cols-[36px_56px_minmax(0,1fr)_100px_148px_148px_92px_36px] items-center gap-2 bg-ink/[.02] px-2.5 text-[13.5px] font-semibold">
+          <span></span>
+          <span></span>
+          <span class="text-ink-2">{{ expenseArticles.length }} artículos</span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span class="text-right text-[14.5px] tabular-nums">{{ articlesTotal | currency: 'MXN' : 'symbol-narrow' }}</span>
+          <span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-2.5 flex items-center gap-3.5 text-[12px] text-ink-3">
+    <span>Pasa el cursor sobre una fila para editarla</span>
+    <span><kbd class="rounded-[5px] border border-b-2 border-line-strong bg-surface px-1.5 text-[11px] font-semibold">Enter</kbd> guardar</span>
+    <span><kbd class="rounded-[5px] border border-b-2 border-line-strong bg-surface px-1.5 text-[11px] font-semibold">Esc</kbd> revertir</span>
+  </div>
+}

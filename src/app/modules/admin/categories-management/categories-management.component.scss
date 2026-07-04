@@ -1,0 +1,44 @@
+:host {
+  display: block;
+}
+
+/* Color bar — fixed dimensions required */
+.category-color-bar {
+  width: 4px;
+  height: 28px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* Chevron rotation — CSS-only transition */
+.chevron-icon {
+  transition: transform 0.25s ease;
+
+  &.expanded {
+    transform: rotate(90deg);
+  }
+}
+
+/* Subcategory border — :not(:last-child) pseudo-class */
+.subcategory-item:not(:last-child) {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* Skeleton shimmer — animated gradient */
+.skeleton-card {
+  background-color: var(--mg-bg-card);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+}
+
+.skeleton-bar {
+  background: linear-gradient(90deg, #F3F4F6 25%, #E5E7EB 50%, #F3F4F6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

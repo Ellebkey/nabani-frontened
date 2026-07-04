@@ -1,0 +1,67 @@
+<!-- Loading bar -->
+<mg-loading-bar></mg-loading-bar>
+
+<!-- Navigation -->
+<mg-vertical-navigation
+  class="dark print:hidden maguey-sidebar"
+  [appearance]="'compact'"
+  [mode]="isScreenSmall() ? 'over' : 'side'"
+  [name]="'mainNavigation'"
+  [navigation]="navigation()"
+  [opened]="!isScreenSmall()">
+  <!-- Navigation header hook -->
+  <ng-container magueyVerticalNavigationContentHeader>
+    <!-- Logo -->
+    <div class="flex items-center justify-center h-20 mt-3 mb-4">
+      <img
+        class="w-16"
+        src="assets/images/logo/maguey-logo.png"
+        alt="Maguey Logo">
+    </div>
+  </ng-container>
+</mg-vertical-navigation>
+
+<!-- Wrapper -->
+<div class="flex flex-col flex-auto w-full min-w-0 bg-canvas">
+
+  <!-- Header -->
+  <div class="relative flex flex-0 items-center w-full h-16 px-4 md:px-6 z-49 print:hidden bg-card border-b border-line">
+    <!-- Navigation toggle button -->
+    <button
+      mat-icon-button
+      (click)="toggleNavigation('mainNavigation')">
+      <mat-icon [svgIcon]="'heroicons_outline:bars-3'"></mat-icon>
+    </button>
+    <!-- Components -->
+    <div class="flex items-center pl-2 ml-auto space-x-0.5 sm:space-x-2">
+      <button
+        mat-icon-button
+        [title]="resolvedScheme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
+        (click)="toggleScheme()">
+        <mat-icon [svgIcon]="resolvedScheme === 'dark' ? 'heroicons_outline:sun' : 'heroicons_outline:moon'"></mat-icon>
+      </button>
+      <draft-notification></draft-notification>
+      <user></user>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="flex flex-col flex-auto bg-canvas">
+    @if (true) {
+      <router-outlet></router-outlet>
+    }
+  </div>
+</div>
+
+<!-- Global Alert -->
+@if (alertConfig(); as alert) {
+  <mg-alert
+    class="absolute bottom-0 left-1/2 transform -translate-x-1/2"
+    [appearance]="alert.appearance"
+    [dismissible]="alert.dismissible"
+    [showIcon]="alert.showIcon"
+    [name]="alert.name"
+    [type]="alert.type">
+    {{ alert.message }}
+  </mg-alert>
+}

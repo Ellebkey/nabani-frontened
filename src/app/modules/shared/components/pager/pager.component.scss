@@ -1,0 +1,17 @@
+/* 30px borderless buttons, brand-tint hover, solid brand when active (sistema.html §11).
+   Class shared by 9 buttons — @apply avoids repeating the recipe in the template */
+.mg-pager-btn {
+  @apply grid h-[30px] min-w-[30px] place-items-center rounded-lg px-1.5 text-[12.5px] font-semibold text-ink-2;
+
+  &:hover:not(:disabled):not(.on) {
+    @apply bg-brand-tint;
+  }
+
+  &.on {
+    @apply bg-brand text-white;
+  }
+
+  &:disabled {
+    @apply cursor-default opacity-45;
+  }
+}

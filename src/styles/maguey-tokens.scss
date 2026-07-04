@@ -1,0 +1,26 @@
+/* ------------------------------------------------------------------
+   Maguey 2.0 — global theme rules that are NOT tokens.
+   The theme CSS variables (--maguey-*, :root and body.dark) are GENERATED
+   from src/styles/maguey-theme.js via maguey-theming.tailwind.js.
+   See THEME.md.
+   ------------------------------------------------------------------ */
+:root {
+  font-feature-settings: "cv11";
+}
+
+/* No native spinners on number inputs (compact table fields) */
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+/* Heroicons outline with stroke 1.7 app-wide (closed handoff decision) */
+mat-icon[data-mat-icon-namespace='heroicons_outline'] svg path {
+  stroke-width: 1.7;
+}
+

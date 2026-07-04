@@ -1,0 +1,215 @@
+<div class="flex flex-col flex-auto w-full">
+  <div class="flex flex-col w-full max-w-screen-xl mx-auto p-4 sm:p-6 md:p-8">
+    <app-family-invite-banner class="block w-full"></app-family-invite-banner>
+
+    <!-- Page header -->
+    <div class="mb-5 flex flex-col items-start gap-4 sm:flex-row">
+      <div>
+        <h1 class="text-[23px] font-bold leading-[30px] tracking-tight text-ink">Dashboard</h1>
+        <div class="mt-0.5 text-[13px] text-ink-3">Cuentas y movimientos</div>
+      </div>
+    </div>
+
+    <!-- Accounts + Trend (same height: items-stretch) -->
+    <div class="mb-5 grid w-full grid-cols-1 items-stretch gap-5 lg:grid-cols-[360px_1fr]">
+      <!-- Accounts -->
+      <div class="bg-card rounded-card flex flex-col">
+        <div class="px-5 pb-3.5 pt-5">
+          <div class="text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Saldo total</div>
+          <div class="text-[30px] font-bold leading-9 tracking-tight text-gold tabular-nums">
+            {{ totalBalance() | currency: 'MXN' : 'symbol-narrow' }}
+          </div>
+        </div>
+
+        @if (isDataLoaded() && accounts().length === 0) {
+          <mg-empty-state
+            icon="heroicons_outline:credit-card"
+            title="No hay cuentas registradas"
+            message="Las cuentas aparecerán aquí cuando las registres.">
+          </mg-empty-state>
+        } @else {
+          <div class="flex flex-col divide-y divide-line border-t border-line">
+            @if (!isDataLoaded()) {
+              @for (i of [1, 2, 3, 4]; track i) {
+                <mg-row-skeleton></mg-row-skeleton>
+              }
+            } @else {
+              @for (item of accounts(); track item.id) {
+                <div
+                  class="grid cursor-pointer grid-cols-[42px_1fr_auto] items-center gap-3.5 px-5 py-3 hover:bg-ink/[.025]"
+                  [matMenuTriggerFor]="quickActionsMenu"
+                  (menuOpened)="selectedAccount.set(item)">
+                  <mg-tile [color]="item.colorPalette">
+                    <mat-icon class="text-current" [svgIcon]="accountIcon(item)"></mat-icon>
+                  </mg-tile>
+                  <span class="truncate text-[13.5px] font-semibold text-ink">{{ item.name }}</span>
+                  <span
+                    class="text-right text-[14px] font-bold tabular-nums"
+                    [class.text-ink-3]="!(item.currentAmount > 0)">
+                    {{ item.currentAmount | currency: 'MXN' : 'symbol-narrow' }}
+                  </span>
+                </div>
+              }
+            }
+          </div>
+
+          <mat-menu #quickActionsMenu="matMenu" class="quick-actions-menu">
+            @if (selectedAccount(); as account) {
+              <button mat-menu-item (click)="openTransferWithAccount(account.id)">
+                <mat-icon [svgIcon]="'heroicons_outline:arrows-right-left'"></mat-icon>
+                <span>Transferencias</span>
+              </button>
+              <button mat-menu-item (click)="openSectionWithAccount(account.id)">
+                <mat-icon [svgIcon]="'heroicons_outline:inbox-stack'"></mat-icon>
+                <span>Apartados</span>
+              </button>
+            }
+          </mat-menu>
+
+          @if (isDataLoaded()) {
+            <div class="mt-auto flex items-center border-t border-line px-5 py-4">
+              @defer (on viewport) {
+                <apx-chart
+                  class="flex w-full items-center justify-center"
+                  [chart]="accountChart().chart"
+                  [colors]="accountChart().colors"
+                  [labels]="accountChart().labels"
+                  [legend]="accountChart().legend"
+                  [series]="accountChart().series"
+                  [stroke]="accountChart().stroke"
+                  [tooltip]="accountChart().tooltip">
+                </apx-chart>
+              } @placeholder {
+                <mg-skeleton class="h-48 w-full rounded-card"></mg-skeleton>
+              }
+            </div>
+          }
+        }
+      </div>
+
+      <!-- Monthly trend -->
+      <div class="bg-card rounded-card flex flex-col">
+        <div class="flex flex-wrap items-center gap-2.5 px-5 pt-4">
+          <div>
+            <h2 class="text-[15px] font-semibold text-ink">Tendencia mensual</h2>
+            <div class="text-[12px] text-ink-3">Últimos 6 meses de actividad</div>
+          </div>
+          <div class="ml-auto flex items-center gap-4 text-[12px] text-ink-2">
+            <span class="flex items-center gap-1.5"><span class="inline-block h-2 w-2 rounded-[2px] bg-user-bosque"></span>Ingresos</span>
+            <span class="flex items-center gap-1.5"><span class="inline-block h-2 w-2 rounded-[2px] bg-user-teja"></span>Gastos</span>
+          </div>
+        </div>
+        @if (isDataLoaded() && monthlyTrendChart()) {
+          <div class="flex min-h-[230px] flex-auto flex-col p-5 pt-2.5">
+            @defer (on viewport) {
+              <apx-chart
+                class="w-full flex-auto"
+                [chart]="monthlyTrendChart().chart"
+                [colors]="monthlyTrendChart().colors"
+                [dataLabels]="monthlyTrendChart().dataLabels"
+                [grid]="monthlyTrendChart().grid"
+                [legend]="monthlyTrendChart().legend"
+                [plotOptions]="monthlyTrendChart().plotOptions"
+                [series]="monthlyTrendChart().series"
+                [stroke]="monthlyTrendChart().stroke"
+                [tooltip]="monthlyTrendChart().tooltip"
+                [xaxis]="monthlyTrendChart().xaxis"
+                [yaxis]="monthlyTrendChart().yaxis"></apx-chart>
+            } @placeholder {
+              <mg-skeleton class="h-52 w-full rounded-card"></mg-skeleton>
+            }
+          </div>
+        } @else if (isDataLoaded() && !monthlyTrendChart()) {
+          <mg-empty-state
+            icon="heroicons_outline:chart-bar"
+            title="Sin datos de tendencia"
+            message="La tendencia mensual aparecerá cuando haya actividad.">
+          </mg-empty-state>
+        }
+      </div>
+    </div>
+
+    @if (isDataLoaded() && accounts().length === 0) {
+      <div class="bg-card rounded-card w-full">
+        <mg-empty-state
+          icon="heroicons_outline:document-text"
+          title="No hay movimientos"
+          message="El libro mayor aparecerá cuando registres cuentas y transacciones.">
+        </mg-empty-state>
+      </div>
+    } @else {
+      <!-- Ledger -->
+      <div class="bg-card rounded-card w-full overflow-hidden">
+        <div class="flex flex-wrap items-center gap-3 px-5 pb-3 pt-4">
+          <div>
+            <h2 class="text-[15px] font-semibold text-ink">Movimientos de la cuenta</h2>
+            <div class="text-[12px] text-ink-3">{{ selectedAccountName() }}</div>
+          </div>
+          <div class="ml-auto flex flex-wrap items-center gap-2.5">
+            <mg-compact-select
+              class="w-[200px]"
+              size="field"
+              placeholder="Cuenta"
+              [options]="accountOptions()"
+              [ngModel]="selectedAccountId()"
+              (ngModelChange)="onAccountSelectionChange($event)">
+            </mg-compact-select>
+            <mat-form-field appearance="fill" class="w-[220px]" subscriptSizing="dynamic" [formGroup]="ledgerRangeForm">
+              <mat-date-range-input [rangePicker]="ledgerPicker">
+                <input matStartDate placeholder="Fecha inicial" formControlName="start">
+                <input matEndDate placeholder="– final" formControlName="end" (dateChange)="onLedgerRangeChange()">
+              </mat-date-range-input>
+              @if (ledgerRangeValue().start || ledgerRangeValue().end) {
+                <button matSuffix mat-icon-button (click)="clearLedgerRange()">
+                  <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                </button>
+              }
+              <mat-datepicker-toggle matSuffix [for]="ledgerPicker"></mat-datepicker-toggle>
+              <mat-date-range-picker #ledgerPicker></mat-date-range-picker>
+            </mat-form-field>
+            <div [class.opacity-60]="!isDataLoaded()" [class.pointer-events-none]="!isDataLoaded()">
+              <mg-pager
+                [limit]="pagination().limit"
+                [offset]="pagination().offset"
+                [count]="pagination().count"
+                (pageChange)="onPageChange($event)">
+              </mg-pager>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-col divide-y divide-line border-t border-line">
+          @for (entry of ledgerEntries(); track $index) {
+            <mg-transaction-row
+              [noIcon]="true"
+              [title]="ledgerTitle(entry)"
+              [amount]="ledgerAmount(entry)"
+              [amountTone]="entry.creditAmount > 0 ? 'in' : 'default'"
+              [amountMeta]="'Saldo ' + (entry.balance | currency: 'MXN' : 'symbol-narrow')">
+              <ng-container mgRowMeta>
+                <span class="whitespace-nowrap">{{ entry.transactionDate | date: "d MMM · HH:mm" }}</span>
+                <span>·</span>
+                @if (entry.originAccount && entry.destinationAccount) {
+                  <mg-dot [color]="entry.originAccount.colorPalette"></mg-dot>
+                  <span class="truncate">{{ entry.originAccount.name }}</span>
+                  <span>·</span>
+                  <mg-dot [color]="entry.destinationAccount.colorPalette"></mg-dot>
+                  <span class="truncate">{{ entry.destinationAccount.name }}</span>
+                } @else {
+                  <mg-dot [color]="selectedAccountColor()"></mg-dot>
+                  <span class="truncate">{{ selectedAccountName() }}</span>
+                }
+              </ng-container>
+            </mg-transaction-row>
+          } @empty {
+            <mg-empty-state
+              icon="heroicons_outline:document-text"
+              title="No hay movimientos"
+              message="Selecciona una cuenta para ver su historial de transacciones.">
+            </mg-empty-state>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>

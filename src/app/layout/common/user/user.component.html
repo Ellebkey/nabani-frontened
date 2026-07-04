@@ -1,0 +1,47 @@
+<!-- Button -->
+<button
+    mat-icon-button
+    [matMenuTriggerFor]="userActions">
+    <mat-icon [svgIcon]="'heroicons_outline:user-circle'"></mat-icon>
+</button>
+
+<mat-menu
+    [xPosition]="'before'"
+    class="usermenu-panel"
+    #userActions="matMenu">
+    <div class="flex items-center gap-3 border-b border-line px-4 py-3.5" (click)="$event.stopPropagation()">
+        <span class="grid h-9 w-9 flex-none place-items-center rounded-full bg-brand text-[13px] font-bold text-gold">{{ initials }}</span>
+        <div class="min-w-0">
+            <div class="truncate text-[13px] font-semibold text-ink">{{ displayName }}</div>
+            <div class="truncate text-[11.5px] text-ink-3">{{ subtitle }}</div>
+        </div>
+    </div>
+    <button
+        mat-menu-item
+        (click)="viewProfile()">
+        <mat-icon class="icon-size-[17px] text-ink-3" [svgIcon]="'heroicons_outline:user-circle'"></mat-icon>
+        <span class="text-[13.5px] font-medium">Ver perfil</span>
+    </button>
+    <div class="flex items-center gap-2.5 border-t border-line px-4 py-2.5" (click)="$event.stopPropagation()">
+        <span class="text-[13.5px] font-medium text-ink">Tema</span>
+        <div class="ml-auto inline-flex gap-0.5 rounded-[9px] border border-line-strong bg-surface p-0.5">
+            @for (option of schemeOptions; track option.value) {
+                <button
+                    type="button"
+                    class="grid h-7 w-8 place-items-center rounded-[7px]"
+                    [class]="scheme() === option.value ? 'bg-brand text-white' : 'text-ink-3 hover:bg-brand-tint hover:text-ink'"
+                    [title]="option.label"
+                    (click)="setScheme(option.value)">
+                    <mat-icon class="icon-size-4 text-current" [svgIcon]="option.icon"></mat-icon>
+                </button>
+            }
+        </div>
+    </div>
+    <button
+        mat-menu-item
+        class="!border-t !border-line"
+        (click)="signOut()">
+        <mat-icon class="icon-size-[17px] !text-rose" [svgIcon]="'heroicons_outline:arrow-right-on-rectangle'"></mat-icon>
+        <span class="text-[13.5px] font-medium text-rose">Cerrar sesión</span>
+    </button>
+</mat-menu>

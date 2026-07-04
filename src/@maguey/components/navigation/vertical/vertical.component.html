@@ -1,0 +1,107 @@
+<div class="mg-vertical-navigation-wrapper">
+
+  <!-- Header -->
+  <div class="mg-vertical-navigation-header">
+    <ng-content select="[magueyVerticalNavigationHeader]"></ng-content>
+  </div>
+
+  <!-- Content -->
+  <div
+    class="mg-vertical-navigation-content"
+    magueyScrollbar
+    [magueyScrollbarOptions]="{wheelPropagation: inner(), suppressScrollX: true}"
+    #navigationContent>
+
+    <!-- Content header -->
+    <div class="mg-vertical-navigation-content-header">
+      <ng-content select="[magueyVerticalNavigationContentHeader]"></ng-content>
+    </div>
+
+    <!-- Items -->
+    @for (item of navigation(); track trackByFn($index, item)) {
+      <!-- Skip the hidden items -->
+      @if ((item.hidden && !item.hidden(item)) || !item.hidden) {
+        <!-- Aside -->
+        @if (item.type === 'aside') {
+          <mg-vertical-navigation-aside-item
+            [item]="item"
+            [name]="name"
+            [activeItemId]="activeAsideItemId() ?? ''"
+            [autoCollapse]="autoCollapse()"
+            [skipChildren]="true"
+          (click)="toggleAside(item)"></mg-vertical-navigation-aside-item>
+        }
+        <!-- Basic -->
+        @if (item.type === 'basic') {
+          <mg-vertical-navigation-basic-item
+            [item]="item"
+          [name]="name"></mg-vertical-navigation-basic-item>
+        }
+        <!-- Collapsable -->
+        @if (item.type === 'collapsable') {
+          <mg-vertical-navigation-collapsable-item
+            [item]="item"
+            [name]="name"
+          [autoCollapse]="autoCollapse()"></mg-vertical-navigation-collapsable-item>
+        }
+        <!-- Divider -->
+        @if (item.type === 'divider') {
+          <mg-vertical-navigation-divider-item
+            [item]="item"
+          [name]="name"></mg-vertical-navigation-divider-item>
+        }
+        <!-- Group -->
+        @if (item.type === 'group') {
+          <mg-vertical-navigation-group-item
+            [item]="item"
+            [name]="name"
+          [autoCollapse]="autoCollapse()"></mg-vertical-navigation-group-item>
+        }
+        <!-- Spacer -->
+        @if (item.type === 'spacer') {
+          <mg-vertical-navigation-spacer-item
+            [item]="item"
+          [name]="name"></mg-vertical-navigation-spacer-item>
+        }
+      }
+    }
+
+    <!-- Content footer -->
+    <div class="mg-vertical-navigation-content-footer">
+      <ng-content select="[magueyVerticalNavigationContentFooter]"></ng-content>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="mg-vertical-navigation-footer">
+    <ng-content select="[magueyVerticalNavigationFooter]"></ng-content>
+  </div>
+
+</div>
+
+<!-- Aside -->
+@if (activeAsideItemId()) {
+  <div
+    class="mg-vertical-navigation-aside-wrapper"
+    magueyScrollbar
+    [magueyScrollbarOptions]="{wheelPropagation: false, suppressScrollX: true}"
+    [@fadeInLeft]="position() === 'left'"
+    [@fadeInRight]="position() === 'right'"
+    [@fadeOutLeft]="position() === 'left'"
+    [@fadeOutRight]="position() === 'right'">
+    <!-- Items -->
+    @for (item of navigation(); track trackByFn($index, item)) {
+      <!-- Skip the hidden items -->
+      @if ((item.hidden && !item.hidden(item)) || !item.hidden) {
+        <!-- Aside -->
+        @if (item.type === 'aside' && item.id === activeAsideItemId()) {
+          <mg-vertical-navigation-aside-item
+            [item]="item"
+            [name]="name"
+          [autoCollapse]="autoCollapse()"></mg-vertical-navigation-aside-item>
+        }
+      }
+    }
+  </div>
+}

@@ -1,0 +1,4 @@
+/* Dropzone background (handoff color-mix): no Tailwind equivalent */
+.dropzone {
+  background: color-mix(in srgb, rgb(var(--maguey-ink)) 1.5%, rgb(var(--maguey-card)));
+}

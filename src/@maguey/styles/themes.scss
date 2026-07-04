@@ -1,0 +1,112 @@
+@use '@angular/material' as mat;
+
+/* Include the core Angular Material styles */
+@include mat.elevation-classes();
+@include mat.app-background();
+
+/* Create a base theme without any color to set the density and typography */
+/* Maguey 2.0 scale (sistema.html §2): hero 30/36·700, page title 23/30·700,
+   card/modal title 15/22·600, body 14/20, meta 12.5/18, overline 11 */
+@include mat.all-component-themes((
+    color: null,
+    density: 0,
+    typography: mat.m2-define-typography-config(
+        $font-family: theme('fontFamily.sans'),
+        $headline-1: mat.m2-define-typography-level(30px, 36px, 700, theme('fontFamily.sans'), -0.02em),
+        $headline-2: mat.m2-define-typography-level(23px, 30px, 700, theme('fontFamily.sans'), -0.01em),
+        $headline-3: mat.m2-define-typography-level(15px, 22px, 600, theme('fontFamily.sans')),
+        $headline-4: mat.m2-define-typography-level(14px, 20px, 600, theme('fontFamily.sans')),
+        $headline-5: mat.m2-define-typography-level(14px, 20px, 600, theme('fontFamily.sans')),
+        $headline-6: mat.m2-define-typography-level(15px, 22px, 600, theme('fontFamily.sans')),
+        $subtitle-1: mat.m2-define-typography-level(15px, 22px, 600, theme('fontFamily.sans')),
+        $subtitle-2: mat.m2-define-typography-level(14px, 20px, 600, theme('fontFamily.sans')),
+        $body-1: mat.m2-define-typography-level(14px, 20px, 400, theme('fontFamily.sans')),
+        $body-2: mat.m2-define-typography-level(14px, 20px, 400, theme('fontFamily.sans')),
+        $caption: mat.m2-define-typography-level(12.5px, 18px, 400, theme('fontFamily.sans')),
+        $button: mat.m2-define-typography-level(14px, 14px, 600, theme('fontFamily.sans'), normal),
+        $overline: mat.m2-define-typography-level(11px, 16px, 600, theme('fontFamily.sans'), 0.07em)
+    )
+));
+
+/* Maguey 2.0: 40px fields come from the Maguey override (40px infix in
+   angular-material.scss). Do NOT use mat.form-field-density(-3 or lower): MDC
+   hides the floating label and every mat-label disappears. */
+
+/* ==========================================================================
+   Angular Material 22 — system tokens from the Maguey theme
+   --------------------------------------------------------------------------
+   Material components read --mat-sys-* custom properties. Instead of the old
+   M2 Sass theme maps (which Material 22 no longer consumes for colors), we
+   define the system tokens ONCE from the --maguey-* variables. Because those
+   variables flip on body.dark, every Material surface and ink follows the
+   scheme automatically — one source of truth (src/styles/maguey-theme.js),
+   no Sass mirror to keep in sync.
+   ========================================================================== */
+body {
+    /* Brand */
+    --mat-sys-primary: rgb(var(--maguey-brand));
+    --mat-sys-on-primary: #FFFFFF;
+    --mat-sys-primary-container: rgb(var(--maguey-brand-tint));
+    --mat-sys-on-primary-container: rgb(var(--maguey-ink));
+    --mat-sys-primary-fixed: rgb(var(--maguey-brand-tint));
+    --mat-sys-primary-fixed-dim: rgb(var(--maguey-brand-tint-2));
+    --mat-sys-on-primary-fixed: rgb(var(--maguey-ink));
+    --mat-sys-inverse-primary: rgb(var(--maguey-brand-tint-2));
+    --mat-sys-surface-tint: rgb(var(--maguey-brand));
+
+    /* Secondary / tertiary accents */
+    --mat-sys-secondary: rgb(var(--maguey-ink-2));
+    --mat-sys-on-secondary: rgb(var(--maguey-card));
+    --mat-sys-secondary-container: rgb(var(--maguey-brand-tint));
+    --mat-sys-on-secondary-container: rgb(var(--maguey-ink));
+    --mat-sys-tertiary: rgb(var(--maguey-teal));
+    --mat-sys-on-tertiary: #FFFFFF;
+    --mat-sys-tertiary-container: rgb(var(--maguey-teal-tint));
+    --mat-sys-on-tertiary-container: rgb(var(--maguey-ink));
+
+    /* Error */
+    --mat-sys-error: rgb(var(--maguey-rose));
+    --mat-sys-on-error: #FFFFFF;
+    --mat-sys-error-container: rgb(var(--maguey-rose-tint));
+    --mat-sys-on-error-container: rgb(var(--maguey-ink));
+
+    /* Surfaces */
+    --mat-sys-background: rgb(var(--maguey-canvas));
+    --mat-sys-on-background: rgb(var(--maguey-ink));
+    --mat-sys-surface: rgb(var(--maguey-card));
+    --mat-sys-surface-dim: rgb(var(--maguey-canvas));
+    --mat-sys-surface-bright: rgb(var(--maguey-card));
+    --mat-sys-surface-container-lowest: rgb(var(--maguey-card));
+    --mat-sys-surface-container-low: rgb(var(--maguey-card));
+    --mat-sys-surface-container: rgb(var(--maguey-card));
+    --mat-sys-surface-container-high: rgb(var(--maguey-card));
+    --mat-sys-surface-container-highest: rgb(var(--maguey-brand-tint));
+    --mat-sys-surface-variant: rgb(var(--maguey-brand-tint));
+    --mat-sys-on-surface: rgb(var(--maguey-ink));
+    --mat-sys-on-surface-variant: rgb(var(--maguey-ink-2));
+    --mat-sys-inverse-surface: rgb(var(--maguey-ink));
+    --mat-sys-inverse-on-surface: rgb(var(--maguey-card));
+
+    /* State layers — without these the hover/press overlays paint at FULL
+       opacity (a white block over primary buttons) */
+    --mat-sys-hover-state-layer-opacity: 0.08;
+    --mat-sys-focus-state-layer-opacity: 0.12;
+    --mat-sys-pressed-state-layer-opacity: 0.12;
+    --mat-sys-dragged-state-layer-opacity: 0.16;
+
+    /* Outlines & misc */
+    --mat-sys-outline: rgb(var(--maguey-line-strong));
+    --mat-sys-outline-variant: rgb(var(--maguey-line));
+    --mat-sys-shadow: #000000;
+    --mat-sys-scrim: #000000;
+    --mat-sys-neutral10: rgb(var(--maguey-ink));
+    --mat-sys-neutral-variant20: rgb(var(--maguey-ink-2));
+}
+
+/* Brand text is unreadable on dark surfaces — Material's "primary" inks
+   (outlined-button labels, links, active icons) get the light brand tone,
+   mirroring the app-wide .dark .text-brand rule. Solid primary surfaces
+   keep the brand green with white text. */
+body.dark {
+    --mat-sys-inverse-primary: rgb(var(--maguey-brand));
+}

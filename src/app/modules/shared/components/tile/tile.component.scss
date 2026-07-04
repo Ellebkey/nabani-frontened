@@ -1,0 +1,43 @@
+/* User muted-color tile — exact mockup geometry and icons
+   (svg 20/17px, stroke 1.7) that Tailwind can't apply to the projected mat-icon */
+:host {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: var(--tc, #5f7386);
+  flex: none;
+}
+
+:host(.sm) {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+}
+
+:host(.neutral) {
+  background: rgb(var(--maguey-brand-tint));
+  color: rgb(var(--maguey-brand));
+}
+
+:host ::ng-deep .mat-icon,
+:host ::ng-deep svg {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
+  line-height: 20px;
+  font-size: 20px;
+}
+
+:host(.sm) ::ng-deep .mat-icon,
+:host(.sm) ::ng-deep svg {
+  width: 17px;
+  height: 17px;
+  min-width: 17px;
+  min-height: 17px;
+  line-height: 17px;
+  font-size: 17px;
+}

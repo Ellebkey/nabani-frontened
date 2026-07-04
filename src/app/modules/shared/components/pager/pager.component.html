@@ -1,0 +1,55 @@
+<mg-compact-select
+  class="mr-1.5 w-[68px]"
+  [options]="sizeOptions"
+  [ngModel]="limit()"
+  (ngModelChange)="onLimitChange($event)">
+</mg-compact-select>
+
+<button
+  type="button"
+  class="mg-pager-btn"
+  aria-label="Primera"
+  [disabled]="currentPage === 1"
+  (click)="goTo(1)">
+  <mat-icon class="icon-size-[15px]" svgIcon="heroicons_outline:chevron-double-left"></mat-icon>
+</button>
+<button
+  type="button"
+  class="mg-pager-btn"
+  aria-label="Anterior"
+  [disabled]="currentPage === 1"
+  (click)="goTo(currentPage - 1)">
+  <mat-icon class="icon-size-[15px]" svgIcon="heroicons_outline:chevron-left"></mat-icon>
+</button>
+
+@for (page of pages; track page) {
+  <button
+    type="button"
+    class="mg-pager-btn"
+    [class.on]="page === currentPage"
+    (click)="goTo(page)">
+    {{ page }}
+  </button>
+}
+
+<button
+  type="button"
+  class="mg-pager-btn"
+  aria-label="Siguiente"
+  [disabled]="currentPage === totalPages"
+  (click)="goTo(currentPage + 1)">
+  <mat-icon class="icon-size-[15px]" svgIcon="heroicons_outline:chevron-right"></mat-icon>
+</button>
+<button
+  type="button"
+  class="mg-pager-btn"
+  aria-label="Última"
+  [disabled]="currentPage === totalPages"
+  (click)="goTo(totalPages)">
+  <mat-icon class="icon-size-[15px]" svgIcon="heroicons_outline:chevron-double-right"></mat-icon>
+</button>
+
+<span class="ml-2.5 whitespace-nowrap text-[12.5px] text-ink-3 tabular-nums">
+  <b class="font-semibold text-ink-2">{{ rangeStart | number }}–{{ rangeEnd | number }}</b>
+  de {{ count() | number }}
+</span>

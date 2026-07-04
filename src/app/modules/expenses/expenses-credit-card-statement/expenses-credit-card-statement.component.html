@@ -1,0 +1,313 @@
+<div class="flex flex-col flex-auto w-full">
+  <div class="flex flex-col w-full max-w-screen-xl mx-auto p-4 sm:p-6 md:p-8">
+    <!-- Page header -->
+    <div class="mb-5 flex items-start gap-4">
+      <div>
+        <h1 class="text-[23px] font-bold leading-[30px] tracking-tight text-ink">Estado de cuenta</h1>
+        <div class="mt-0.5 text-[13px] text-ink-3">Concilia tu estado de cuenta bancario con tus registros</div>
+      </div>
+    </div>
+
+    @if (isInitialDataLoaded() && creditCardsList().length === 0) {
+      <div class="bg-card rounded-card mt-4 w-full">
+        <mg-empty-state
+          icon="heroicons_outline:credit-card"
+          title="No hay tarjetas de crédito registradas"
+          message="Las tarjetas de crédito aparecerán aquí cuando las registres.">
+        </mg-empty-state>
+      </div>
+    } @else {
+      <!-- Filters -->
+      <form [formGroup]="searchForm" class="mb-5 grid w-full grid-cols-1 gap-2.5 sm:grid-cols-[280px_240px_auto]">
+        <ng-select
+          formControlName="creditCard"
+          [items]="creditCardsList()"
+          bindLabel="shortName"
+          bindValue="id"
+          placeholder="Tarjeta de crédito"
+          class="w-full">
+          <ng-template ng-label-tmp let-item="item">
+            <span class="inline-flex items-center gap-1.5">
+              <mg-dot [color]="item.backgroundColor"></mg-dot>
+              {{ item.shortName }}
+            </span>
+          </ng-template>
+          <ng-template ng-option-tmp let-item="item">
+            <span class="inline-flex items-center gap-1.5">
+              <mg-dot [color]="item.backgroundColor"></mg-dot>
+              {{ item.shortName }}
+            </span>
+          </ng-template>
+        </ng-select>
+
+        <mat-form-field appearance="fill" class="w-full" subscriptSizing="dynamic">
+          <input matInput
+                 [matDatepicker]="picker"
+                 formControlName="dateLimit"
+                 placeholder="Fecha de corte">
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+
+        <button
+          mat-flat-button
+          [color]="'primary'"
+          class="justify-self-start"
+          (click)="onSearch()"
+          [disabled]="searchFormInvalid()">
+          <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+          <span class="ml-2">Buscar</span>
+        </button>
+      </form>
+
+      @if (isDataLoading()) {
+        <div class="bg-card rounded-card w-full">
+          @for (i of [1, 2, 3]; track i) {
+            <mg-row-skeleton></mg-row-skeleton>
+          }
+        </div>
+      }
+
+      @if (creditCard(); as creditCard) {
+        <!-- Hero -->
+        <div class="bg-card rounded-card mb-5 grid w-full grid-cols-1 items-center gap-6 p-6 sm:grid-cols-[1fr_auto]">
+          <div>
+            <div class="group relative text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">
+              {{ creditCard.name }} · corte {{ searchFormValue().dateLimit | date: 'dd MMM y' }} · cuenta ligada
+              <span class="cursor-pointer underline decoration-dotted underline-offset-2">{{ creditCard.account?.name || '—' }}</span>
+              <div class="absolute left-0 top-full z-10 hidden w-64 pt-1 group-hover:block">
+                <ng-select
+                  [items]="accounts()"
+                  bindLabel="name"
+                  bindValue="id"
+                  [ngModel]="creditCard.account?.id"
+                  (ngModelChange)="updateCreditCardAccount($event)"
+                  [disabled]="isUpdatingAccount()"
+                  [clearable]="false"
+                  placeholder="Seleccionar cuenta">
+                  <ng-template ng-label-tmp let-item="item">
+                    <span class="inline-flex items-center gap-1.5">
+                      <mg-dot [color]="item.colorPalette"></mg-dot>
+                      {{ item.name }}
+                    </span>
+                  </ng-template>
+                  <ng-template ng-option-tmp let-item="item">
+                    <span class="inline-flex items-center gap-1.5">
+                      <mg-dot [color]="item.colorPalette"></mg-dot>
+                      {{ item.name }}
+                    </span>
+                  </ng-template>
+                </ng-select>
+              </div>
+            </div>
+            <div class="mb-4 mt-1 text-[30px] font-bold leading-9 tracking-tight text-gold tabular-nums">
+              {{ creditCard.totalAprox | currency: 'MXN' : 'symbol-narrow' }}
+            </div>
+            <div class="flex flex-wrap gap-x-12 gap-y-3">
+              <div>
+                <div class="text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Saldo al corte</div>
+                <div class="mt-0.5 text-[20px] font-bold tabular-nums">{{ creditCard.totalAprox | currency: 'MXN' : 'symbol-narrow' }}</div>
+              </div>
+              <div>
+                <div class="text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Deuda total</div>
+                <div class="mt-0.5 text-[20px] font-bold tabular-nums">{{ creditCard.totalAmount | currency: 'MXN' : 'symbol-narrow' }}</div>
+              </div>
+              <div>
+                <div class="text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Conciliado</div>
+                <div class="mt-0.5 text-[20px] font-bold text-teal tabular-nums">
+                  {{ reviewedSum() | currency: 'MXN' : 'symbol-narrow' }} · {{ reviewedStatementRecords().length }} de
+                  {{ statementRecords().length + reviewedStatementRecords().length }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <mg-ccard
+            [name]="creditCard.name"
+            [subtitle]="'Crédito'"
+            [lastDigits]="creditCard.cardNumber"
+            [color]="creditCard.backgroundColor">
+          </mg-ccard>
+        </div>
+
+        @if (statementRecords().length > 0 || reviewedStatementRecords().length > 0) {
+          <!-- Reconciliation -->
+          <div class="bg-card rounded-card w-full overflow-hidden">
+            <div class="flex flex-wrap items-center gap-3 border-b border-line px-5 py-4">
+              <div class="flex items-baseline gap-2.5">
+                <span class="text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Total a pagar</span>
+                <span class="text-[18px] font-bold tabular-nums">{{ totalReviewedAmount() | currency: 'MXN' : 'symbol-narrow' }}</span>
+              </div>
+              <span class="ml-auto"></span>
+              <span class="text-[11px] font-bold uppercase tracking-[.04em] text-ink-3">Fecha y hora de pago</span>
+              <mat-form-field appearance="fill" class="w-44" subscriptSizing="dynamic">
+                <input matInput
+                       [matDatepicker]="paymentPicker"
+                       [(ngModel)]="paymentDate"
+                       [max]="maxPaymentDate">
+                <mat-datepicker-toggle matSuffix [for]="paymentPicker"></mat-datepicker-toggle>
+                <mat-datepicker #paymentPicker></mat-datepicker>
+              </mat-form-field>
+              <mat-form-field appearance="fill" class="w-32" subscriptSizing="dynamic">
+                <input matInput type="time" [(ngModel)]="paymentTime" step="60">
+              </mat-form-field>
+              <button
+                mat-flat-button
+                [color]="'primary'"
+                (click)="processSelectedPayments()"
+                [disabled]="reviewedStatementRecords().length < 1"
+                type="submit">
+                <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:banknotes'"></mat-icon>
+                <span class="ml-2">Pagar</span>
+              </button>
+            </div>
+
+            <!-- TO RECONCILE -->
+            @if (statementRecords().length > 0) {
+              <div class="flex items-center gap-[7px] px-5 pb-2 pt-3.5 text-[11px] font-bold uppercase tracking-[.07em] text-amber">
+                <mat-icon class="icon-size-[14px] text-current" [svgIcon]="'heroicons_outline:exclamation-triangle'"></mat-icon>
+                Por conciliar <span class="font-semibold text-ink-3">· {{ statementRecords().length }}</span>
+                <button
+                  type="button"
+                  class="ml-2.5 inline-flex h-[26px] items-center gap-[5px] rounded-full border border-line-strong bg-surface px-2.5 text-[11.5px] font-semibold normal-case tracking-[.02em] text-ink-2 hover:bg-brand-tint hover:text-ink"
+                  title="Confirmar todos"
+                  (click)="moveAllToReviewed()">
+                  <mat-icon class="icon-size-[13px] text-current" [svgIcon]="'heroicons_outline:chevron-double-down'"></mat-icon>
+                  Confirmar todo
+                </button>
+                <span class="ml-auto text-[12.5px] font-semibold normal-case tracking-normal text-ink-2 tabular-nums">
+                  {{ pendingSum() | currency: 'MXN' : 'symbol-narrow' }}
+                </span>
+              </div>
+
+              <div class="overflow-x-auto">
+                <table class="w-full border-collapse">
+                  <thead>
+                    <tr>
+                      <th class="w-[100px] border-b border-line px-3.5 py-2.5 pl-5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">ID</th>
+                      <th class="w-[130px] border-b border-line px-3.5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Fecha</th>
+                      <th class="border-b border-line px-3.5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Concepto</th>
+                      <th class="w-[180px] border-b border-line px-3.5 py-2.5 text-right text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Total</th>
+                      <th class="w-[110px] border-b border-line px-3.5 py-2.5"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (item of statementRecords(); track item.id) {
+                      <tr class="hover:bg-ink/[.025]">
+                        <td class="border-b border-line px-3.5 py-3 pl-5 font-mono text-[12px] text-ink-3">INV-{{ item.id }}</td>
+                        <td class="border-b border-line px-3.5 py-3 text-[13.5px] text-ink-3 tabular-nums">{{ item.expenseDate | date: 'dd MMM y' }}</td>
+                        <td class="border-b border-line px-3.5 py-3 text-[13.5px] text-ink">{{ item.recipientName }}</td>
+                        <td class="border-b border-line px-3.5 py-3 text-right text-[13.5px] font-semibold tabular-nums">
+                          @if (item.isMonths) {
+                            <div class="flex flex-col items-end gap-1">
+                              <div class="flex items-center justify-end gap-1.5 text-[12.5px]">
+                                <span class="font-semibold">{{ item.totalAmount | currency: 'MXN' : 'symbol-narrow' }}</span>
+                                <span class="font-semibold text-rose">{{ item.debtAmount | currency: 'MXN' : 'symbol-narrow' }}</span>
+                                <mg-pill variant="neutral" size="sm">×{{ item.remainingMonths }}</mg-pill>
+                              </div>
+                              <label class="flex h-8 w-28 items-center rounded-compact border border-line-strong bg-surface px-2 focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+                                <input
+                                  type="number"
+                                  [(ngModel)]="item.calculateAmount"
+                                  class="w-full border-0 bg-transparent text-right text-[13px] text-ink outline-none" />
+                              </label>
+                            </div>
+                          } @else {
+                            {{ item.totalAmount | currency: 'MXN' : 'symbol-narrow' }}
+                          }
+                        </td>
+                        <td class="border-b border-line px-3.5 py-3">
+                          <div class="flex items-center justify-end gap-0.5">
+                            <button
+                              type="button"
+                              class="grid h-[30px] w-[30px] place-items-center rounded-lg text-ink-3 hover:bg-teal-tint hover:text-teal"
+                              matTooltip="Confirmar"
+                              (click)="moveToReviewed(item)">
+                              <mat-icon class="icon-size-4 text-current" [svgIcon]="'heroicons_outline:arrow-down'"></mat-icon>
+                            </button>
+                            <button
+                              type="button"
+                              class="grid h-[30px] w-[30px] place-items-center rounded-lg text-ink-3 hover:bg-brand-tint hover:text-ink"
+                              matTooltip="Editar"
+                              (click)="editExpense(item)">
+                              <mat-icon class="icon-size-4 text-current" [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+
+            <!-- RECONCILED -->
+            @if (reviewedStatementRecords().length > 0) {
+              <div class="mt-1 flex items-center gap-[7px] border-t border-line px-5 pb-2 pt-3.5 text-[11px] font-bold uppercase tracking-[.07em] text-teal">
+                <mat-icon class="icon-size-[14px] text-current" [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                Conciliados <span class="font-semibold text-ink-3">· {{ reviewedStatementRecords().length }}</span>
+                <button
+                  type="button"
+                  class="ml-2.5 inline-flex h-[26px] items-center gap-[5px] rounded-full border border-line-strong bg-surface px-2.5 text-[11.5px] font-semibold normal-case tracking-[.02em] text-ink-2 hover:bg-brand-tint hover:text-ink"
+                  title="Regresar todos"
+                  (click)="moveAllForReview()">
+                  <mat-icon class="icon-size-[13px] text-current" [svgIcon]="'heroicons_outline:chevron-double-up'"></mat-icon>
+                  Regresar todo
+                </button>
+                <span class="ml-auto text-[12.5px] font-semibold normal-case tracking-normal text-ink-2 tabular-nums">
+                  {{ reviewedSum() | currency: 'MXN' : 'symbol-narrow' }}
+                </span>
+              </div>
+
+              <div class="overflow-x-auto">
+                <table class="w-full border-collapse">
+                  <tbody>
+                    @for (item of reviewedStatementRecords(); track item.id) {
+                      <tr class="hover:bg-ink/[.025]">
+                        <td class="w-[100px] border-b border-line px-3.5 py-3 pl-5 font-mono text-[12px] text-ink-3">INV-{{ item.id }}</td>
+                        <td class="w-[130px] border-b border-line px-3.5 py-3 text-[13.5px] text-ink-3 tabular-nums">{{ item.expenseDate | date: 'dd MMM y' }}</td>
+                        <td class="border-b border-line px-3.5 py-3 text-[13.5px] text-ink-2">{{ item.recipientName }}</td>
+                        <td class="w-[180px] border-b border-line px-3.5 py-3 text-right text-[13.5px] font-semibold text-ink-3 tabular-nums">
+                          @if (item.isMonths) {
+                            {{ item.calculateAmount | currency: 'MXN' : 'symbol-narrow' }}
+                          } @else {
+                            {{ item.totalAmount | currency: 'MXN' : 'symbol-narrow' }}
+                          }
+                        </td>
+                        <td class="w-[110px] border-b border-line px-3.5 py-3">
+                          <div class="flex items-center justify-end gap-0.5">
+                            <button
+                              type="button"
+                              class="grid h-[30px] w-[30px] place-items-center rounded-lg text-ink-3 hover:bg-amber-tint hover:text-amber"
+                              matTooltip="Regresar"
+                              (click)="moveBackToStatement(item)">
+                              <mat-icon class="icon-size-4 text-current" [svgIcon]="'heroicons_outline:arrow-up'"></mat-icon>
+                            </button>
+                            <button
+                              type="button"
+                              class="grid h-[30px] w-[30px] place-items-center rounded-lg text-ink-3 hover:bg-brand-tint hover:text-ink"
+                              matTooltip="Editar"
+                              (click)="editExpense(item)">
+                              <mat-icon class="icon-size-4 text-current" [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="bg-card rounded-card w-full">
+            <mg-empty-state
+              icon="heroicons_outline:credit-card"
+              title="Sin cargos pendientes"
+              message="No hay cargos pendientes por revisar.">
+            </mg-empty-state>
+          </div>
+        }
+      }
+    }
+  </div>
+</div>

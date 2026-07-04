@@ -1,0 +1,12 @@
+// Mockup row states (hover brand 4%, editing brand-tint + inset ring):
+// color-mix with tokens has no Tailwind equivalent
+.art-row:not(.editing):hover {
+  background: color-mix(in srgb, rgb(var(--maguey-brand)) 4%, rgb(var(--maguey-card)));
+}
+
+.art-row.editing {
+  position: relative;
+  z-index: 2;
+  background: rgb(var(--maguey-brand-tint));
+  box-shadow: inset 0 0 0 2px rgb(var(--maguey-brand));
+}

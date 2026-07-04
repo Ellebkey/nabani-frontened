@@ -1,0 +1,33 @@
+<mg-modal-shell
+  [title]="currentStep() === 'processing' ? 'Procesando…' : 'Escanear recibo'"
+  [subtitle]="currentStep() === 'processing' ? undefined : 'La IA extrae los artículos y abre Revisar Recibo'"
+  [footer]="false"
+  (closed)="closeDialog()">
+  <div class="flex flex-1 flex-col overflow-hidden">
+    <!-- Capture -->
+    @if (currentStep() === 'capture') {
+      <app-camera-capture
+        (photoCapture)="onPhotoCapture($event)"
+        (cancelled)="onCaptureCancelled()">
+      </app-camera-capture>
+    }
+
+    <!-- Processing -->
+    @if (currentStep() === 'processing') {
+      <div class="flex flex-col items-center justify-center p-12 text-center">
+        <mat-spinner diameter="64"></mat-spinner>
+        <h3 class="mb-1 mt-6 text-[15px] font-semibold text-ink">Analizando recibo</h3>
+        <p class="m-2 text-[13px] text-ink-3">Extrayendo artículos con IA…</p>
+      </div>
+    }
+
+    <!-- Error -->
+    @if (errorMessage() && currentStep() === 'capture') {
+      <div class="m-4 flex items-center gap-2 rounded-xl bg-rose-tint p-4 text-[13px] text-rose">
+        <mat-icon class="text-current icon-size-5" [svgIcon]="'heroicons_outline:exclamation-triangle'"></mat-icon>
+        {{ errorMessage() }}
+        <button mat-button class="ml-auto" (click)="retryCapture()">Reintentar</button>
+      </div>
+    }
+  </div>
+</mg-modal-shell>

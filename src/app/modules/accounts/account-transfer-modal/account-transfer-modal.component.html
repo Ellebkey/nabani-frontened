@@ -1,0 +1,185 @@
+<mg-modal-shell title="Transferir entre cuentas" (closed)="closeDialog()">
+  <form [formGroup]="transferForm" class="flex flex-col gap-3.5 p-5">
+    <!-- From -->
+    <div>
+      <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Desde *</label>
+      <button
+        type="button"
+        class="flex w-full items-center gap-3 rounded-xl border border-line-strong bg-surface px-3.5 py-2.5 text-left hover:border-brand"
+        [matMenuTriggerFor]="sourceMenu">
+        @if (sourceAccount(); as account) {
+          <mg-tile size="sm" [color]="account.colorPalette">
+            <mat-icon class="text-current" [svgIcon]="'heroicons_outline:building-library'"></mat-icon>
+          </mg-tile>
+          <div class="min-w-0">
+            <div class="truncate text-[14px] font-semibold text-ink">{{ account.name }}</div>
+            <div class="text-[12.5px] text-ink-3 tabular-nums">Saldo {{ account.currentAmount | currency: 'MXN' : 'symbol-narrow' }}</div>
+          </div>
+        } @else {
+          <mg-tile size="sm" [neutral]="true">
+            <mat-icon class="text-current" [svgIcon]="'heroicons_outline:building-library'"></mat-icon>
+          </mg-tile>
+          <div class="text-[14px] text-ink-3">Elegir cuenta</div>
+        }
+        <mat-icon class="ml-auto icon-size-4 text-ink-3" [svgIcon]="'heroicons_outline:chevron-down'"></mat-icon>
+      </button>
+      <mat-menu #sourceMenu="matMenu" class="min-w-[280px]">
+        @for (account of accounts; track account.id) {
+          <button mat-menu-item (click)="selectSource(account.id)">
+            <span class="flex items-center gap-2.5">
+              <mg-dot [color]="account.colorPalette"></mg-dot>
+              <span class="min-w-0 truncate">{{ account.name }}</span>
+              <span class="ml-auto pl-4 text-[12.5px] text-ink-3 tabular-nums">
+                {{ account.currentAmount | currency: 'MXN' : 'symbol-narrow' }}
+              </span>
+            </span>
+          </button>
+        }
+      </mat-menu>
+    </div>
+
+    <!-- Swap -->
+    <!-- Exact vertical centering of the gap: 14px gap + 24px label + 14px gap = 44px; 36px button -->
+    <div class="relative z-[2] -mt-2.5 -mb-[34px] flex justify-center">
+      <button
+        type="button"
+        class="grid h-9 w-9 place-items-center rounded-full border border-line-strong bg-surface text-brand enabled:hover:bg-brand-tint disabled:cursor-default disabled:opacity-40"
+        title="Intercambiar"
+        [disabled]="!sourceAccount() || !destinationAccount()"
+        (click)="swapAccounts()">
+        <mat-icon class="rotate-90 icon-size-[17px] text-current" [svgIcon]="'heroicons_outline:arrows-right-left'"></mat-icon>
+      </button>
+    </div>
+
+    <!-- To -->
+    <div>
+      <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Hacia *</label>
+      <button
+        type="button"
+        class="flex w-full items-center gap-3 rounded-xl border border-line-strong bg-surface px-3.5 py-2.5 text-left hover:border-brand"
+        [matMenuTriggerFor]="destinationMenu">
+        @if (destinationAccount(); as account) {
+          <mg-tile size="sm" [color]="account.colorPalette">
+            <mat-icon class="text-current" [svgIcon]="'heroicons_outline:building-library'"></mat-icon>
+          </mg-tile>
+          <div class="min-w-0">
+            <div class="truncate text-[14px] font-semibold text-ink">{{ account.name }}</div>
+            <div class="text-[12.5px] text-ink-3 tabular-nums">Saldo {{ account.currentAmount | currency: 'MXN' : 'symbol-narrow' }}</div>
+          </div>
+        } @else {
+          <mg-tile size="sm" [neutral]="true">
+            <mat-icon class="text-current" [svgIcon]="'heroicons_outline:building-library'"></mat-icon>
+          </mg-tile>
+          <div class="text-[14px] text-ink-3">Elegir cuenta destino</div>
+        }
+        <mat-icon class="ml-auto icon-size-4 text-ink-3" [svgIcon]="'heroicons_outline:chevron-down'"></mat-icon>
+      </button>
+      <mat-menu #destinationMenu="matMenu" class="min-w-[280px]">
+        @for (account of destinationAccounts(); track account.id) {
+          <button mat-menu-item (click)="selectDestination(account.id)">
+            <span class="flex items-center gap-2.5">
+              <mg-dot [color]="account.colorPalette"></mg-dot>
+              <span class="min-w-0 truncate">{{ account.name }}</span>
+              <span class="ml-auto pl-4 text-[12.5px] text-ink-3 tabular-nums">
+                {{ account.currentAmount | currency: 'MXN' : 'symbol-narrow' }}
+              </span>
+            </span>
+          </button>
+        }
+      </mat-menu>
+    </div>
+
+    <!-- Amount -->
+    <div>
+      <div class="mb-1.5 flex items-baseline justify-between">
+        <label class="block text-[12.5px] font-semibold text-ink-2">Monto *</label>
+        <button
+          type="button"
+          class="rounded-md px-1.5 py-0.5 text-[12.5px] font-semibold text-brand hover:bg-brand-tint tabular-nums"
+          title="Usar todo el saldo disponible"
+          (click)="transferAll()">
+          Transferir todo · {{ sourceAccount()?.currentAmount | currency: 'MXN' : 'symbol-narrow' }}
+        </button>
+      </div>
+      <label
+        class="flex h-14 items-center rounded-xl border border-line-strong bg-surface px-3 focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+        <input
+          type="number"
+          formControlName="amount"
+          placeholder="$0.00"
+          class="w-full border-0 bg-transparent text-center text-[22px] font-bold text-ink outline-none tabular-nums placeholder:text-ink-3" />
+      </label>
+      @if (hasInsufficientFunds()) {
+        <div class="mt-1 text-[12.5px] font-semibold text-rose">
+          Excede el saldo disponible ({{ sourceAccount()?.currentAmount | currency: 'MXN' : 'symbol-narrow' }})
+        </div>
+      }
+    </div>
+
+    <!-- Date and time -->
+    <div class="grid grid-cols-2 gap-2.5">
+      <div>
+        <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Fecha *</label>
+        <mat-form-field appearance="fill" class="w-full" subscriptSizing="dynamic">
+          <input matInput [matDatepicker]="picker" formControlName="movementDate">
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+      </div>
+      <div>
+        <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Hora *</label>
+        <label
+          class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+          <input type="time" formControlName="movementTime" class="w-full border-0 bg-transparent outline-none" />
+        </label>
+      </div>
+    </div>
+
+    <!-- Comments -->
+    <div>
+      <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Comentarios</label>
+      <label
+        class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+        <input formControlName="comment" placeholder="Opcional" class="w-full border-0 bg-transparent outline-none placeholder:text-ink-3" />
+      </label>
+    </div>
+
+    <!-- Expected result -->
+    @if (formValue().amount > 0 && !hasInsufficientFunds() && destinationAccount(); as destination) {
+      <div class="flex flex-col gap-2 rounded-xl border border-dashed border-line-strong bg-ink/[.015] px-4 py-3">
+        <div class="flex items-center gap-2 text-[12.5px] text-ink-2">
+          <mg-dot [color]="sourceAccount()?.colorPalette"></mg-dot>
+          <span class="truncate">{{ sourceAccount()?.name }}</span>
+          <b class="font-semibold text-ink tabular-nums">{{ sourceAccount()?.currentAmount | currency: 'MXN' : 'symbol-narrow' }}</b>
+          <span class="text-ink-3">→</span>
+          <b class="font-semibold text-ink tabular-nums">{{ newBalance() | currency: 'MXN' : 'symbol-narrow' }}</b>
+        </div>
+        <div class="flex items-center gap-2 text-[12.5px] text-ink-2">
+          <mg-dot [color]="destination.colorPalette"></mg-dot>
+          <span class="truncate">{{ destination.name }}</span>
+          <b class="font-semibold text-ink tabular-nums">{{ destination.currentAmount | currency: 'MXN' : 'symbol-narrow' }}</b>
+          <span class="text-ink-3">→</span>
+          <b class="font-semibold text-ink tabular-nums">{{ destinationNewBalance() | currency: 'MXN' : 'symbol-narrow' }}</b>
+        </div>
+      </div>
+    }
+  </form>
+
+  <ng-container mgModalActions>
+    <button mat-stroked-button type="button" (click)="closeDialog()">Cancelar</button>
+    <button
+      mat-flat-button
+      color="primary"
+      (click)="save()"
+      [disabled]="formDisabled() || formInvalid() || hasInsufficientFunds()">
+      @if (!formDisabled()) {
+        <span class="inline-flex items-center gap-2">
+          <mat-icon class="icon-size-[17px]" [svgIcon]="'heroicons_outline:arrows-right-left'"></mat-icon>
+          Transferir
+        </span>
+      } @else {
+        <mat-progress-spinner [diameter]="20" [mode]="'indeterminate'"></mat-progress-spinner>
+      }
+    </button>
+  </ng-container>
+</mg-modal-shell>

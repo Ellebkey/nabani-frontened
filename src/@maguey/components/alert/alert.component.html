@@ -1,0 +1,69 @@
+@if (!dismissible() || (dismissible() && !dismissed)) {
+  <div
+    class="mg-alert-container"
+    [@fadeIn]="!dismissed"
+    [@fadeOut]="!dismissed">
+    <!-- Border -->
+    @if (appearance() === 'border') {
+      <div
+        class="mg-alert-border"
+      ></div>
+    }
+    <!-- Icon -->
+    @if (showIcon()) {
+      <div
+        class="mg-alert-icon"
+        >
+        <!-- Custom icon -->
+        <div class="mg-alert-custom-icon">
+          <ng-content select="[magueyAlertIcon]"></ng-content>
+        </div>
+        <!-- Default icons -->
+        <div class="mg-alert-default-icon">
+          @switch (type()) {
+            @case ('primary') {
+              <mat-icon [svgIcon]="'heroicons_solid:check-circle'"></mat-icon>
+            }
+            @case ('accent') {
+              <mat-icon [svgIcon]="'heroicons_solid:check-circle'"></mat-icon>
+            }
+            @case ('warn') {
+              <mat-icon [svgIcon]="'heroicons_solid:x-circle'"></mat-icon>
+            }
+            @case ('basic') {
+              <mat-icon [svgIcon]="'heroicons_solid:check-circle'"></mat-icon>
+            }
+            @case ('info') {
+              <mat-icon [svgIcon]="'heroicons_solid:information-circle'"></mat-icon>
+            }
+            @case ('success') {
+              <mat-icon [svgIcon]="'heroicons_solid:check-circle'"></mat-icon>
+            }
+            @case ('warning') {
+              <mat-icon [svgIcon]="'heroicons_solid:exclamation-triangle'"></mat-icon>
+            }
+            @case ('error') {
+              <mat-icon [svgIcon]="'heroicons_solid:x-circle'"></mat-icon>
+            }
+          }
+        </div>
+      </div>
+    }
+    <!-- Content -->
+    <div class="mg-alert-content">
+      <div class="mg-alert-title">
+        <ng-content select="[magueyAlertTitle]"></ng-content>
+      </div>
+      <div class="mg-alert-message">
+        <ng-content></ng-content>
+      </div>
+    </div>
+    <!-- Dismiss button -->
+    <button
+      class="mg-alert-dismiss-button"
+      mat-icon-button
+      (click)="dismiss()">
+      <mat-icon [svgIcon]="'heroicons_solid:x-mark'"></mat-icon>
+    </button>
+  </div>
+}

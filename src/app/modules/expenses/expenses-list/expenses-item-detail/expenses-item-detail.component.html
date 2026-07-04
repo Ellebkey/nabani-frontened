@@ -1,0 +1,104 @@
+<mg-transaction-row
+  class="cursor-pointer select-none"
+  [title]="expense.recipientName"
+  [rid]="'INV-' + expense.id"
+  [icon]="paymentIcon"
+  [color]="expense.backgroundColor"
+  [amount]="expense.totalAmount | currency: 'MXN' : 'symbol-narrow'"
+  [active]="showDetails()"
+  (click)="onDetailsClick()">
+  <ng-container mgRowMeta>
+    @if (expense.firstArticleName) {
+      <span class="truncate">{{ expense.firstArticleName }}</span>
+      <span>·</span>
+    }
+    <span class="whitespace-nowrap">{{ expense.expenseDate | date: 'HH:mm' }}</span>
+    <span>·</span>
+    <mg-dot [color]="expense.backgroundColor"></mg-dot>
+    <span class="truncate">{{ paymentLabel }}</span>
+  </ng-container>
+
+  <ng-container mgRowActions>
+    @if (!showDetails()) {
+      <button
+        type="button"
+        class="grid h-[30px] w-[30px] place-items-center rounded-lg text-ink-3 hover:bg-brand-tint hover:text-ink"
+        aria-label="Expandir">
+        <mat-icon class="icon-size-4 text-current" [svgIcon]="'heroicons_outline:chevron-down'"></mat-icon>
+      </button>
+    } @else {
+      <div class="flex items-center gap-0.5">
+        <button
+          type="button"
+          class="grid h-[30px] w-[30px] place-items-center rounded-lg text-ink-3 hover:bg-brand-tint hover:text-ink"
+          title="Editar"
+          (click)="editExpense(); $event.stopPropagation()">
+          <mat-icon class="icon-size-4 text-current" [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+        </button>
+        <button
+          type="button"
+          class="grid h-[30px] w-[30px] place-items-center rounded-lg text-ink-3 hover:bg-brand-tint hover:text-ink"
+          title="Clonar"
+          (click)="createExpenseFromTemplate(); $event.stopPropagation()">
+          <mat-icon class="icon-size-4 text-current" [svgIcon]="'heroicons_outline:document-duplicate'"></mat-icon>
+        </button>
+        <button
+          type="button"
+          class="grid h-[30px] w-[30px] place-items-center rounded-lg text-ink-3 hover:bg-rose-tint hover:text-rose"
+          title="Eliminar"
+          (click)="deleteExpense(); $event.stopPropagation()">
+          <mat-icon class="icon-size-4 text-current" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+        </button>
+        <button
+          type="button"
+          class="ml-1 grid h-[30px] w-[30px] place-items-center rounded-lg text-ink-3 hover:bg-brand-tint hover:text-ink"
+          aria-label="Contraer">
+          <mat-icon class="icon-size-4 text-current" [svgIcon]="'heroicons_outline:chevron-up'"></mat-icon>
+        </button>
+      </div>
+    }
+  </ng-container>
+</mg-transaction-row>
+
+<!-- Articles expando -->
+@if (showDetails()) {
+  <div class="mx-5 mb-3.5 ml-[76px] overflow-hidden rounded-xl border border-line">
+    @if (isLoadingDetails()) {
+      <div class="flex flex-col gap-2.5 p-3.5">
+        <mg-skeleton class="h-3 w-3/4"></mg-skeleton>
+        <mg-skeleton class="h-3 w-2/3"></mg-skeleton>
+        <mg-skeleton class="h-3 w-1/2"></mg-skeleton>
+      </div>
+    } @else {
+      <div class="flex flex-col divide-y divide-line">
+        @for (article of expense.articles; track $index) {
+          <div class="grid grid-cols-[1fr_auto_auto] items-center gap-3 px-3.5 py-[9px] text-[13px]">
+            <div class="flex min-w-0 flex-wrap items-center gap-2">
+              <span>{{ article.articleName || $any(article).concept }}</span>
+              @if (article.onDiscount) {
+                <mg-pill variant="amber" size="sm">Descuento</mg-pill>
+              }
+              @if (article.categoryName) {
+                <mg-pill variant="tint" size="sm" [color]="articleColor(article)">
+                  {{ articlePillLabel(article) }}
+                </mg-pill>
+              }
+            </div>
+            <span class="whitespace-nowrap text-[12.5px] text-ink-3 tabular-nums">
+              {{ article.quantity | number: '1.0-0' }} × {{ article.price | currency: 'MXN' : 'symbol-narrow' }}
+            </span>
+            <span class="min-w-[70px] text-right font-semibold tabular-nums">
+              {{ article.subtotal | currency: 'MXN' : 'symbol-narrow' }}
+            </span>
+          </div>
+        }
+        <div class="grid grid-cols-[1fr_auto] items-center gap-3 bg-ink/[.025] px-3.5 py-[9px] text-[13px] font-semibold">
+          <span class="text-ink-2 tabular-nums">{{ expense.articles.length }} artículos</span>
+          <span class="min-w-[70px] text-right tabular-nums">
+            {{ expense.totalAmount | currency: 'MXN' : 'symbol-narrow' }}
+          </span>
+        </div>
+      </div>
+    }
+  </div>
+}

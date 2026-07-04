@@ -1,0 +1,69 @@
+<div
+  #trigger
+  cdkOverlayOrigin
+  #origin="cdkOverlayOrigin"
+  class="flex min-h-[40px] w-full cursor-pointer flex-wrap items-center gap-1.5 rounded-field border border-line-strong bg-surface py-1 pl-1.5 pr-2.5"
+  (click)="toggle()">
+  @for (pill of pills; track pill.kind + '-' + pill.id) {
+    <mg-pill variant="tint" size="sm" [color]="pill.color">
+      {{ pill.label }}
+      <button
+        type="button"
+        class="ml-1 inline-grid h-3.5 w-3.5 translate-y-[2px] place-items-center align-baseline opacity-60 hover:opacity-100"
+        [attr.aria-label]="'Quitar ' + pill.label"
+        (click)="removePill(pill, $event)">
+        <mat-icon class="icon-size-[11px] text-current" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+      </button>
+    </mg-pill>
+  } @empty {
+    <span class="pl-1.5 text-[13px] text-ink-3">Categorías o subcategorías</span>
+  }
+  <mat-icon class="ml-auto icon-size-4 text-ink-3" [svgIcon]="'heroicons_outline:chevron-down'"></mat-icon>
+</div>
+
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="origin"
+  [cdkConnectedOverlayOpen]="open()"
+  [cdkConnectedOverlayMinWidth]="triggerWidth"
+  [cdkConnectedOverlayHasBackdrop]="true"
+  [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
+  (backdropClick)="close()"
+  (detach)="close()">
+  <div class="mt-1 max-h-80 overflow-y-auto rounded-xl border border-line bg-card py-1.5 shadow-overlay">
+    @for (category of categories; track category.id) {
+      <button
+        type="button"
+        class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-[13px] font-semibold text-ink hover:bg-brand-tint"
+        (click)="toggleCategory(category)">
+        <span
+          class="grid h-4 w-4 flex-none place-items-center rounded border"
+          [class]="isCategorySelected(category) ? 'border-brand bg-brand text-white' : 'border-line-strong bg-surface'">
+          @if (isCategorySelected(category)) {
+            <mat-icon class="icon-size-3 text-current" [svgIcon]="'heroicons_outline:check'"></mat-icon>
+          }
+        </span>
+        <span class="h-2 w-2 flex-none rounded-full" [style.background]="mutedColor(category.colorPalette)"></span>
+        <span class="truncate">{{ category.name }}</span>
+      </button>
+      @for (sub of category.subcategories; track sub.id) {
+        <button
+          type="button"
+          class="flex w-full items-center gap-2.5 py-1.5 pl-10 pr-3 text-left text-[13px] text-ink-2 hover:bg-brand-tint disabled:opacity-50"
+          [disabled]="isCategorySelected(category)"
+          (click)="toggleSubcategory(category, sub)">
+          <span
+            class="grid h-4 w-4 flex-none place-items-center rounded border"
+            [class]="isSubcategorySelected(sub) || isCategorySelected(category)
+              ? 'border-brand bg-brand text-white'
+              : 'border-line-strong bg-surface'">
+            @if (isSubcategorySelected(sub) || isCategorySelected(category)) {
+              <mat-icon class="icon-size-3 text-current" [svgIcon]="'heroicons_outline:check'"></mat-icon>
+            }
+          </span>
+          <span class="truncate">{{ sub.name }}</span>
+        </button>
+      }
+    }
+  </div>
+</ng-template>

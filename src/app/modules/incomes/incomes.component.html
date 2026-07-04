@@ -1,0 +1,143 @@
+<div class="flex flex-col flex-auto w-full">
+  <div class="flex flex-col w-full max-w-screen-xl mx-auto p-4 sm:p-6 md:p-8">
+    <!-- Page header -->
+    <div class="mb-5 flex flex-col items-start gap-4 sm:flex-row">
+      <div>
+        <h1 class="text-[23px] font-bold leading-[30px] tracking-tight text-ink">Ingresos</h1>
+        <div class="mt-0.5 text-[13px] text-ink-3 tabular-nums">{{ pagination().count | number }} ingresos registrados</div>
+      </div>
+      <div class="flex items-center gap-2.5 sm:ml-auto">
+        <button mat-flat-button [color]="'primary'" (click)="openCreateIncome()">
+          <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+          <span class="ml-2">Nuevo ingreso</span>
+        </button>
+      </div>
+    </div>
+
+    @if (pagination().count === 0 && !selectedAccountId() && !startDate() && isDataLoaded()) {
+      <div class="bg-card rounded-card mt-4 w-full">
+        <mg-empty-state
+          icon="heroicons_outline:arrow-trending-up"
+          title="No hay ingresos registrados"
+          message="Los ingresos aparecerán aquí cuando los registres.">
+          <button mat-stroked-button (click)="openCreateIncome()">
+            <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+            <span class="ml-2">Crear primer ingreso</span>
+          </button>
+        </mg-empty-state>
+      </div>
+    } @else {
+      <!-- Stats -->
+      @if (stats(); as stats) {
+        <div class="mb-5 grid w-full grid-cols-1 gap-4 sm:grid-cols-3">
+          <div class="bg-card rounded-card px-5 py-[18px]">
+            <span class="text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Este mes</span>
+            <div class="mt-0.5 text-[22px] font-bold text-teal tabular-nums">
+              +{{ stats.currentMonth | currency: 'MXN' : 'symbol-narrow' }}
+            </div>
+          </div>
+          <div class="bg-card rounded-card px-5 py-[18px]">
+            <span class="text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Promedio mensual</span>
+            <div class="mt-0.5 text-[22px] font-bold text-ink tabular-nums">
+              {{ stats.monthlyAverage | currency: 'MXN' : 'symbol-narrow' }}
+            </div>
+          </div>
+          <div class="bg-card rounded-card px-5 py-[18px]">
+            <span class="text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Este año</span>
+            <div class="mt-0.5 text-[22px] font-bold text-ink tabular-nums">
+              {{ stats.currentYear | currency: 'MXN' : 'symbol-narrow' }}
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Filters -->
+      <div class="mb-5 grid w-full grid-cols-1 gap-2.5 sm:grid-cols-[280px_280px]">
+        <app-date-range-filter [defaultPreset]="'none'" (rangeChange)="onDateRangeChange($event)">
+        </app-date-range-filter>
+        @if (accounts().length > 0) {
+          <mg-compact-select
+            class="sm:-order-1"
+            size="field"
+            placeholder="Todas las cuentas"
+            [options]="accountOptions()"
+            [ngModel]="selectedAccountId()"
+            (ngModelChange)="onAccountSelectionChange($event)">
+          </mg-compact-select>
+        }
+      </div>
+
+      <!-- Flat list, ungrouped -->
+      <div class="bg-card rounded-card w-full overflow-hidden">
+        <div class="flex flex-wrap items-center gap-3 border-b border-line px-5 pb-3 pt-4">
+          <h2 class="text-[15px] font-semibold text-ink">Ingresos recientes</h2>
+          <div class="ml-auto" [class.opacity-60]="!isDataLoaded()" [class.pointer-events-none]="!isDataLoaded()">
+            <mg-pager
+              [limit]="pagination().limit"
+              [offset]="pagination().offset"
+              [count]="pagination().count"
+              (pageChange)="onPageChange($event)">
+            </mg-pager>
+          </div>
+        </div>
+
+        @if (!isDataLoaded()) {
+          @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+            <mg-row-skeleton></mg-row-skeleton>
+          }
+        } @else {
+          <div class="flex flex-col divide-y divide-line">
+            @for (income of incomes(); track income.id) {
+              <mg-transaction-row
+                [noIcon]="true"
+                [rid]="'INC-' + income.id"
+                [title]="income.concept"
+                [amount]="'+' + (income.totalAmount | currency: 'MXN' : 'symbol-narrow')"
+                amountTone="in">
+                <ng-container mgRowMeta>
+                  <span class="whitespace-nowrap">{{ income.incomeDate | date: 'd MMM y' }}</span>
+                  <span>·</span>
+                  <mg-dot [color]="income.accountColor"></mg-dot>
+                  <span class="truncate">{{ income.accountName }}</span>
+                </ng-container>
+                <ng-container mgRowActions>
+                  <button
+                    type="button"
+                    class="grid h-[30px] w-[30px] place-items-center rounded-lg text-ink-3 hover:bg-brand-tint hover:text-ink"
+                    [matMenuTriggerFor]="incomeMenu"
+                    (menuOpened)="menuIncome.set(income)"
+                    aria-label="Acciones">
+                    <mat-icon class="icon-size-[17px] text-current" [svgIcon]="'heroicons_outline:ellipsis-horizontal'"></mat-icon>
+                  </button>
+                </ng-container>
+              </mg-transaction-row>
+            } @empty {
+              <mg-empty-state
+                icon="heroicons_outline:magnifying-glass"
+                title="Sin resultados"
+                message="Ajusta los filtros para encontrar ingresos.">
+              </mg-empty-state>
+            }
+          </div>
+        }
+
+        <mat-menu #incomeMenu="matMenu">
+          @if (menuIncome(); as income) {
+            <button mat-menu-item (click)="editIncome(income)">
+              <mat-icon [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+              <span>Editar</span>
+            </button>
+            <button mat-menu-item (click)="createIncomeFromTemplate(income.id)">
+              <mat-icon [svgIcon]="'heroicons_outline:document-duplicate'"></mat-icon>
+              <span>Clonar</span>
+            </button>
+            <button mat-menu-item (click)="deleteIncome(income)">
+              <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+              <span>Eliminar</span>
+            </button>
+          }
+        </mat-menu>
+      </div>
+    }
+  </div>
+</div>

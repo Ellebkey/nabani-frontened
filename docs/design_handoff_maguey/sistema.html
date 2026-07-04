@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maguey 2.0 — Sistema de diseño</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/maguey.css">
+<style>
+  body{ background:var(--card); }
+  .doc{ max-width:880px; margin:0 auto; padding:48px 40px 80px; }
+  .doc h1{ font-size:28px; font-weight:700; letter-spacing:-.02em; }
+  .doc .lead{ font-size:14.5px; color:var(--ink-2); margin:8px 0 0; max-width:640px; }
+  .doc h2{ font-size:19px; font-weight:700; margin:44px 0 6px; padding-top:24px; border-top:1px solid var(--line); letter-spacing:-.01em; }
+  .doc h3{ font-size:14.5px; font-weight:600; margin:22px 0 8px; }
+  .doc p{ font-size:13.5px; color:var(--ink-2); margin:6px 0; max-width:680px; }
+  .doc ul{ font-size:13.5px; color:var(--ink-2); margin:6px 0; padding-left:18px; }
+  .doc li{ margin:4px 0; }
+  code, .tw{ font-family:'JetBrains Mono',monospace; font-size:11.5px; background:color-mix(in srgb, var(--ink) 5%, var(--card)); border-radius:5px; padding:1.5px 6px; color:var(--ink); }
+  .tw{ display:block; padding:10px 12px; margin:8px 0; white-space:pre-wrap; line-height:1.6; border:1px solid var(--line); }
+  .tw b{ color:var(--brand); font-weight:500; }
+  .demo{ border:1px solid var(--line); border-radius:12px; padding:20px; margin:10px 0; background:var(--canvas); display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+  .sw{ display:flex; flex-direction:column; gap:6px; width:92px; font-size:11px; }
+  .sw .c{ height:48px; border-radius:10px; border:1px solid rgb(0 0 0/.06); }
+  .sw b{ font-weight:600; }
+  .sw span{ color:var(--ink-3); font-family:'JetBrains Mono',monospace; font-size:10px; }
+  .note{ border-left:3px solid var(--gold); background:var(--amber-tint); border-radius:0 10px 10px 0; padding:10px 14px; font-size:13px; color:var(--ink-2); margin:10px 0; max-width:680px; }
+  .note b{ color:var(--ink); }
+  table.spec{ width:100%; border-collapse:collapse; font-size:13px; margin:10px 0; }
+  table.spec th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-3); padding:8px 10px; border-bottom:1px solid var(--line); }
+  table.spec td{ padding:9px 10px; border-bottom:1px solid var(--line); color:var(--ink-2); vertical-align:top; }
+  table.spec td:first-child{ font-weight:600; color:var(--ink); white-space:nowrap; }
+</style>
+</head>
+<body>
+<div class="doc">
+  <span class="mg-kicker">Maguey · Julio 2026</span>
+  <h1>Maguey 2.0 — Sistema de diseño</h1>
+  <p class="lead">Un solo lenguaje visual para toda la app: una card, una fila, una familia de pills, un campo, una tabla, una paginación. La paleta no cambia; cambia la disciplina con la que se aplica.</p>
+
+  <h2>0 · Principios (lo que Nu hace bien, traducido)</h2>
+  <ul>
+    <li><b>Un color manda.</b> Verde marca + neutros en el 95% de la superficie. El color del usuario (cuentas, métodos de pago) vive solo en tiles de 42px y dots de 7px — nunca en bandas, strips ni chips sólidos gigantes.</li>
+    <li><b>El dinero tiene reglas.</b> Tinta (<code>--ink</code>) por defecto. Teal solo con signo <code>+</code>, rose solo en resta/deuda explícita. Gold <b>únicamente</b> en el monto héroe de la pantalla (máx. 1 por vista) y nav activa. Todo monto usa <code>tabular-nums</code>.</li>
+    <li><b>Una anatomía por concepto.</b> Toda lista de dinero es la misma fila (tile · texto · monto). Toda tabla es la misma tabla. Todo modal es el mismo modal.</li>
+    <li><b>Jerarquía tipográfica estricta</b>: 6 tamaños, nada intermedio.</li>
+    <li>Sin animaciones de entrada; Heroicons outline 1.7; texto es_MX.</li>
+  </ul>
+
+  <h2>1 · Tokens</h2>
+  <div class="demo" style="background:var(--card); border-style:dashed;">
+    <div class="sw"><div class="c" style="background:#2A4C3C"></div><b>brand</b><span>#2A4C3C</span></div>
+    <div class="sw"><div class="c" style="background:#E1B66B"></div><b>gold</b><span>#E1B66B</span></div>
+    <div class="sw"><div class="c" style="background:#0D9488"></div><b>teal +</b><span>#0D9488</span></div>
+    <div class="sw"><div class="c" style="background:#E11D48"></div><b>rose −</b><span>#E11D48</span></div>
+    <div class="sw"><div class="c" style="background:#F59E0B"></div><b>amber</b><span>#F59E0B</span></div>
+    <div class="sw"><div class="c" style="background:#F8F9FA; border:1px solid #E7EAE8"></div><b>canvas</b><span>#F8F9FA</span></div>
+    <div class="sw"><div class="c" style="background:#17201B"></div><b>ink</b><span>#17201B</span></div>
+    <div class="sw"><div class="c" style="background:#4E5A54"></div><b>ink-2</b><span>#4E5A54</span></div>
+    <div class="sw"><div class="c" style="background:#7C8680"></div><b>ink-3</b><span>#7C8680</span></div>
+    <div class="sw"><div class="c" style="background:#E7EAE8"></div><b>line</b><span>#E7EAE8</span></div>
+  </div>
+  <p>Los grises son <b>verdosos</b> (hue de la marca, chroma bajísimo) — esto es lo que hace que todo se sienta "de la misma familia" sin usar más color.</p>
+
+  <h3>Paleta muted para colores de usuario (cuentas / métodos / tags)</h3>
+  <p>El usuario sigue eligiendo el color de su banco, pero de una paleta de 16 tonos con el mismo nivel de saturación que los charts terrosos. Reemplaza 1:1 al picker actual de colores crudos:</p>
+  <div class="demo" style="background:var(--card); border-style:dashed;">
+    <div class="sw"><div class="c" style="background:#3B5F82"></div><b>Marino</b><span>#3B5F82</span></div>
+    <div class="sw"><div class="c" style="background:#A64F4F"></div><b>Teja</b><span>#A64F4F</span></div>
+    <div class="sw"><div class="c" style="background:#4E8A6A"></div><b>Bosque</b><span>#4E8A6A</span></div>
+    <div class="sw"><div class="c" style="background:#6A5A8C"></div><b>Ciruela</b><span>#6A5A8C</span></div>
+    <div class="sw"><div class="c" style="background:#C08A4E"></div><b>Ámbar</b><span>#C08A4E</span></div>
+    <div class="sw"><div class="c" style="background:#58939C"></div><b>Laguna</b><span>#58939C</span></div>
+    <div class="sw"><div class="c" style="background:#A85D6E"></div><b>Frambuesa</b><span>#A85D6E</span></div>
+    <div class="sw"><div class="c" style="background:#5F7386"></div><b>Acero</b><span>#5F7386</span></div>
+    <div class="sw"><div class="c" style="background:#8A8A4E"></div><b>Olivo</b><span>#8A8A4E</span></div>
+    <div class="sw"><div class="c" style="background:#B0806A"></div><b>Arcilla</b><span>#B0806A</span></div>
+    <div class="sw"><div class="c" style="background:#C9A45C"></div><b>Ocre</b><span>#C9A45C</span></div>
+    <div class="sw"><div class="c" style="background:#8FA98C"></div><b>Salvia</b><span>#8FA98C</span></div>
+    <div class="sw"><div class="c" style="background:#7D6A85"></div><b>Malva</b><span>#7D6A85</span></div>
+    <div class="sw"><div class="c" style="background:#56698F"></div><b>Índigo</b><span>#56698F</span></div>
+    <div class="sw"><div class="c" style="background:#3E7C74"></div><b>Jade</b><span>#3E7C74</span></div>
+    <div class="sw"><div class="c" style="background:#2E3A46"></div><b>Grafito</b><span>#2E3A46</span></div>
+  </div>
+  <p><b>Migración:</b> mapea cada color crudo guardado al muted más cercano en carga (por hue), sin tocar la BD; o migra los 16 hex del picker.</p>
+
+  <h2>2 · Tipografía</h2>
+  <table class="spec">
+    <tr><th>Rol</th><th>Spec</th><th>Tailwind</th></tr>
+    <tr><td>Héroe monetario</td><td>30/36 · 700 · tabular · gold u ink</td><td><code>text-3xl font-bold tabular-nums tracking-tight</code></td></tr>
+    <tr><td>Título de página</td><td>23/30 · 700</td><td><code>text-2xl font-bold tracking-tight</code></td></tr>
+    <tr><td>Título de card / modal</td><td>15/22 · 600</td><td><code>text-[15px] font-semibold</code></td></tr>
+    <tr><td>Cuerpo / fila título</td><td>14/20 · 600 en títulos de fila, 400 en cuerpo</td><td><code>text-sm</code></td></tr>
+    <tr><td>Secundario / meta</td><td>12.5/18 · 400 · ink-3</td><td><code>text-[12.5px] text-ink-3</code></td></tr>
+    <tr><td>Overline (grupos, thead)</td><td>11 · 600–700 · uppercase · tracking .07em · ink-3</td><td><code>text-[11px] font-semibold uppercase tracking-wider</code></td></tr>
+  </table>
+  <div class="note"><b>Todo monto</b> lleva <code>tabular-nums</code> (<code>font-variant-numeric</code>). Es el 50% de la "escaneabilidad Nu".</div>
+
+  <h2>3 · Profundidad y radios — elige UNA (las 3 están montadas en Gastos)</h2>
+  <table class="spec">
+    <tr><th>Opción</th><th>Card</th><th>Canvas</th><th>Carácter</th></tr>
+    <tr><td>A · Trazo</td><td>borde 1px <code>line</code>, radio 12, sin sombra</td><td>#F8F9FA</td><td>Continuidad con hoy; estructurado, técnico</td></tr>
+    <tr><td>B · Nube</td><td>sin borde, radio 16, sombra <code>0 1px 2px .05 + 0 8px 24px -14px .14</code></td><td>#F8F9FA</td><td>El más Nu; suave y premium</td></tr>
+    <tr><td>C · Plano</td><td>sin borde, sin sombra, radio 16</td><td>#F1F3F2 (más oscuro para dar contraste)</td><td>Máxima calma; exige disciplina de espaciado</td></tr>
+  </table>
+  <p>Overlays (modales, menús) siempre llevan sombra (<code>--shadow-overlay</code>) en las 3 opciones. Radios: card 12–16 · botón/campo 10 · compacto 8 · pill 999.</p>
+
+  <h2>4 · Card</h2>
+  <div class="note"><b>Contenedor de página:</b> todo el contenido vive en la caja centrada existente — <code>flex flex-col w-full max-w-screen-xl mx-auto p-4 sm:p-6 md:p-8</code>. Se conserva tal cual en todas las pantallas; los mockups la replican (1280px centrados).</div>
+  <ul>
+    <li>Header: título 15/600 + sub 12 ink-3 izquierda; overline o acción a la derecha. Padding 20px, header 16px top.</li>
+    <li>Sin bandas de color, sin strips, sin borde izquierdo de acento. La identidad de color va en el <b>tile</b>.</li>
+  </ul>
+  <span class="tw">bg-white rounded-2xl <b>(+A)</b> border border-line rounded-xl <b>(+B)</b> shadow-card <b>(+C)</b> —</span>
+
+  <h2>5 · Tile (reemplaza headers de color, strips y cuadros crudos)</h2>
+  <p>Cuadro 42px (34px en denso), radio 12, color muted del usuario, ícono Heroicon blanco 20px. Variante <code>neutral</code>: fondo brand-tint + ícono verde, para conceptos sin color propio.</p>
+  <span class="tw">w-[42px] h-[42px] rounded-xl grid place-items-center text-white bg-[var(--user-color)]</span>
+
+  <h2>6 · Pills — UNA familia (mata a las 5 variantes)</h2>
+  <div class="demo">
+    <span class="mg-pill tint" style="--pc:#C9A45C"><span class="dot"></span>Comida</span>
+    <span class="mg-pill neutral">Abarrotes</span>
+    <span class="mg-pill solid" style="--pc:#3B5F82">BBVA Débito ·5695</span>
+    <span class="mg-pill teal">+ Ingreso</span>
+    <span class="mg-pill rose">Vencido</span>
+    <span class="mg-pill amber sm">−15%</span>
+    <span class="mg-pill neutral sm">×3</span>
+    <span class="mg-pill outline">Transporte</span>
+    <span class="mg-pill brand sm">Premium</span>
+  </div>
+  <table class="spec">
+    <tr><th>Variante</th><th>Uso</th><th>Receta</th></tr>
+    <tr><td>tint + dot</td><td>Categoría (color de la categoría)</td><td>bg 11% del color, texto 80% color/ink, dot 6px</td></tr>
+    <tr><td>neutral</td><td>Subcategoría, badge ×N, conteos</td><td>bg ink 7%, texto ink-2</td></tr>
+    <tr><td>solid</td><td>Método de pago / cuenta (color muted del usuario) — se conserva sólido</td><td>bg color, texto blanco</td></tr>
+    <tr><td>teal / rose / amber</td><td>Semánticos: estado, % descuento (amber), por liquidar</td><td>tint semántico</td></tr>
+    <tr><td>outline</td><td>Chips seleccionables (categorías personales en Familia)</td><td>borde line-strong; activo → borde+texto rose con candado</td></tr>
+    <tr><td>brand</td><td>Tier (Free/Premium), "Dueño"</td><td>brand-tint + texto brand</td></tr>
+  </table>
+  <span class="tw">Base: inline-flex items-center gap-1.5 h-6 px-2.5 rounded-full text-xs font-semibold whitespace-nowrap
+sm:   h-5 px-2 text-[11px]
+Un solo componente Angular: &lt;mg-pill variant size color&gt;</span>
+
+  <h2>7 · Botones</h2>
+  <div class="demo">
+    <button class="mg-btn primary">Primario</button>
+    <button class="mg-btn secondary">Secundario</button>
+    <button class="mg-btn ghost">Terciario</button>
+    <button class="mg-btn danger">Destructivo</button>
+    <button class="mg-btn primary sm">Compacto</button>
+    <button class="mg-btn primary" disabled>Deshabilitado</button>
+  </div>
+  <span class="tw">h-10 px-4 rounded-[10px] text-sm font-semibold inline-flex items-center gap-2
+primary: bg-brand text-white hover:bg-brand-strong · secondary: bg-white border border-line-strong
+ghost: text-brand hover:bg-brand-tint · danger: bg-rose-tint text-rose · sm: h-8 px-3 text-[13px]
+disabled: opacity-45. Ícono 17px SIEMPRE a la izquierda. Máx 1 primary por vista.</span>
+  <div class="note">Cambio propuesto vs. hoy: radio 6 → <b>10px</b> unificado con campos. Sigue sin ser pill; se percibe más afín a las cards de radio 12–16.</div>
+
+  <h2>8 · Campos</h2>
+  <div class="demo" style="max-width:640px;">
+    <label class="mg-field" style="width:230px;"><i data-i="search"></i><input placeholder="Buscar por nombre"></label>
+    <label class="mg-field" style="width:200px;"><input value="Costco"><i data-i="chevD" class="chev"></i></label>
+    <label class="mg-compact" style="width:150px;"><span class="dot" style="--pc:#C9A45C"></span><input value="Comida"><i data-i="chevD"></i></label>
+    <label class="mg-compact" style="width:70px;"><input value="1" style="text-align:center"></label>
+  </div>
+  <table class="spec">
+    <tr><th>Tamaño</th><th>Spec</th><th>Dónde</th></tr>
+    <tr><td>Estándar 40px</td><td>radio 10, borde line-strong, focus: borde brand + ring 3px brand/14%</td><td>Formularios, filtros de página</td></tr>
+    <tr><td>Compacto 32px</td><td>radio 8, texto 13, mismas reglas de focus</td><td>Edición inline en tablas, modal Revisar Recibo — <b>reemplaza los &lt;select&gt; nativos</b></td></tr>
+  </table>
+  <span class="tw">Estándar: h-10 px-3 rounded-[10px] border border-line-strong bg-white text-sm
+       focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15
+Compacto: h-8 px-2 rounded-lg text-[13px] (mismo focus)
+Material: densidad -2/-4 vía @use mat.form-field-density; o CVA propio para el compacto
+(un wrapper &lt;mg-compact-select&gt; sobre CDK Overlay es más barato que forzar MDC a 32px).
+ng-select: mismos tokens vía CSS vars de .ng-select-container.</span>
+
+  <h2>9 · Fila de transacción (la anatomía estrella)</h2>
+  <p>Toda lista de dinero — Gastos, ledger del Dashboard, Ingresos, Familia — es esta fila:</p>
+  <div class="demo" style="display:block; padding:0; background:var(--card);">
+    <div class="mg-row">
+      <div class="mg-tile" style="--tc:#3B5F82"><i data-i="card"></i></div>
+      <div>
+        <div class="tt">Costco</div>
+        <div class="ss">Espinaca Earthboun 454g · 19:40 · <span class="pdot" style="--pc:#3B5F82"></span>BBVA Débito ·5695</div>
+      </div>
+      <div class="amt num">$5,496.20</div>
+    </div>
+  </div>
+  <span class="tw">grid grid-cols-[42px_1fr_auto] gap-x-3.5 items-center px-5 py-3.5
+título: text-sm font-semibold · meta: text-[12.5px] text-ink-3 (concepto · hora · dot+método)
+monto: text-right font-bold tabular-nums · separador entre filas: divide-y divide-line
+Grupo de fecha: overline 11px + total del día a la derecha (py-3.5 px-5)
+El folio INV-xxxxx sale de la fila → vive en el detalle expandido.</span>
+
+  <h2>10 · Tabla</h2>
+  <span class="tw">thead: text-[11px] uppercase tracking-wider text-ink-3 font-semibold, sin fondo
+td: py-3 px-3.5 text-[13.5px] border-b border-line · hover fila: bg-ink/[.025]
+números: text-right tabular-nums font-semibold · débito: −$ ink o rose, crédito: +$ teal
+acciones: SIEMPRE kebab (⋯) al final — nunca lápiz/flecha sueltos de colores</span>
+
+  <h2>11 · Paginación (números se quedan, peso se va)</h2>
+  <div class="demo">
+    <div class="mg-pager">
+      <button><i data-i="chevLL"></i></button><button><i data-i="chevL"></i></button>
+      <button class="on">1</button><button>2</button><button>3</button><button>4</button><button>5</button>
+      <button><i data-i="chevR"></i></button><button><i data-i="chevRR"></i></button>
+      <span class="info"><b>1–25</b> de 9,813</span>
+    </div>
+  </div>
+  <span class="tw">botones h-[30px] min-w-[30px] rounded-lg SIN borde (solo hover:bg-brand-tint; activo bg-brand text-white)
+posición ÚNICA: header de la card de lista, derecha. "Show: 25" → menú en el kebab o select compacto.</span>
+
+  <h2>12 · Modal</h2>
+  <ul>
+    <li>Header verde 56px: título 15.5/600 + sub 12 blanco/65 + X (hover blanco/12). Se conserva — ya es tu firma.</li>
+    <li>Cuerpo scrollable; footer 14px con borde superior, acciones a la derecha (secundario + primario), dato clave (total) a la izquierda.</li>
+    <li>Radio 16, sombra overlay, scrim ink/45.</li>
+  </ul>
+
+  <h2>13 · Estados</h2>
+  <div class="demo" style="display:flex; align-items:stretch;">
+    <div class="mg-card" style="width:250px;"><div class="mg-empty" style="padding:28px 16px;"><div class="cir"><i data-i="pie"></i></div><h3>Sin presupuestos</h3><p>Crea uno para empezar.</p><button class="mg-btn secondary sm">Crear</button></div></div>
+    <div class="mg-card" style="width:250px; padding:18px; display:flex; flex-direction:column; gap:10px;">
+      <div style="display:flex; gap:10px; align-items:center;"><div class="mg-skel" style="width:42px;height:42px;border-radius:12px;"></div><div style="flex:1; display:flex; flex-direction:column; gap:6px;"><div class="mg-skel" style="height:12px; width:70%;"></div><div class="mg-skel" style="height:10px; width:45%;"></div></div></div>
+      <div style="display:flex; gap:10px; align-items:center;"><div class="mg-skel" style="width:42px;height:42px;border-radius:12px;"></div><div style="flex:1; display:flex; flex-direction:column; gap:6px;"><div class="mg-skel" style="height:12px; width:60%;"></div><div class="mg-skel" style="height:10px; width:40%;"></div></div></div>
+    </div>
+  </div>
+  <ul>
+    <li><b>Vacío:</b> círculo 64px brand-tint + ícono, título 15/600, texto 13 ink-3, CTA secundario. Uno solo por vista.</li>
+    <li><b>Cargando:</b> skeleton con la MISMA geometría del contenido final (tile + 2 líneas para filas; celdas para tablas). Paginación viva con opacity-60, como hoy.</li>
+    <li><b>Error:</b> toast semántico (ya resuelto); en línea solo para formularios: texto 12.5 rose bajo el campo.</li>
+  </ul>
+
+  <h2>14 · Edición inline (tabla de artículos)</h2>
+  <ul>
+    <li><b>Affordance</b>: al hover, lápiz fantasma en la última columna (28px, opacity 0→1) + fondo brand 4%. La columna del lápiz está SIEMPRE reservada (36px) — geometría idéntica.</li>
+    <li><b>Edición</b>: fondo brand-tint + <code>inset ring 2px brand</code> (adiós <code>bg-blue-50</code>). Inputs compactos de 32px dentro de la misma grilla de columnas; altura de fila fija 54px en ambos modos.</li>
+    <li><b>Descuento</b>: chip amber <code>−15%</code> clicable en la celda del artículo (toggle), no una segunda línea → la fila ya no crece.</li>
+    <li>Enter guarda · Esc revierte · blur con gracia de 300ms (sin cambios de comportamiento).</li>
+  </ul>
+
+  <h2>15 · Dark mode</h2>
+  <p>Mismos tokens con canvas #141715 / card #1C201E, líneas #2A2F2C, tinta invertida. Los colores muted de usuario y la paleta terrosa funcionan sin cambios (esa es la ventaja de bajarles la saturación). Cards siempre con borde 1px en dark (la sombra no se lee). Gold y semánticos idénticos.</p>
+</div>
+<script src="shared/shell.js"></script>
+</body>
+</html>

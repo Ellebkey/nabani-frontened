@@ -1,0 +1,195 @@
+<div class="flex flex-col flex-auto w-full">
+  <div class="flex flex-col w-full max-w-screen-xl mx-auto p-4 sm:p-6 md:p-8">
+
+    @if (!familyState.loaded()) {
+      <div class="bg-card rounded-card w-full">
+        @for (i of [1, 2, 3]; track i) {
+          <mg-row-skeleton></mg-row-skeleton>
+        }
+      </div>
+    } @else if (!familyState.hasPartnership()) {
+      <div class="w-full">
+        <app-no-partnership></app-no-partnership>
+      </div>
+    } @else {
+      <!-- Page header -->
+      <div class="mb-5 flex items-start gap-4">
+        <div>
+          <h1 class="text-[23px] font-bold leading-[30px] tracking-tight text-ink">Ajustes del hogar</h1>
+          <div class="mt-0.5 text-[13px] text-ink-3">
+            {{ familyState.partnership()?.name || 'Mi Hogar' }} · {{ familyState.members().length }} miembros
+          </div>
+        </div>
+      </div>
+
+      <div class="grid w-full grid-cols-1 items-start gap-5 lg:grid-cols-2">
+        <div class="flex flex-col gap-5">
+          <!-- Members -->
+          <div class="bg-card rounded-card overflow-hidden">
+            <div class="px-5 pb-3 pt-4">
+              <h2 class="text-[15px] font-semibold text-ink">Miembros</h2>
+            </div>
+            <div class="flex flex-col divide-y divide-line border-t border-line">
+              @for (member of familyState.members(); track member.id) {
+                <div class="flex items-center gap-3 px-5 py-[13px]">
+                  <span class="grid h-[42px] w-[42px] flex-none place-items-center rounded-full bg-brand-tint text-[14px] font-bold text-brand">
+                    {{ memberInitials(member) }}
+                  </span>
+                  <div class="min-w-0">
+                    <div class="truncate text-[14px] font-semibold text-ink">
+                      {{ memberName(member) }}
+                      @if (isSelf(member)) {
+                        <span class="font-normal text-ink-3">(tú)</span>
+                      }
+                    </div>
+                    <div class="truncate text-[12.5px] text-ink-3">{{ member.email || member.username }}</div>
+                  </div>
+                  <span class="ml-auto"></span>
+                  <mg-pill [variant]="member.role === 'owner' ? 'brand' : 'neutral'" size="sm">
+                    {{ member.role === 'owner' ? 'Dueño' : 'Miembro' }}
+                  </mg-pill>
+                  @if (member.role !== 'owner' && (familyState.isOwner() || isSelf(member))) {
+                    <button
+                      type="button"
+                      class="grid h-[30px] w-[30px] place-items-center rounded-lg text-ink-3 hover:bg-brand-tint hover:text-ink"
+                      [matMenuTriggerFor]="memberMenu"
+                      (menuOpened)="menuMember = member"
+                      aria-label="Acciones">
+                      <mat-icon class="icon-size-[17px] text-current" [svgIcon]="'heroicons_outline:ellipsis-horizontal'"></mat-icon>
+                    </button>
+                  }
+                </div>
+              }
+
+              <!-- Pending invites: same row, dimmed -->
+              @for (invite of familyState.pendingInvites(); track invite.id) {
+                <div class="flex items-center gap-3 px-5 py-[13px] opacity-75">
+                  <span class="grid h-[42px] w-[42px] flex-none place-items-center rounded-full bg-amber-tint text-amber">
+                    <mat-icon class="icon-size-[18px] text-current" [svgIcon]="'heroicons_outline:envelope'"></mat-icon>
+                  </span>
+                  <div class="min-w-0">
+                    <div class="truncate text-[14px] font-semibold text-ink-2">{{ invite.inviteeEmail }}</div>
+                    <div class="truncate text-[12.5px] text-ink-3">
+                      Invitación enviada@if (invite.expiresAt) { · expira {{ invite.expiresAt | date: 'd MMM' }}}
+                    </div>
+                  </div>
+                  <span class="ml-auto"></span>
+                  <mg-pill variant="amber" size="sm">Pendiente</mg-pill>
+                  <button
+                    type="button"
+                    class="grid h-[30px] w-[30px] place-items-center rounded-lg text-ink-3 hover:bg-rose-tint hover:text-rose"
+                    matTooltip="Revocar invitación"
+                    (click)="revokeInvite(invite.id)">
+                    <mat-icon class="icon-size-4 text-current" [svgIcon]="'heroicons_outline:x-circle'"></mat-icon>
+                  </button>
+                </div>
+              }
+            </div>
+
+            @if (canInvite()) {
+              <div class="flex gap-2.5 border-t border-line px-5 py-4">
+                @if (isPremium) {
+                  <label
+                    class="flex h-10 flex-1 items-center gap-2 rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+                    <mat-icon class="icon-size-4 text-ink-3" [svgIcon]="'heroicons_outline:envelope'"></mat-icon>
+                    <input
+                      type="email"
+                      class="w-full border-0 bg-transparent outline-none placeholder:text-ink-3"
+                      placeholder="correo@ejemplo.com"
+                      [formControl]="inviteEmail" />
+                  </label>
+                  <button
+                    mat-flat-button
+                    [color]="'primary'"
+                    [disabled]="inviteEmail.invalid || sendingInvite()"
+                    (click)="sendInvite()">
+                    <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                    <span class="ml-2">Invitar</span>
+                  </button>
+                } @else {
+                  <p class="text-[12.5px] text-ink-3">Enviar invitaciones requiere una cuenta Premium.</p>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Danger zone: the red lives on the button, not the card -->
+          @if (familyState.isOwner()) {
+            <div class="bg-card rounded-card flex items-center gap-3.5 px-5 py-[18px]">
+              <div>
+                <h3 class="text-[14px] font-semibold text-ink">Disolver hogar</h3>
+                <p class="mt-0.5 text-[12.5px] text-ink-3">Los miembros conservan sus datos personales; se elimina lo compartido.</p>
+              </div>
+              <span class="ml-auto"></span>
+              <button
+                type="button"
+                class="inline-flex h-10 flex-none items-center gap-2 rounded-btn bg-rose-tint px-4 text-[14px] font-semibold text-rose hover:bg-rose/20"
+                (click)="confirmDissolve()">
+                <mat-icon class="icon-size-[17px] text-current" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                Disolver
+              </button>
+            </div>
+          }
+        </div>
+
+        <div class="flex flex-col gap-5">
+          <!-- Shared categories -->
+          <div class="bg-card rounded-card">
+            <div class="flex items-start gap-2.5 px-5 pb-3 pt-4">
+              <div>
+                <h2 class="text-[15px] font-semibold text-ink">Categorías compartidas</h2>
+                <div class="text-[12px] text-ink-3">Se eligen de las categorías existentes · crear nuevas es solo del administrador</div>
+              </div>
+              @if (familyState.isOwner() && categoriesDirty()) {
+                <button
+                  mat-flat-button
+                  [color]="'primary'"
+                  class="ml-auto !h-8 !min-h-8 !px-3 !text-[13px]"
+                  [disabled]="familyState.loading()"
+                  (click)="saveExcludedCategories()">
+                  Guardar cambios
+                </button>
+              }
+            </div>
+
+            @if (allCategories().length === 0) {
+              <div class="px-5 pb-4 pt-1">
+                <mg-skeleton class="h-[30px] w-2/3 !rounded-full"></mg-skeleton>
+              </div>
+            } @else {
+              <div class="flex flex-wrap gap-2 px-5 pb-[18px] pt-1">
+                @for (category of allCategories(); track category.id) {
+                  <button
+                    type="button"
+                    class="inline-flex h-[30px] items-center gap-1.5 rounded-full border px-[13px] text-[13px]"
+                    [class.cursor-default]="!familyState.isOwner()"
+                    [class]="selectedCategoryIds().has(category.id)
+                      ? 'border-rose bg-rose-tint font-semibold text-rose'
+                      : 'border-brand bg-brand-tint font-semibold text-brand'"
+                    (click)="toggleCategory(category.id)">
+                    @if (selectedCategoryIds().has(category.id)) {
+                      <mat-icon class="icon-size-[13px] text-current" [svgIcon]="'heroicons_outline:lock-closed'"></mat-icon>
+                    } @else {
+                      <mg-dot [color]="category.colorPalette || '#5F7386'" class="!h-[7px] !w-[7px]"></mg-dot>
+                    }
+                    {{ category.name }}
+                  </button>
+                }
+              </div>
+              <div class="px-5 pb-4 text-[12px] text-ink-3">
+                Las categorías con candado son personales y sus gastos nunca se comparten
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <mat-menu #memberMenu="matMenu">
+        <button mat-menu-item (click)="confirmRemoveMember(menuMember)">
+          <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+          <span>{{ menuMember && isSelf(menuMember) ? 'Salir del hogar' : 'Eliminar del hogar' }}</span>
+        </button>
+      </mat-menu>
+    }
+  </div>
+</div>

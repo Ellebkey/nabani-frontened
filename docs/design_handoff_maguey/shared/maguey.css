@@ -1,0 +1,354 @@
+/* ============================================================
+   AGAVE 2.0 — Maguey design tokens + components
+   Cada bloque incluye su receta Tailwind en comentario.
+   Profundidad: body.depth-a (borde) / depth-b (sombra) / depth-c (plano)
+   Dark: body.dark
+   ============================================================ */
+
+:root{
+  /* Lienzo y superficies */
+  --canvas:#F8F9FA;          /* bg-[#F8F9FA] */
+  --card:#FFFFFF;
+  --ink:#17201B;             /* text-[#17201B] — negro verdoso */
+  --ink-2:#4E5A54;           /* secundario */
+  --ink-3:#7C8680;           /* meta / placeholders */
+  --line:#E7EAE8;            /* divisores */
+  --line-strong:#D8DDDA;     /* bordes de inputs */
+
+  /* Marca */
+  --brand:#2A4C3C;
+  --brand-strong:#1F3A2D;    /* hover */
+  --brand-tint:#EDF2EF;      /* 8% aprox — bg-[color-mix(...)] */
+  --brand-tint-2:#DCE7E1;
+
+  /* Acentos */
+  --gold:#E1B66B;            /* SOLO nav activa + montos héroe */
+  --teal:#0D9488;  --teal-tint:#E6F4F1;
+  --rose:#E11D48;  --rose-tint:#FCE8ED;
+  --amber:#B45309; --amber-bright:#F59E0B; --amber-tint:#FCF0DC;
+
+  /* Paleta terrosa (charts) */
+  --e-forest:#33604A; --e-olive:#8A8A4E; --e-gold:#C9A45C; --e-sienna:#A9704F;
+  --e-slate:#5F7386;  --e-sage:#8FA98C;  --e-clay:#B0806A; --e-plum:#7D6A85;
+
+  --r-card:16px; --r-btn:10px; --r-field:10px; --r-compact:8px; --r-tile:12px;
+  --shadow-overlay:0 12px 40px -8px rgb(23 32 27/.28);
+  font-feature-settings:"cv11";
+}
+
+/* Profundidad ------------------------------------------------- */
+body.depth-a{ --r-card:12px; }
+body.depth-a .mg-card{ border:1px solid var(--line); box-shadow:none; }
+body.depth-b .mg-card{ border:0; box-shadow:0 1px 2px rgb(23 32 27/.05), 0 8px 24px -14px rgb(23 32 27/.14); }
+body.depth-c{ --canvas:#F1F3F2; }
+body.depth-c .mg-card{ border:0; box-shadow:none; }
+
+/* Dark -------------------------------------------------------- */
+body.dark{
+  --canvas:#141715; --card:#1C201E;
+  --ink:#ECEFED; --ink-2:#A9B1AD; --ink-3:#788079;
+  --line:#2A2F2C; --line-strong:#39403C;
+  --brand-tint:#243830; --brand-tint-2:#2C443A;
+  --teal-tint:#12312C; --rose-tint:#3A1A22; --amber-tint:#3A2C14;
+  --amber:#E8A84C;
+}
+body.dark .mg-card{ border:1px solid var(--line); box-shadow:none; }
+
+/* Base -------------------------------------------------------- */
+*{box-sizing:border-box; margin:0;}
+html,body{height:100%;}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--canvas); color:var(--ink);
+  font-size:14px; line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+}
+.num{ font-variant-numeric:tabular-nums; } /* tabular-nums */
+a{color:inherit; text-decoration:none;}
+button{font:inherit; cursor:pointer; background:none; border:0; color:inherit;}
+svg{flex:none;}
+
+/* ============================================================
+   SHELL  (sidebar 92px + topbar 60px)
+   ============================================================ */
+.mg-shell{ display:grid; grid-template-columns:92px 1fr; min-height:100vh; }
+.mg-side{
+  background:#2A4C3C; color:#fff; padding:14px 8px 20px;
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  position:sticky; top:0; height:100vh;
+}
+.mg-logo{ width:44px; height:44px; margin-bottom:14px; }
+.mg-nav{ display:flex; flex-direction:column; gap:2px; width:100%; }
+.mg-nav a{
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  padding:10px 4px 8px; border-radius:10px;
+  font-size:10.5px; font-weight:500; color:rgb(255 255 255/.72);
+}
+.mg-nav a svg{ width:21px; height:21px; }
+.mg-nav a:hover{ background:rgb(255 255 255/.06); color:#fff; }
+.mg-nav a.active{ background:rgb(255 255 255/.10); color:var(--gold); font-weight:600; }
+
+.mg-main{ min-width:0; display:flex; flex-direction:column; }
+.mg-topbar{
+  height:60px; background:var(--card); border-bottom:1px solid var(--line);
+  display:flex; align-items:center; gap:16px; padding:0 24px;
+  position:sticky; top:0; z-index:20;
+}
+.mg-topbar .spacer{flex:1;}
+.mg-iconbtn{
+  width:38px; height:38px; border-radius:10px; display:grid; place-items:center;
+  color:var(--ink-2); position:relative;
+}
+.mg-iconbtn:hover{ background:var(--brand-tint); color:var(--ink); }
+.mg-iconbtn svg{ width:21px; height:21px; }
+.mg-iconbtn .dot{
+  position:absolute; top:7px; right:7px; width:8px; height:8px;
+  border-radius:999px; background:var(--amber-bright); border:2px solid var(--card);
+}
+
+/* Contenedor de página — igual que la app real:
+   tw: flex flex-col w-full max-w-screen-xl mx-auto p-4 sm:p-6 md:p-8 */
+.mg-page{ display:flex; flex-direction:column; padding:32px; max-width:1280px; width:100%; margin:0 auto; }
+
+/* Encabezado de página: h1 24/700, sub 13 ink-3, acciones derecha */
+.mg-pagehead{ display:flex; align-items:flex-start; gap:16px; margin-bottom:20px; }
+.mg-pagehead h1{ font-size:23px; font-weight:700; letter-spacing:-.01em; }
+.mg-pagehead .sub{ font-size:13px; color:var(--ink-3); margin-top:2px; }
+.mg-pagehead .actions{ margin-left:auto; display:flex; gap:10px; }
+
+/* ============================================================
+   CARD — una sola anatomía
+   tw: bg-white rounded-2xl (+ variante de profundidad)
+   ============================================================ */
+.mg-card{ background:var(--card); border-radius:var(--r-card); }
+.mg-card-pad{ padding:20px; }
+.mg-cardhead{
+  display:flex; align-items:center; gap:10px; padding:16px 20px 0;
+}
+.mg-cardhead h2{ font-size:15px; font-weight:600; }
+.mg-cardhead .sub{ font-size:12px; color:var(--ink-3); }
+.mg-cardhead .right{ margin-left:auto; font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); }
+
+/* ============================================================
+   TILE — ícono cuadrado 40/44px, color muted del usuario
+   tw: w-11 h-11 rounded-xl grid place-items-center text-white
+   ============================================================ */
+.mg-tile{
+  width:42px; height:42px; border-radius:var(--r-tile);
+  display:grid; place-items:center; color:#fff; background:var(--tc,#5F7386);
+}
+.mg-tile svg{ width:20px; height:20px; }
+.mg-tile.sm{ width:34px; height:34px; border-radius:10px; }
+.mg-tile.sm svg{ width:17px; height:17px; }
+.mg-tile.neutral{ background:var(--brand-tint); color:var(--brand); }
+body.dark .mg-tile.neutral{ color:#9DBAA9; }
+
+/* ============================================================
+   PILLS — UNA familia. base 24px / .sm 20px
+   tw base: inline-flex items-center gap-1.5 h-6 px-2.5 rounded-full text-xs font-semibold
+   variantes: tint (categoría, dot color), solid (método pago), neutral, semantic, outline
+   ============================================================ */
+.mg-pill{
+  display:inline-flex; align-items:center; gap:6px;
+  height:24px; padding:0 10px; border-radius:999px;
+  font-size:12px; font-weight:600; line-height:1; white-space:nowrap;
+  max-width:100%;
+}
+.mg-pill .tx{ overflow:hidden; text-overflow:ellipsis; }
+.mg-pill.sm{ height:20px; padding:0 8px; font-size:11px; gap:5px; }
+.mg-pill .dot{ width:6px; height:6px; border-radius:999px; background:var(--pc,currentColor); }
+.mg-pill.tint{ background:color-mix(in srgb, var(--pc) 11%, var(--card)); color:color-mix(in srgb, var(--pc) 80%, var(--ink)); }
+.mg-pill.solid{ background:var(--pc,#5F7386); color:#fff; }
+.mg-pill.neutral{ background:color-mix(in srgb, var(--ink) 7%, var(--card)); color:var(--ink-2); }
+.mg-pill.outline{ background:var(--card); border:1px solid var(--line-strong); color:var(--ink-2); height:26px; }
+.mg-pill.teal{ background:var(--teal-tint); color:var(--teal); }
+.mg-pill.rose{ background:var(--rose-tint); color:var(--rose); }
+.mg-pill.amber{ background:var(--amber-tint); color:var(--amber); }
+.mg-pill.brand{ background:var(--brand-tint); color:var(--brand); }
+body.dark .mg-pill.brand{ color:#9DBAA9; }
+
+/* ============================================================
+   BOTONES — 40px / .sm 32px, radio 10
+   tw: h-10 px-4 rounded-[10px] font-semibold text-sm inline-flex items-center gap-2
+   ============================================================ */
+.mg-btn{
+  height:40px; padding:0 16px; border-radius:var(--r-btn);
+  font-size:14px; font-weight:600; white-space:nowrap;
+  display:inline-flex; align-items:center; gap:8px;
+  transition:background .12s;
+}
+.mg-btn svg{ width:17px; height:17px; }
+.mg-btn.sm{ height:32px; padding:0 12px; font-size:13px; border-radius:8px; }
+.mg-btn.primary{ background:var(--brand); color:#fff; }
+.mg-btn.primary:hover{ background:var(--brand-strong); }
+.mg-btn.secondary{ background:var(--card); border:1px solid var(--line-strong); color:var(--ink); }
+.mg-btn.secondary:hover{ background:var(--brand-tint); }
+.mg-btn.ghost{ color:var(--brand); }
+.mg-btn.ghost:hover{ background:var(--brand-tint); }
+body.dark .mg-btn.ghost{ color:#9DBAA9; }
+.mg-btn.danger{ background:var(--rose-tint); color:var(--rose); }
+.mg-btn[disabled]{ opacity:.45; cursor:not-allowed; }
+
+/* ============================================================
+   CAMPOS — 40px / .compact 32px (tabla + verify modal)
+   tw: h-10 px-3 rounded-[10px] border border-[--line-strong] bg-white text-sm
+   focus: border-brand ring-4 ring-brand/12
+   ============================================================ */
+.mg-field{
+  height:40px; width:100%; padding:0 12px; border-radius:var(--r-field);
+  border:1px solid var(--line-strong); background:var(--card);
+  font-size:14px; color:var(--ink); display:flex; align-items:center; gap:8px;
+}
+.mg-field input{ border:0; outline:0; background:none; font:inherit; color:inherit; width:100%; }
+.mg-field ::placeholder{ color:var(--ink-3); }
+.mg-field:focus-within{ border-color:var(--brand); box-shadow:0 0 0 3px color-mix(in srgb, var(--brand) 14%, transparent); }
+.mg-field svg{ width:17px; height:17px; color:var(--ink-3); }
+.mg-field .chev{ margin-left:auto; }
+.mg-label{ display:block; font-size:12.5px; font-weight:600; color:var(--ink-2); margin-bottom:6px; }
+
+/* select/inputs compactos: h-8 rounded-lg text-[13px] */
+.mg-compact{
+  height:32px; padding:0 9px; border-radius:var(--r-compact);
+  border:1px solid var(--line-strong); background:var(--card);
+  font-size:13px; color:var(--ink); display:inline-flex; align-items:center; gap:6px;
+}
+.mg-compact:focus-within{ border-color:var(--brand); box-shadow:0 0 0 3px color-mix(in srgb, var(--brand) 14%, transparent); }
+.mg-compact input{ border:0; outline:0; background:none; font:inherit; color:inherit; width:100%; text-align:inherit; }
+.mg-compact .dot{ width:7px; height:7px; border-radius:999px; background:var(--pc,var(--ink-3)); }
+.mg-compact svg{ width:14px; height:14px; color:var(--ink-3); margin-left:auto; }
+
+/* Chips de rango de fechas (Este mes / 3 meses …) */
+.mg-chiprow{ display:flex; gap:8px; flex-wrap:wrap; }
+.mg-chip{
+  height:28px; padding:0 12px; border-radius:999px; font-size:12.5px; font-weight:500;
+  border:1px solid var(--line-strong); background:var(--card); color:var(--ink-2);
+}
+.mg-chip:hover{ background:var(--brand-tint); }
+.mg-chip.on{ background:var(--brand); border-color:var(--brand); color:#fff; font-weight:600; }
+
+/* ============================================================
+   FILA DE TRANSACCIÓN — la anatomía única
+   grid: tile 42px · contenido · monto
+   tw: grid grid-cols-[42px_1fr_auto] gap-x-3.5 items-center px-5 py-3.5
+   ============================================================ */
+.mg-rows{ display:flex; flex-direction:column; }
+.mg-rows > * + *{ border-top:1px solid var(--line); }
+.mg-row{
+  display:grid; grid-template-columns:42px 1fr auto; gap:0 14px;
+  align-items:center; padding:13px 20px;
+}
+.mg-row:hover{ background:color-mix(in srgb, var(--ink) 2.5%, var(--card)); }
+.mg-row .tt{ font-size:14px; font-weight:600; }
+/* Folio/ID dentro del título de fila: INV-10633 · INC-474 */
+.rid{ font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:11.5px; font-weight:500; color:var(--ink-3); letter-spacing:.02em; margin-right:8px; position:relative; top:-1px; }
+.mg-row.noicon{ grid-template-columns:1fr auto; }
+.mg-row .ss{ font-size:12.5px; color:var(--ink-3); margin-top:2px; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.mg-row .ss .pdot{ width:7px; height:7px; border-radius:999px; background:var(--pc,#5F7386); }
+.mg-row .amt{ text-align:right; font-size:14.5px; font-weight:700; }
+.mg-row .amt .meta{ font-size:11.5px; font-weight:500; color:var(--ink-3); margin-top:2px; }
+.amt-in{ color:var(--teal); }
+.amt-out{ color:var(--ink); }
+
+/* Encabezado de grupo por fecha: uppercase 11px + total del día */
+.mg-daterow{
+  display:flex; align-items:baseline; gap:10px;
+  padding:14px 20px 8px;
+  font-size:11px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-3);
+}
+.mg-daterow .sum{ margin-left:auto; letter-spacing:0; font-size:12px; font-weight:600; }
+
+/* ============================================================
+   TABLA — una sola anatomía
+   thead: text-[11px] uppercase tracking-wider text-ink-3 font-semibold
+   ============================================================ */
+.mg-table{ width:100%; border-collapse:collapse; }
+.mg-table th{
+  text-align:left; font-size:11px; font-weight:600; letter-spacing:.07em;
+  text-transform:uppercase; color:var(--ink-3);
+  padding:10px 14px; border-bottom:1px solid var(--line);
+}
+.mg-table td{ padding:12px 14px; border-bottom:1px solid var(--line); font-size:13.5px; }
+.mg-table tr:last-child td{ border-bottom:0; }
+.mg-table tbody tr:hover td{ background:color-mix(in srgb, var(--ink) 2.5%, var(--card)); }
+.mg-table .r{ text-align:right; }
+.mg-table td.r{ font-weight:600; }
+
+/* ============================================================
+   PAGINACIÓN compacta — una sola posición (arriba-derecha de la card)
+   tw: h-8 min-w-8 rounded-lg border text-[13px]
+   ============================================================ */
+.mg-pager{ display:flex; align-items:center; gap:4px; }
+.mg-pager button{
+  height:30px; min-width:30px; padding:0 6px; border-radius:8px;
+  border:1px solid transparent; font-size:12.5px; font-weight:600; color:var(--ink-2);
+  display:grid; place-items:center;
+}
+.mg-pager button svg{ width:15px; height:15px; }
+.mg-pager button:hover{ background:var(--brand-tint); }
+.mg-pager button.on{ background:var(--brand); color:#fff; }
+.mg-pager .info{ font-size:12.5px; color:var(--ink-3); margin-left:10px; white-space:nowrap; }
+.mg-pager .info b{ color:var(--ink-2); font-weight:600; }
+
+/* ============================================================
+   MODAL — header verde 56px, cuerpo, footer con borde
+   ============================================================ */
+.mg-scrim{ position:fixed; inset:0; background:rgb(23 32 27/.45); display:grid; place-items:center; padding:32px; z-index:50; }
+.mg-modal{
+  background:var(--card); border-radius:16px; overflow:hidden;
+  box-shadow:var(--shadow-overlay); width:100%; max-height:100%;
+  display:flex; flex-direction:column;
+}
+.mg-modalhead{
+  background:var(--brand); color:#fff; min-height:56px;
+  display:flex; align-items:center; gap:12px; padding:0 20px; flex:none;
+}
+.mg-modalhead .t{ font-size:15.5px; font-weight:600; }
+.mg-modalhead .s{ font-size:12px; color:rgb(255 255 255/.65); margin-top:1px; }
+.mg-modalhead .x{ margin-left:auto; width:34px; height:34px; border-radius:9px; display:grid; place-items:center; color:rgb(255 255 255/.8); }
+.mg-modalhead .x:hover{ background:rgb(255 255 255/.12); color:#fff; }
+.mg-modalbody{ overflow:auto; }
+.mg-modalfoot{
+  border-top:1px solid var(--line); padding:14px 20px;
+  display:flex; align-items:center; gap:10px; flex:none; background:var(--card);
+}
+.mg-modalfoot .actions{ margin-left:auto; display:flex; gap:10px; }
+
+/* ============================================================
+   ESTADO VACÍO + SKELETON
+   ============================================================ */
+.mg-empty{ text-align:center; padding:56px 24px; }
+.mg-empty .cir{
+  width:64px; height:64px; border-radius:999px; margin:0 auto 16px;
+  background:var(--brand-tint); color:var(--brand); display:grid; place-items:center;
+}
+.mg-empty .cir svg{ width:28px; height:28px; }
+body.dark .mg-empty .cir{ color:#9DBAA9; }
+.mg-empty h3{ font-size:15px; font-weight:600; }
+.mg-empty p{ font-size:13px; color:var(--ink-3); margin:4px 0 18px; }
+
+.mg-skel{ border-radius:8px; background:linear-gradient(90deg, color-mix(in srgb,var(--ink) 5%,var(--card)) 25%, color-mix(in srgb,var(--ink) 9%,var(--card)) 45%, color-mix(in srgb,var(--ink) 5%,var(--card)) 65%); background-size:220% 100%; animation:mgsk 1.4s infinite linear; }
+@keyframes mgsk{ from{background-position:120% 0} to{background-position:-120% 0} }
+
+/* ============================================================
+   BARRAS de distribución (lista categorías)
+   ============================================================ */
+.mg-bars{ display:flex; flex-direction:column; gap:14px; }
+.mg-bar .lbl{ display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px; align-items:center; }
+.mg-bar .lbl b{ font-weight:600; }
+.mg-bar .track{ height:6px; border-radius:999px; background:color-mix(in srgb, var(--ink) 6%, var(--card)); overflow:hidden; }
+.mg-bar .fill{ height:100%; border-radius:999px; background:var(--pc,var(--e-forest)); }
+
+/* Héroe monetario: gold SOLO aquí */
+.mg-hero{ font-size:30px; font-weight:700; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+.mg-hero.gold{ color:var(--gold); }
+.mg-kicker{ font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3); }
+
+/* Toggle (mat-slide-toggle compacto) */
+.mg-toggle{ display:inline-block; width:36px; height:20px; border-radius:999px; background:var(--line-strong); position:relative; flex:none; }
+.mg-toggle::after{ content:""; position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:999px; background:#fff; box-shadow:0 1px 2px rgb(0 0 0/.2); transition:left .12s; }
+.mg-toggle.on{ background:var(--brand); }
+.mg-toggle.on::after{ left:18px; }
+
+/* Scrollbars sutiles */
+::-webkit-scrollbar{ width:10px; height:10px; }
+::-webkit-scrollbar-thumb{ background:color-mix(in srgb, var(--ink) 16%, transparent); border-radius:999px; border:3px solid transparent; background-clip:content-box; }

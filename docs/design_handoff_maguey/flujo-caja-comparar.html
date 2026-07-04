@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flujo de caja · Comparar — Maguey 2.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/maguey.css">
+<style>
+  /* Barra de comparación: A vs B — selects MULTI: las selecciones son pills dentro del campo */
+  .cmpbar{
+    display:flex; align-items:center; gap:10px; padding:14px 16px; margin-bottom:20px;
+    background:var(--card); border:1px solid var(--line); border-radius:14px; flex-wrap:wrap;
+  }
+  .multifield{
+    min-height:40px; border:1px solid var(--line-strong); border-radius:10px; background:var(--card);
+    display:flex; align-items:center; gap:6px; flex-wrap:wrap; padding:4px 10px 4px 6px; width:296px;
+  }
+  .multifield .mg-pill{ height:26px; }
+  .multifield .mg-pill .rm{ width:14px; height:14px; display:grid; place-items:center; margin-left:2px; opacity:.6; }
+  .multifield .mg-pill .rm svg{ width:11px; height:11px; }
+  .multifield > svg{ width:16px; height:16px; color:var(--ink-3); margin-left:auto; }
+  .cmpbar .vs{
+    width:34px; height:34px; border-radius:999px; background:var(--brand); color:#fff;
+    display:grid; place-items:center; font-size:11.5px; font-weight:700; flex:none;
+  }
+  .side-a{ --side:#2A4C3C; }
+  .side-b{ --side:#C9A45C; }
+  .sidetag{ width:8px; height:22px; border-radius:4px; background:var(--side); flex:none; }
+
+  .duo{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .duo3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:20px; }
+  .stat{ padding:18px 20px; }
+  .stat .v{ font-size:22px; font-weight:700; font-variant-numeric:tabular-nums; margin-top:2px; }
+  .stat .l{ font-size:12px; color:var(--ink-3); margin-top:2px; }
+  .stat .head{ display:flex; align-items:center; gap:8px; margin-bottom:4px; }
+
+  /* Barras pareadas por comercio */
+  .pair{ padding:0 20px 18px; display:flex; flex-direction:column; gap:16px; }
+  .prow .lbl{ display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px; }
+  .prow .lbl b{ font-weight:600; }
+  .prow .lbl .nums{ display:flex; gap:14px; font-variant-numeric:tabular-nums; font-size:12.5px; color:var(--ink-2); }
+  .prow .nums i{ width:8px; height:8px; border-radius:2px; display:inline-block; margin-right:5px; }
+  .prow .track{ height:7px; border-radius:999px; background:color-mix(in srgb, var(--ink) 6%, var(--card)); overflow:hidden; margin-bottom:4px; }
+  .prow .fill{ height:100%; border-radius:999px; }
+
+  .panelhead{ display:flex; align-items:center; gap:10px; padding:16px 20px 12px; }
+  .panelhead h2{ font-size:15px; font-weight:600; }
+  .panelhead .sum{ margin-left:auto; font-size:12.5px; color:var(--ink-3); }
+  .panelhead .sum b{ color:var(--ink); font-variant-numeric:tabular-nums; }
+  .idc{ font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:12px; color:var(--ink-3); }
+</style>
+</head>
+<body class="depth-a">
+<div class="mg-shell">
+  <aside class="mg-side" data-shell="reportes"></aside>
+  <div class="mg-main">
+    <div data-topbar></div>
+    <div class="mg-page">
+
+      <div class="mg-pagehead">
+        <div>
+          <h1>Flujo de caja</h1>
+          <div class="sub">Modo comparación — se entra con el botón «Comparar» del Flujo de caja</div>
+        </div>
+        <div class="actions">
+          <button class="mg-btn secondary sm"><i data-i="x"></i>Salir de comparar</button>
+        </div>
+      </div>
+
+      <!-- Barra A vs B: cada lado acepta VARIAS categorías/subcategorías (pills) + su período -->
+      <div class="cmpbar">
+        <span class="sidetag side-a" style="--side:#2A4C3C;"></span>
+        <div class="multifield">
+          <span class="mg-pill tint sm" style="--pc:#C9A45C"><span class="dot"></span>Abarrotes<span class="rm"><i data-i="x"></i></span></span>
+          <span class="mg-pill tint sm" style="--pc:#C9A45C"><span class="dot"></span>Restaurant<span class="rm"><i data-i="x"></i></span></span>
+          <i data-i="chevD"></i>
+        </div>
+        <label class="mg-field" style="width:148px;"><i data-i="cal"></i><input value="Mayo 2026"></label>
+        <span class="vs">VS</span>
+        <span class="sidetag side-b" style="--side:#C9A45C;"></span>
+        <div class="multifield">
+          <span class="mg-pill tint sm" style="--pc:#C9A45C"><span class="dot"></span>Abarrotes<span class="rm"><i data-i="x"></i></span></span>
+          <span class="mg-pill tint sm" style="--pc:#C9A45C"><span class="dot"></span>Restaurant<span class="rm"><i data-i="x"></i></span></span>
+          <i data-i="chevD"></i>
+        </div>
+        <label class="mg-field" style="width:148px;"><i data-i="cal"></i><input value="Junio 2026"></label>
+        <span style="margin-left:auto"></span>
+        <button class="mg-btn primary sm">Comparar</button>
+      </div>
+
+      <!-- Resultado: A, B y diferencia -->
+      <div class="duo3">
+        <div class="mg-card stat">
+          <div class="head"><span class="sidetag" style="--side:#2A4C3C; height:16px;"></span><span class="mg-kicker">Abarrotes + Restaurant · Mayo</span></div>
+          <div class="v num">$9,494.10</div>
+          <div class="l">26 gastos · promedio $365.16</div>
+        </div>
+        <div class="mg-card stat">
+          <div class="head"><span class="sidetag" style="--side:#C9A45C; height:16px;"></span><span class="mg-kicker">Abarrotes + Restaurant · Junio</span></div>
+          <div class="v num">$11,092.05</div>
+          <div class="l">30 gastos · promedio $369.74</div>
+        </div>
+        <div class="mg-card stat">
+          <div class="head"><span class="mg-kicker">Diferencia</span></div>
+          <div class="v num" style="color:var(--rose)">+$1,597.95</div>
+          <div class="l"><span class="mg-pill rose sm">+16.8%</span> junio gastó más</div>
+        </div>
+      </div>
+
+      <!-- Barras pareadas por comercio -->
+      <div class="mg-card" style="margin-bottom:20px;">
+        <div class="panelhead">
+          <h2>Por subcategoría</h2>
+          <span class="sum"><i style="width:8px;height:8px;border-radius:2px;background:#2A4C3C;display:inline-block;margin-right:5px;"></i>Mayo &nbsp;&nbsp;<i style="width:8px;height:8px;border-radius:2px;background:#C9A45C;display:inline-block;margin-right:5px;"></i>Junio</span>
+        </div>
+        <div class="pair">
+          <div class="prow">
+            <div class="lbl"><b>Abarrotes</b><span class="nums"><span><i style="background:#2A4C3C"></i>$6,842.10</span><span><i style="background:#C9A45C"></i>$7,915.45</span></span></div>
+            <div class="track"><div class="fill" style="width:86%; background:#2A4C3C;"></div></div>
+            <div class="track"><div class="fill" style="width:100%; background:#C9A45C;"></div></div>
+          </div>
+          <div class="prow">
+            <div class="lbl"><b>Restaurant</b><span class="nums"><span><i style="background:#2A4C3C"></i>$2,652.00</span><span><i style="background:#C9A45C"></i>$3,176.60</span></span></div>
+            <div class="track"><div class="fill" style="width:34%; background:#2A4C3C;"></div></div>
+            <div class="track"><div class="fill" style="width:40%; background:#C9A45C;"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detalle lado a lado -->
+      <div class="duo">
+        <div class="mg-card">
+          <div class="panelhead">
+            <span class="sidetag" style="--side:#2A4C3C; height:16px;"></span>
+            <h2>Mayo 2026</h2>
+            <span class="sum">26 gastos · <b class="num">$9,494.10</b></span>
+          </div>
+          <table class="mg-table">
+            <thead><tr><th style="width:100px; padding-left:20px;">Folio</th><th style="width:90px">Fecha</th><th>Comercio</th><th class="r" style="width:110px">Monto</th></tr></thead>
+            <tbody>
+              <tr><td class="idc" style="padding-left:20px;">INV-10501</td><td class="num" style="color:var(--ink-3)">31 may</td><td>Costco</td><td class="r num">$2,104.60</td></tr>
+              <tr><td class="idc" style="padding-left:20px;">INV-10488</td><td class="num" style="color:var(--ink-3)">24 may</td><td>Soriana</td><td class="r num">$1,102.20</td></tr>
+              <tr><td class="idc" style="padding-left:20px;">INV-10470</td><td class="num" style="color:var(--ink-3)">17 may</td><td>Costco</td><td class="r num">$1,805.80</td></tr>
+              <tr><td class="idc" style="padding-left:20px;">INV-10455</td><td class="num" style="color:var(--ink-3)">10 may</td><td>Walmart</td><td class="r num">$945.40</td></tr>
+              <tr><td class="idc" style="padding-left:20px;">INV-10440</td><td class="num" style="color:var(--ink-3)">03 may</td><td>Soriana</td><td class="r num">$884.10</td></tr>
+            </tbody>
+          </table>
+          <div style="padding:10px 20px;"><button class="mg-btn ghost sm">Ver los 26 gastos</button></div>
+        </div>
+
+        <div class="mg-card">
+          <div class="panelhead">
+            <span class="sidetag" style="--side:#C9A45C; height:16px;"></span>
+            <h2>Junio 2026</h2>
+            <span class="sum">30 gastos · <b class="num">$11,092.05</b></span>
+          </div>
+          <table class="mg-table">
+            <thead><tr><th style="width:100px; padding-left:20px;">Folio</th><th style="width:90px">Fecha</th><th>Comercio</th><th class="r" style="width:110px">Monto</th></tr></thead>
+            <tbody>
+              <tr><td class="idc" style="padding-left:20px;">INV-10627</td><td class="num" style="color:var(--ink-3)">27 jun</td><td>Costco</td><td class="r num">$3,241.20</td></tr>
+              <tr><td class="idc" style="padding-left:20px;">INV-10611</td><td class="num" style="color:var(--ink-3)">20 jun</td><td>Costco</td><td class="r num">$2,255.00</td></tr>
+              <tr><td class="idc" style="padding-left:20px;">INV-10598</td><td class="num" style="color:var(--ink-3)">14 jun</td><td>Soriana</td><td class="r num">$833.45</td></tr>
+              <tr><td class="idc" style="padding-left:20px;">INV-10581</td><td class="num" style="color:var(--ink-3)">07 jun</td><td>Walmart</td><td class="r num">$985.40</td></tr>
+              <tr><td class="idc" style="padding-left:20px;">INV-10566</td><td class="num" style="color:var(--ink-3)">01 jun</td><td>Soriana</td><td class="r num">$600.40</td></tr>
+            </tbody>
+          </table>
+          <div style="padding:10px 20px;"><button class="mg-btn ghost sm">Ver los 30 gastos</button></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script src="shared/shell.js"></script>
+</body>
+</html>

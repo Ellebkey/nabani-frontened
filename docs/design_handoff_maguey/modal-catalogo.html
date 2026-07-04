@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modales de catálogo — Maguey 2.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/maguey.css">
+<style>
+  body{ overflow:hidden; background:var(--canvas); }
+  .stage{ min-height:100vh; display:flex; align-items:flex-start; justify-content:center; gap:32px; padding:40px; background:rgb(23 32 27/.45); }
+  .slot{ display:flex; flex-direction:column; gap:10px; }
+  .slot > .cap{ font-size:11px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:#fff; opacity:.85; }
+  .form{ padding:20px; display:flex; flex-direction:column; gap:14px; }
+
+  /* Historial de precios */
+  .lastprice{
+    display:flex; align-items:center; gap:12px; padding:14px 16px;
+    background:var(--brand-tint); border-radius:12px;
+  }
+  .lastprice b{ font-size:22px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .hist{ border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  .hrow{ display:flex; align-items:center; gap:10px; padding:10px 14px; font-size:13px; }
+  .hrow + .hrow{ border-top:1px solid var(--line); }
+  .hrow .d{ color:var(--ink-3); font-variant-numeric:tabular-nums; width:110px; }
+  .hrow .merch{ color:var(--ink-2); }
+  .hrow .p{ margin-left:auto; font-weight:600; font-variant-numeric:tabular-nums; }
+  .hrow .mg-pill{ min-width:64px; justify-content:center; }
+</style>
+</head>
+<body class="depth-a">
+
+<div class="stage">
+
+  <!-- CREAR ARTÍCULO -->
+  <div class="slot">
+    <span class="cap">Registrar artículo · desde Inventario o el modal de gasto</span>
+    <div class="mg-modal" style="width:440px;">
+      <div class="mg-modalhead">
+        <div><div class="t">Registrar artículo</div></div>
+        <button class="x"><i data-i="x"></i></button>
+      </div>
+      <div class="form">
+        <div><label class="mg-label">Concepto *</label><label class="mg-field"><input placeholder="Nombre del artículo"></label></div>
+        <div style="font-size:12px; color:var(--ink-3);">La categoría se asigna al usarlo en un gasto</div>
+      </div>
+      <div class="mg-modalfoot">
+        <div class="actions" style="width:100%; justify-content:flex-end;">
+          <button class="mg-btn secondary">Cancelar</button>
+          <button class="mg-btn primary">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDITAR ARTÍCULO + HISTORIAL DE PRECIOS -->
+  <div class="slot">
+    <span class="cap">Actualizar artículo · con tendencia de precio</span>
+    <div class="mg-modal" style="width:500px;">
+      <div class="mg-modalhead">
+        <div>
+          <div class="t">Actualizar artículo</div>
+          <div class="s">ID 259 · 14 compras registradas</div>
+        </div>
+        <button class="x"><i data-i="x"></i></button>
+      </div>
+      <div class="mg-modalbody">
+        <div class="form">
+          <div><label class="mg-label">Concepto *</label><label class="mg-field"><input value="Cena Genérica"></label></div>
+
+          <div>
+            <label class="mg-label">Historial de precios</label>
+            <div class="lastprice">
+              <div>
+                <span class="mg-kicker">Último precio · 26 jun 2026</span>
+                <b class="num" style="display:block;">$410.16</b>
+              </div>
+              <span style="margin-left:auto"></span>
+              <span class="mg-pill rose">▲ +23.5%</span>
+            </div>
+          </div>
+
+          <!-- rose = subió (malo para tu bolsillo) · teal = bajó -->
+          <div class="hist">
+            <div class="hrow"><span class="d num">26 jun 2026</span><span class="merch">Restaurante Bap</span><span class="p num">$410.16</span><span class="mg-pill rose sm num">+23.5%</span></div>
+            <div class="hrow"><span class="d num">07 jun 2026</span><span class="merch">Sushi Kiuri</span><span class="p num">$332.00</span><span class="mg-pill rose sm num">+27.7%</span></div>
+            <div class="hrow"><span class="d num">25 may 2026</span><span class="merch">Tacos Jaime</span><span class="p num">$260.00</span><span class="mg-pill teal sm num">−23.3%</span></div>
+            <div class="hrow"><span class="d num">16 may 2026</span><span class="merch">Asadero Los Primos</span><span class="p num">$339.00</span><span class="mg-pill rose sm num">+4.3%</span></div>
+            <div class="hrow"><span class="d num">09 may 2026</span><span class="merch">Restaurante Bap</span><span class="p num">$325.00</span><span class="mg-pill teal sm num">−11.3%</span></div>
+            <div class="hrow"><span class="d num">02 may 2026</span><span class="merch">Sushi Kiuri</span><span class="p num">$366.50</span><span class="mg-pill neutral sm">—</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="mg-modalfoot">
+        <div class="actions" style="width:100%; justify-content:flex-end;">
+          <button class="mg-btn secondary">Cancelar</button>
+          <button class="mg-btn primary">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CREAR BENEFICIARIO -->
+  <div class="slot">
+    <span class="cap">Registrar beneficiario · desde Inventario o el modal de gasto</span>
+    <div class="mg-modal" style="width:440px;">
+      <div class="mg-modalhead">
+        <div><div class="t">Registrar beneficiario</div></div>
+        <button class="x"><i data-i="x"></i></button>
+      </div>
+      <div class="form">
+        <div><label class="mg-label">Nombre *</label><label class="mg-field"><input placeholder="Comercio o persona"></label></div>
+        <div><label class="mg-label">Método de pago habitual</label>
+          <label class="mg-field"><span class="pdot" style="width:8px;height:8px;border-radius:999px;background:#3B5F82;"></span><input value="5695 – BBVA Débito"><i data-i="chevD" class="chev"></i></label>
+        </div>
+        <div style="font-size:12px; color:var(--ink-3);">Se preselecciona al registrar un gasto con este beneficiario</div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span class="mg-toggle on"></span>
+          <span style="font-size:13.5px; font-weight:500;">Activo</span>
+        </div>
+      </div>
+      <div class="mg-modalfoot">
+        <div class="actions" style="width:100%; justify-content:flex-end;">
+          <button class="mg-btn secondary">Cancelar</button>
+          <button class="mg-btn primary">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script src="shared/shell.js"></script>
+</body>
+</html>

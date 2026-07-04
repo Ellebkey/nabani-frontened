@@ -1,0 +1,132 @@
+<!-- Always-light split screen: form left, illustration right (mirror of the login) -->
+<div class="light grid min-h-screen w-full grid-cols-1 md:grid-cols-2" style="color-scheme: light">
+    <!-- Form panel -->
+    <div class="flex min-w-0 flex-col items-center justify-center bg-card px-6 py-10 sm:px-12">
+        <div class="w-full max-w-[400px]">
+            <!-- Logo -->
+            <div class="w-48">
+                <img src="assets/images/logo/maguey-banner.png" alt="Maguey"/>
+            </div>
+
+            <!-- Title -->
+            <h1 class="mt-8 text-[30px] font-bold leading-9 tracking-tight text-ink">Crear cuenta</h1>
+            <div class="mt-1.5 text-[13px] text-ink-3">
+                ¿Ya tienes una cuenta?
+                <a class="font-semibold text-brand hover:underline" [routerLink]="['/authentication/login']">Iniciar sesión</a>
+            </div>
+
+            <!-- Alert -->
+            @if (showAlert()) {
+                <mg-alert
+                    class="mt-6 block"
+                    [appearance]="'outline'"
+                    [showIcon]="false"
+                    [type]="alertConfig().type"
+                    [@shake]="alertConfig().type === 'error'">
+                    {{ alertConfig().message }}
+                </mg-alert>
+            }
+
+            <!-- Sign Up form -->
+            <form class="mt-8 flex flex-col gap-5" [formGroup]="signUpForm">
+
+                <!-- Name field -->
+                <div>
+                    <label for="displayName" class="mb-1.5 block text-[13px] font-semibold text-ink">
+                        Nombre completo <span class="text-rose">*</span>
+                    </label>
+                    <div class="flex h-11 items-center rounded-field border border-line-strong bg-card px-3.5 focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+                        <input
+                            id="displayName"
+                            type="text"
+                            formControlName="displayName"
+                            placeholder="Tu nombre"
+                            class="w-full border-0 bg-transparent text-[14px] text-ink outline-none placeholder:text-ink-3" />
+                    </div>
+                    @if (displayNameErrors()?.['required']) {
+                        <div class="mt-1.5 text-[12.5px] text-rose">El nombre es obligatorio</div>
+                    }
+                </div>
+
+                <!-- Email field -->
+                <div>
+                    <label for="email" class="mb-1.5 block text-[13px] font-semibold text-ink">
+                        Correo electrónico <span class="text-rose">*</span>
+                    </label>
+                    <div class="flex h-11 items-center rounded-field border border-line-strong bg-card px-3.5 focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+                        <input
+                            id="email"
+                            type="email"
+                            formControlName="email"
+                            placeholder="tu@correo.com"
+                            class="w-full border-0 bg-transparent text-[14px] text-ink outline-none placeholder:text-ink-3" />
+                    </div>
+                    @if (emailErrors()?.['required']) {
+                        <div class="mt-1.5 text-[12.5px] text-rose">El correo es obligatorio</div>
+                    }
+                    @if (emailErrors()?.['email']) {
+                        <div class="mt-1.5 text-[12.5px] text-rose">Ingresa un correo electronico valido</div>
+                    }
+                </div>
+
+                <!-- Password field -->
+                <div>
+                    <label for="password" class="mb-1.5 block text-[13px] font-semibold text-ink">
+                        Contraseña <span class="text-rose">*</span>
+                    </label>
+                    <div class="flex h-11 items-center gap-2 rounded-field border border-line-strong bg-card px-3.5 focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+                        <input
+                            id="password"
+                            type="password"
+                            formControlName="password"
+                            placeholder="Mínimo 6 caracteres"
+                            class="w-full border-0 bg-transparent text-[14px] text-ink outline-none placeholder:text-ink-3"
+                            #passwordField />
+                        <button
+                            type="button"
+                            class="grid h-7 w-7 flex-none place-items-center rounded-lg text-ink-3 hover:text-ink"
+                            aria-label="Ver u ocultar"
+                            (click)="passwordField.type === 'password' ? passwordField.type = 'text' : passwordField.type = 'password'">
+                            @if (passwordField.type === 'password') {
+                                <mat-icon class="icon-size-[18px] text-current" [svgIcon]="'heroicons_outline:eye'"></mat-icon>
+                            } @else {
+                                <mat-icon class="icon-size-[18px] text-current" [svgIcon]="'heroicons_outline:eye-slash'"></mat-icon>
+                            }
+                        </button>
+                    </div>
+                    @if (passwordErrors()?.['required']) {
+                        <div class="mt-1.5 text-[12.5px] text-rose">La contraseña es obligatoria</div>
+                    } @else if (passwordErrors()?.['minlength']) {
+                        <div class="mt-1.5 text-[12.5px] text-rose">La contraseña debe tener al menos 6 caracteres</div>
+                    } @else {
+                        <div class="mt-1.5 text-[12.5px] text-ink-3">Mínimo 6 caracteres</div>
+                    }
+                </div>
+
+                <!-- Submit button -->
+                <button
+                    class="w-full !h-12 !min-h-12 mt-1"
+                    mat-flat-button
+                    [color]="'primary'"
+                    [disabled]="isLoading()"
+                    (click)="onSubmit()">
+                    @if (!isLoading()) {
+                        <span>Crear cuenta</span>
+                    } @else {
+                        <mat-progress-spinner
+                            [diameter]="24"
+                            [mode]="'indeterminate'"></mat-progress-spinner>
+                    }
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Illustration panel -->
+    <div class="relative hidden overflow-hidden md:block" aria-hidden="true">
+        <img
+            src="assets/images/logo/financial_background.png"
+            alt=""
+            class="absolute inset-0 h-full w-full object-cover" />
+    </div>
+</div>

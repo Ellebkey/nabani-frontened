@@ -1,0 +1,23 @@
+/* Handoff shimmer (mg-skel): animated gradient Tailwind can't generate.
+   Geometry (w/h/rounded) is set by the consumer with Tailwind classes. */
+:host {
+  display: block;
+  border-radius: 8px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, rgb(var(--maguey-ink)) 5%, rgb(var(--maguey-card))) 25%,
+    color-mix(in srgb, rgb(var(--maguey-ink)) 9%, rgb(var(--maguey-card))) 45%,
+    color-mix(in srgb, rgb(var(--maguey-ink)) 5%, rgb(var(--maguey-card))) 65%
+  );
+  background-size: 220% 100%;
+  animation: mg-skeleton-shimmer 1.4s infinite linear;
+}
+
+@keyframes mg-skeleton-shimmer {
+  from {
+    background-position: 120% 0;
+  }
+  to {
+    background-position: -120% 0;
+  }
+}

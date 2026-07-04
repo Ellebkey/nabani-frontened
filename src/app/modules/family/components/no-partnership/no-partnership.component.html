@@ -1,0 +1,48 @@
+<div class="bg-card rounded-card flex w-full flex-col items-center px-6 py-14 text-center">
+  <div class="mb-4 grid h-16 w-16 place-items-center rounded-full bg-brand-tint text-brand">
+    <mat-icon class="icon-size-7 text-current" [svgIcon]="'heroicons_outline:users'"></mat-icon>
+  </div>
+
+  <h3 class="text-[15px] font-semibold text-ink">
+    Aún no tienes un hogar
+  </h3>
+  <p class="mx-auto mb-6 mt-1 max-w-md text-[13px] text-ink-3">
+    El Modo Familiar comparte automáticamente los gastos del hogar con tu pareja —
+    todas las categorías excepto las personales (como "Personal") — manteniendo lo
+    demás privado.
+  </p>
+
+  @if (isPremium) {
+    <div class="flex w-full max-w-md flex-col items-center gap-3 sm:flex-row">
+      <mat-form-field class="mg-mat-dense w-full" subscriptSizing="dynamic">
+        <mat-label>Nombre del hogar (opcional)</mat-label>
+        <input matInput [formControl]="nameControl" placeholder="Casa García" maxlength="100">
+      </mat-form-field>
+      <button
+        class="w-full whitespace-nowrap sm:w-auto"
+        mat-flat-button
+        [color]="'primary'"
+        [disabled]="loading()"
+        (click)="createPartnership()">
+        <mat-icon class="mr-2 icon-size-5" [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+        Crear mi hogar
+      </button>
+    </div>
+  } @else {
+    <div class="flex items-center justify-center gap-2 text-amber">
+      <mat-icon class="icon-size-5 text-current" [svgIcon]="'heroicons_outline:star'"></mat-icon>
+      <span class="text-[14px] font-semibold">Función Premium</span>
+    </div>
+    <p class="mx-auto mt-1 max-w-md text-[13px] text-ink-3">
+      Crear un hogar requiere una cuenta Premium. Si tu pareja ya tiene Premium,
+      pídele que te envíe una invitación: aceptar es gratis.
+    </p>
+  }
+
+  <a
+    class="mt-6 inline-flex items-center text-[13px] font-semibold text-brand hover:underline"
+    [routerLink]="['/family/accept']">
+    <mat-icon class="mr-1 icon-size-5 text-current" [svgIcon]="'heroicons_outline:envelope-open'"></mat-icon>
+    ¿Recibiste una invitación? Acéptala aquí
+  </a>
+</div>

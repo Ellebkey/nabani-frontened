@@ -1,0 +1,139 @@
+<div class="flex flex-col flex-auto w-full">
+  <div class="flex flex-col w-full max-w-screen-xl mx-auto p-4 sm:p-6 md:p-8">
+    <!-- Page header -->
+    <div class="mb-5 flex flex-col items-start gap-4 sm:flex-row">
+      <div>
+        <h1 class="text-[23px] font-bold leading-[30px] tracking-tight text-ink">Gastos</h1>
+        <div class="mt-0.5 text-[13px] text-ink-3 tabular-nums">{{ pagination().count | number }} movimientos</div>
+      </div>
+      <div class="flex items-center gap-2.5 sm:ml-auto">
+        <button mat-stroked-button (click)="openReceiptScan()">
+          <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:camera'"></mat-icon>
+          <span class="ml-2">Escanear</span>
+        </button>
+        <button mat-flat-button [color]="'primary'" (click)="openCreateExpense()">
+          <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+          <span class="ml-2">Nuevo gasto</span>
+        </button>
+      </div>
+    </div>
+
+    @if (pagination().count === 0 && !pagination().searchText && !hasActiveFilters() && isDataLoaded()) {
+      <div class="bg-card rounded-card mt-4 w-full">
+        <mg-empty-state
+          icon="heroicons_outline:banknotes"
+          title="No hay gastos registrados"
+          message="Los gastos aparecerán aquí cuando los registres.">
+          <button mat-stroked-button (click)="openCreateExpense()">
+            <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+            <span class="ml-2">Crear primer gasto</span>
+          </button>
+        </mg-empty-state>
+      </div>
+    } @else {
+      <!-- Unified filters: same height (40px), same radius -->
+      <form
+        [formGroup]="expensesForm"
+        class="mb-5 grid w-full grid-cols-1 gap-2.5 md:grid-cols-2 lg:grid-cols-[300px_1fr_1fr_220px]">
+        <label
+          class="flex h-10 items-center gap-2 rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+          <mat-icon class="icon-size-4 text-ink-3" [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+          <input
+            class="w-full border-0 bg-transparent outline-none placeholder:text-ink-3"
+            placeholder="Buscar por nombre"
+            [formControl]="searchControl" />
+        </label>
+
+        <ng-select
+          [items]="merchantList()"
+          bindLabel="name"
+          bindValue="id"
+          formControlName="merchantId"
+          [virtualScroll]="true"
+          [multiple]="true"
+          placeholder="Beneficiario"
+        ></ng-select>
+
+        <ng-select
+          [items]="paymentMethodList()"
+          bindLabel="name"
+          bindValue="id"
+          formControlName="paymentMethodId"
+          [virtualScroll]="true"
+          [multiple]="true"
+          placeholder="Método de pago">
+          <ng-template ng-label-tmp let-item="item" let-clear="clear">
+            <span class="ng-value-icon left" (click)="clear(item)" aria-hidden="true">×</span>
+            <span class="ng-value-label inline-flex items-center gap-1.5">
+              <mg-dot [color]="item.backgroundColor"></mg-dot>
+              {{ item.name }}
+            </span>
+          </ng-template>
+          <ng-template ng-option-tmp let-item="item">
+            <span class="inline-flex items-center gap-1.5">
+              <mg-dot [color]="item.backgroundColor"></mg-dot>
+              {{ item.name }}
+            </span>
+          </ng-template>
+        </ng-select>
+
+        <app-date-range-filter [defaultPreset]="'none'" (rangeChange)="onDateRangeChange($event)">
+        </app-date-range-filter>
+      </form>
+
+      <!-- Distribution + List -->
+      <div class="grid w-full grid-cols-1 items-start gap-5 lg:grid-cols-[340px_1fr]">
+        <div class="bg-card rounded-card hidden lg:block">
+          @if (expensesByCategory()) {
+            <app-expenses-category-chart
+              [expensesByCategory]="expensesByCategory()"
+              [dateLabel]="chartDateLabel()">
+            </app-expenses-category-chart>
+          }
+        </div>
+
+        <div id="expenses-list-card" class="bg-card rounded-card overflow-hidden">
+          <div class="flex flex-wrap items-center gap-3 border-b border-line px-5 pb-3 pt-4">
+            <h2 class="text-[15px] font-semibold text-ink">Movimientos</h2>
+            <div class="ml-auto" [class.opacity-60]="!isDataLoaded()" [class.pointer-events-none]="!isDataLoaded()">
+              <mg-pager
+                [limit]="pagination().limit"
+                [offset]="pagination().offset"
+                [count]="pagination().count"
+                (pageChange)="onPageChange($event)">
+              </mg-pager>
+            </div>
+          </div>
+
+          @if (!isDataLoaded()) {
+            @for (i of [1, 2, 3, 4, 5, 6, 7, 8]; track i) {
+              <mg-row-skeleton></mg-row-skeleton>
+            }
+          } @else if (pagination().count === 0) {
+            <mg-empty-state
+              icon="heroicons_outline:magnifying-glass"
+              title="Sin resultados"
+              message="Ajusta los filtros o la búsqueda para encontrar movimientos.">
+            </mg-empty-state>
+          } @else {
+            @for (item of expenses(); track item.dateLabel) {
+              <mg-date-row
+                [label]="item.dateLabel | date: 'EEE — d \'de\' MMMM'"
+                [sum]="groupTotal(item) | currency: 'MXN' : 'symbol-narrow'">
+              </mg-date-row>
+              <div class="flex flex-col divide-y divide-line">
+                @for (expense of item.expenses; track expense.id) {
+                  <app-expenses-item-detail
+                    [expense]="expense"
+                    [categoryColors]="categoryColors()"
+                    (reload)="onReload()">
+                  </app-expenses-item-detail>
+                }
+              </div>
+            }
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>

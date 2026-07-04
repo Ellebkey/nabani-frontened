@@ -1,0 +1,203 @@
+// Custom ng-select Material theme
+.ng-select {
+  position: relative;
+  display: block;
+  width: 100%;
+
+  .ng-select-container {
+    padding: 0;
+    border-radius: 10px;
+    border-width: 1px;
+    border-style: solid;
+    height: 40px !important;
+    align-items: center;
+    background: rgb(var(--maguey-card)) !important;
+    @apply border-line-strong #{!important};
+
+    &:hover {
+      border-color: currentColor;
+    }
+
+    .ng-value-container {
+      padding: 0 12px;
+      align-items: center;
+
+      .ng-placeholder {
+        @apply text-hint #{!important};
+      }
+
+      .ng-value {
+        font-size: 14px;
+        @apply text-default;
+      }
+
+      .ng-input {
+        padding: 0;
+
+        input {
+          font: inherit;
+          background: none;
+          padding: 0;
+          margin: 0;
+          @apply text-default;
+
+          &::placeholder {
+            @apply text-hint #{!important};
+          }
+        }
+      }
+    }
+  }
+
+  // Multiple select specific styles
+  &.ng-select-multiple {
+    .ng-select-container {
+      height: auto !important;
+      min-height: 40px !important;
+
+      .ng-value-container {
+        padding: 6px 12px;
+        flex-wrap: wrap;
+        gap: 4px;
+
+        .ng-placeholder {
+          position: relative !important;
+        }
+
+        .ng-value {
+          margin: 0;
+          padding: 2px 8px;
+          font-size: 12px;
+          font-weight: 600;
+          background: rgba(0, 0, 0, 0.05);
+          border-radius: 999px;
+          white-space: nowrap;
+
+          &.ng-value-disabled {
+            background: rgba(0,0,0,0.1);
+          }
+        }
+
+        .ng-input {
+          padding: 0;
+          height: 24px;
+          display: flex;
+          align-items: center;
+        }
+      }
+    }
+
+    &.ng-select-filtered {
+      .ng-placeholder {
+        display: none;
+      }
+    }
+  }
+
+  &.ng-select-opened,
+  &.ng-select-focused {
+    .ng-select-container {
+      box-shadow: 0 0 0 3px rgb(var(--maguey-brand) / 0.14) !important;
+      @apply border-primary dark:border-primary #{!important};
+    }
+  }
+
+  // 36px variant for the "agregar articulo" form (modal de gasto)
+  &.ng-select-36 {
+    .ng-select-container {
+      height: 36px !important;
+      min-height: 36px !important;
+      border-radius: 9px;
+      font-size: 13px;
+    }
+  }
+
+  // Dense variant to match Material's dense form fields
+  &.ng-select-dense {
+    .ng-select-container {
+      height: 40px !important;
+    }
+
+    &.ng-select-multiple .ng-select-container {
+      height: auto !important;
+      min-height: 40px !important;
+    }
+  }
+
+  // Invalid state
+  &.ng-invalid.ng-touched {
+    .ng-select-container {
+      @apply border-warn dark:border-warn #{!important};
+    }
+  }
+
+  // Disabled state
+  &.ng-select-disabled {
+    opacity: 0.7;
+
+    .ng-select-container {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+  }
+}
+
+.ng-select.ng-select-multiple .ng-select-container .ng-value-container .ng-value {
+  margin-bottom: 0 !important;
+  background-color: rgba(var(--mg-primary-rgb), 0.1) !important;
+  color: var(--primary-color) !important;
+}
+
+/* Dropdown panel — TOP-LEVEL SELECTOR on purpose: with [appendTo]="body"
+   the panel hangs directly off <body>, outside .ng-select, so any nested
+   rule never applies to it (which is why it rendered white in dark). */
+.ng-dropdown-panel {
+  margin-top: 4px !important;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgb(var(--maguey-line));
+  box-shadow: 0 12px 40px -8px rgb(23 32 27 / 0.28);
+  background: rgb(var(--maguey-card));
+
+  /* The vendor positional variants (.ng-select-bottom / -top) out-specify the
+     base rule and repaint one edge light gray — pin all four edges to the token */
+  &.ng-select-bottom,
+  &.ng-select-top,
+  &.ng-select-left,
+  &.ng-select-right {
+    border-color: rgb(var(--maguey-line));
+    border-radius: 10px;
+  }
+
+  .ng-dropdown-panel-items {
+    .ng-option {
+      padding: 8px 12px;
+      font-size: 13px;
+      background: rgb(var(--maguey-card));
+      color: rgb(var(--maguey-ink));
+
+      &.ng-option-marked {
+        background: rgb(var(--maguey-brand-tint)) !important;
+        color: rgb(var(--maguey-ink)) !important;
+      }
+
+      &.ng-option-selected {
+        background: rgb(var(--maguey-brand-tint)) !important;
+        color: rgb(var(--maguey-ink)) !important;
+        font-weight: 600;
+      }
+
+      &.ng-option-disabled {
+        color: rgb(var(--maguey-ink-3));
+      }
+    }
+
+    .ng-optgroup {
+      color: rgb(var(--maguey-ink-3));
+    }
+  }
+}
+
+// Ensure dropdown panels appended to body render above MatDialog overlay
+body > .ng-dropdown-panel {
+  z-index: 1100;
+}

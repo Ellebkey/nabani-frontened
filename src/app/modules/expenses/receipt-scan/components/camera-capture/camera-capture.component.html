@@ -1,0 +1,113 @@
+<div class="relative flex w-full flex-col overflow-hidden">
+  <!-- Initial state: dropzone + actions -->
+  @if (!isCameraActive() && !capturedImage() && !isLoading() && !errorMessage()) {
+    <div class="flex flex-col gap-3.5 p-5">
+      <div
+        class="dropzone flex flex-col items-center gap-2 rounded-[14px] border-[1.5px] border-dashed border-line-strong px-6 py-9 text-center"
+        (dragover)="onDragOver($event)"
+        (drop)="onFileDropped($event)">
+        <div class="mb-1 grid h-14 w-14 place-items-center rounded-full bg-brand-tint text-brand">
+          <mat-icon class="text-current icon-size-[26px]" [svgIcon]="'heroicons_outline:document-text'"></mat-icon>
+        </div>
+        <h3 class="text-[14px] font-semibold text-ink">Arrastra el recibo aquí</h3>
+        <p class="m-0 text-[12.5px] text-ink-3">o toma una foto · JPG o PNG · hasta 10 MB</p>
+      </div>
+
+      <button mat-flat-button color="primary" class="w-full" (click)="startCamera()">
+        <mat-icon class="icon-size-[17px]" [svgIcon]="'heroicons_outline:camera'"></mat-icon>
+        <span class="ml-2">Abrir cámara</span>
+      </button>
+
+      <button mat-stroked-button class="w-full" (click)="openFilePicker()">
+        <mat-icon class="icon-size-[17px]" [svgIcon]="'heroicons_outline:photo'"></mat-icon>
+        <span class="ml-2">Elegir de galería</span>
+      </button>
+
+      <input
+        #fileInput
+        type="file"
+        accept="image/*"
+        (change)="onFileSelected($event)"
+        hidden
+      />
+    </div>
+  }
+
+  <!-- Loading -->
+  @if (isLoading()) {
+    <div class="flex flex-col items-center p-10 text-center">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p class="mt-4 text-[13px] text-ink-3">Accediendo a la cámara…</p>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (errorMessage()) {
+    <div class="flex flex-col items-center gap-3.5 p-6 text-center">
+      <div class="grid h-14 w-14 place-items-center rounded-full bg-rose-tint text-rose">
+        <mat-icon class="text-current icon-size-[26px]" [svgIcon]="'heroicons_outline:exclamation-circle'"></mat-icon>
+      </div>
+      <p class="text-[13px] text-ink-2">{{ errorMessage() }}</p>
+      <button mat-stroked-button class="w-full" (click)="openFilePicker()">
+        <mat-icon class="icon-size-[17px]" [svgIcon]="'heroicons_outline:photo'"></mat-icon>
+        <span class="ml-2">Elegir de galería</span>
+      </button>
+      <button
+        type="button"
+        class="inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-[13px] font-semibold text-brand hover:bg-brand-tint"
+        (click)="clearError()">
+        <mat-icon class="icon-size-4 text-current" [svgIcon]="'heroicons_outline:arrow-left'"></mat-icon>
+        Volver
+      </button>
+    </div>
+  }
+
+  <!-- Camera active -->
+  @if (isCameraActive()) {
+    <div class="relative h-[70vh] w-full">
+      <video
+        #videoElement
+        autoplay
+        playsinline
+        class="h-full w-full object-cover">
+      </video>
+
+      <div class="absolute bottom-8 left-1/2 -translate-x-1/2">
+        <button mat-fab color="accent" (click)="capturePhoto()">
+          <mat-icon [svgIcon]="'heroicons_outline:camera'"></mat-icon>
+        </button>
+      </div>
+
+      <button mat-icon-button class="absolute right-4 top-4 bg-black/50 text-white" (click)="cancel()">
+        <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+      </button>
+    </div>
+  }
+
+  <!-- Captured photo: confirm / retake -->
+  @if (capturedImage() && !isCameraActive()) {
+    <div class="relative flex h-[70vh] w-full flex-col">
+      <div class="min-h-0 flex-1 overflow-hidden">
+        <img [src]="capturedImage()" alt="Recibo capturado" class="h-full w-full bg-black object-contain" />
+      </div>
+
+      <div class="flex flex-shrink-0 justify-center gap-2.5 p-4">
+        <button mat-stroked-button (click)="retakePhoto()">
+          <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:arrow-path'"></mat-icon>
+          <span class="ml-2">Volver a tomar</span>
+        </button>
+        <button mat-flat-button color="primary" (click)="confirmPhoto()">
+          <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:check'"></mat-icon>
+          <span class="ml-2">Usar esta foto</span>
+        </button>
+      </div>
+
+      <button mat-icon-button class="absolute right-4 top-4 bg-black/50 text-white" (click)="cancel()">
+        <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+      </button>
+    </div>
+  }
+
+  <!-- Hidden canvas for capture -->
+  <canvas #canvasElement hidden></canvas>
+</div>

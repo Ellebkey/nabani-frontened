@@ -1,0 +1,27 @@
+<mg-modal-shell title="Invitación creada" (closed)="closeDialog()">
+  <div class="p-5">
+    <p class="text-ink-2 mb-1">
+      Comparte este enlace con <span class="font-semibold text-ink">{{ data.email }}</span> para que se una a tu hogar.
+    </p>
+    <p class="text-sm text-amber mb-4 inline-flex items-center">
+      <mat-icon class="icon-size-4 mr-1 text-current" [svgIcon]="'heroicons_outline:exclamation-triangle'"></mat-icon>
+      Guárdalo ahora: por seguridad no podrás verlo de nuevo. Expira en 7 días.
+    </p>
+
+    <div class="flex items-center gap-2 rounded-lg border border-line bg-canvas p-3">
+      <span class="flex-1 text-sm font-mono text-ink break-all select-all">{{ inviteLink }}</span>
+      <button mat-icon-button (click)="copyLink()" [matTooltip]="'Copiar enlace'">
+        <mat-icon
+          class="icon-size-5"
+          [svgIcon]="copied() ? 'heroicons_outline:check' : 'heroicons_outline:clipboard-document'"></mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <ng-container mgModalActions>
+    <button mat-flat-button color="primary" (click)="copyLink()">
+      <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_outline:clipboard-document'"></mat-icon>
+      Copiar enlace
+    </button>
+  </ng-container>
+</mg-modal-shell>

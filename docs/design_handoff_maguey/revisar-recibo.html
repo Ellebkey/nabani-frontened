@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Revisar Recibo v2 — Maguey 2.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/maguey.css">
+<style>
+  body{ overflow:hidden; }
+  .bg-dim{ position:fixed; inset:0; background:var(--canvas); }
+
+  .toolbar{ display:flex; align-items:center; gap:12px; padding:12px 20px; border-bottom:1px solid var(--line); flex:none; }
+
+  /* ====== MISMA tabla de artículos que el modal de gasto ====== */
+  .arts{ }
+  .artrow{
+    display:grid; align-items:center;
+    grid-template-columns: 36px 56px minmax(0,1fr) 100px 148px 148px 92px 36px;
+    gap:8px; padding:0 20px 0 12px; height:54px;
+  }
+  .artrow.head{
+    height:38px; font-size:11px; font-weight:600; letter-spacing:.07em;
+    text-transform:uppercase; color:var(--ink-3);
+    border-bottom:1px solid var(--line); background:color-mix(in srgb, var(--ink) 2%, var(--card));
+    position:sticky; top:0; z-index:3;
+  }
+  .artrow .r{ text-align:right; }
+  .artrow .nm{ font-size:13.5px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; gap:8px; min-width:0; }
+  .artrow .nm .tx{ overflow:hidden; text-overflow:ellipsis; }
+  .artrow .price, .artrow .qty, .artrow .sub{ font-size:13.5px; font-variant-numeric:tabular-nums; }
+  .artrow .sub{ font-weight:600; }
+  .artrow .mg-compact{ width:100%; }
+
+  .item + .item{ border-top:1px solid var(--line); }
+
+  /* status en la primera columna (donde el modal tiene el trash) */
+  .st-ic{ width:28px; height:28px; border-radius:8px; display:grid; place-items:center; }
+  .st-ic svg{ width:16px; height:16px; }
+  .st-ic.pend{ color:var(--amber); background:var(--amber-tint); border-radius:999px; }
+  .st-ic.ok{ color:var(--teal); }
+
+  /* affordance hover-to-edit idéntica al modal */
+  .editghost{ width:28px; height:28px; border-radius:8px; display:grid; place-items:center; color:var(--ink-3); opacity:0; transition:opacity .12s; }
+  .editghost svg{ width:15px; height:15px; }
+  .item:hover .editghost{ opacity:1; }
+  .item:hover .artrow{ background:color-mix(in srgb, var(--brand) 4%, var(--card)); }
+
+  /* Fila pendiente: la resolución es una 2ª línea DENTRO del mismo item */
+  .item.pend{ background:color-mix(in srgb, var(--amber-bright) 3%, var(--card)); }
+  .resolve{
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+    padding:0 20px 12px 56px; margin-top:-4px;
+  }
+  .resolve .q{ font-size:12.5px; color:var(--ink-3); }
+  .candchip{ height:26px; padding:0 11px; border-radius:999px; border:1px solid var(--brand-tint-2); background:var(--brand-tint); color:var(--brand); font-size:12.5px; font-weight:600; }
+  .candchip:hover{ background:var(--brand-tint-2); }
+  .resolve .spacer{ flex:1; }
+
+  .linkbtn{ font-size:12.5px; font-weight:600; color:var(--brand); padding:6px 8px; border-radius:8px; display:inline-flex; align-items:center; gap:5px; }
+  .linkbtn:hover{ background:var(--brand-tint); }
+  .linkbtn svg{ width:14px; height:14px; }
+  .linkbtn.quiet{ color:var(--ink-3); }
+  .linkbtn.quiet:hover{ background:color-mix(in srgb, var(--ink) 5%, var(--card)); color:var(--ink-2); }
+
+  /* Encabezado de sección = mismo patrón que grupos de fecha en Gastos */
+  .secrow{
+    display:flex; align-items:center; gap:7px; padding:14px 20px 8px;
+    font-size:11px; font-weight:700; letter-spacing:.07em; text-transform:uppercase;
+  }
+  .secrow svg{ width:14px; height:14px; }
+  .secrow.pend{ color:var(--amber); }
+  .secrow.ok{ color:var(--teal); border-top:1px solid var(--line); margin-top:4px; }
+  .secrow .n{ color:var(--ink-3); font-weight:600; }
+  .secrow .hint{ margin-left:auto; text-transform:none; letter-spacing:0; font-weight:500; font-size:12px; color:var(--ink-3); }
+
+  .checkrow{ display:inline-flex; align-items:center; gap:7px; font-size:12.5px; color:var(--ink-2); white-space:nowrap; }
+  .cbx{ width:16px; height:16px; border-radius:5px; border:1.5px solid var(--line-strong); display:inline-grid; place-items:center; background:var(--card); flex:none; }
+  .cbx.on{ background:var(--brand); border-color:var(--brand); color:#fff; }
+  .cbx.on svg{ width:11px; height:11px; }
+  .sku{ font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:11.5px; color:var(--ink-3); background:color-mix(in srgb, var(--ink) 5%, var(--card)); border:1px solid var(--line); border-radius:6px; padding:2px 7px; letter-spacing:.03em; }
+</style>
+</head>
+<body class="depth-a">
+<div class="bg-dim"></div>
+
+<div class="mg-scrim">
+  <div class="mg-modal" style="max-width:1260px; height:94vh;">
+    <div class="mg-modalhead">
+      <div>
+        <div class="t">Revisar recibo</div>
+        <div class="s">Aliexpress · 11 artículos</div>
+      </div>
+      <button class="x"><i data-i="x"></i></button>
+    </div>
+
+    <div class="toolbar">
+      <span class="mg-toggle"></span>
+      <span style="font-size:13px; font-weight:500;">Ajuste Costco / Sam's</span>
+      <span style="margin-left:auto"></span>
+      <button class="mg-btn secondary sm"><i data-i="merge"></i>Combinar</button>
+    </div>
+
+    <div class="mg-modalbody">
+      <div class="arts">
+        <div class="artrow head">
+          <span></span><span>Cant</span><span>Artículo</span><span class="r">Precio</span><span>Categoría</span><span>Subcategoría</span><span class="r">Subtotal</span><span></span>
+        </div>
+
+        <!-- POR REVISAR -->
+        <div class="secrow pend"><i data-i="alert"></i>Por revisar <span class="n">· 2</span><span class="hint">Vincula cada renglón a un artículo tuyo</span></div>
+
+        <div class="item pend">
+          <div class="artrow">
+            <span class="st-ic pend"><i data-i="alert"></i></span>
+            <label class="mg-compact"><input value="1" style="text-align:center"></label>
+            <span class="nm"><span class="tx">Pantalones de pijama para mujer</span></span>
+            <label class="mg-compact"><input value="123.94" style="text-align:right"></label>
+            <label class="mg-compact" style="color:var(--ink-3)"><input placeholder="Categoría"><i data-i="chevD"></i></label>
+            <label class="mg-compact" style="color:var(--ink-3)"><input placeholder="Subcategoría"><i data-i="chevD"></i></label>
+            <span class="sub num r">$123.94</span>
+            <span></span>
+          </div>
+          <div class="resolve">
+            <span class="q">¿Es…?</span>
+            <button class="candchip">Pantalón pijama M</button>
+            <button class="candchip">Pijama algodón dama</button>
+            <span class="spacer"></span>
+            <button class="linkbtn"><i data-i="search"></i>Buscar</button>
+            <button class="linkbtn"><i data-i="plus"></i>Crear artículo</button>
+          </div>
+        </div>
+
+        <div class="item pend">
+          <div class="artrow">
+            <span class="st-ic pend"><i data-i="alert"></i></span>
+            <label class="mg-compact"><input value="2" style="text-align:center"></label>
+            <span class="nm"><span class="tx">Pegatinas de gemas autoadhesivas</span><span class="mg-pill neutral sm">×2</span></span>
+            <label class="mg-compact"><input value="39.95" style="text-align:right"></label>
+            <label class="mg-compact" style="color:var(--ink-3)"><input placeholder="Categoría"><i data-i="chevD"></i></label>
+            <label class="mg-compact" style="color:var(--ink-3)"><input placeholder="Subcategoría"><i data-i="chevD"></i></label>
+            <span class="sub num r">$79.90</span>
+            <span></span>
+          </div>
+          <div class="resolve">
+            <span class="q">Sin candidatos</span>
+            <span class="spacer"></span>
+            <button class="linkbtn"><i data-i="search"></i>Buscar</button>
+            <button class="linkbtn"><i data-i="plus"></i>Crear artículo</button>
+          </div>
+        </div>
+
+        <!-- VERIFICADOS: idénticos a la fila de lectura del modal de gasto -->
+        <div class="secrow ok"><i data-i="check"></i>Verificados <span class="n">· 9</span><span class="hint">Pasa el cursor para editar, como en el gasto</span></div>
+
+        <div class="item">
+          <div class="artrow">
+            <span class="st-ic ok"><i data-i="check"></i></span>
+            <span class="qty num" style="text-align:center">1</span>
+            <span class="nm"><span class="tx">Suministros de limpieza de pintura</span><span class="mg-pill teal sm">Nuevo</span></span>
+            <span class="price num r">$99.90</span>
+            <span><span class="mg-pill tint sm" style="--pc:#B0806A"><span class="dot"></span><span class="tx">Artículos del Hogar</span></span></span>
+            <span><span class="mg-pill neutral sm"><span class="tx">Misceláneos</span></span></span>
+            <span class="sub num r">$99.90</span>
+            <span class="editghost"><i data-i="pencil"></i></span>
+          </div>
+          <div class="resolve" style="padding-bottom:10px;">
+            <span class="checkrow"><span class="cbx on"><i data-i="check"></i></span>Guardar código</span>
+            <span class="sku">7 501055 310884</span>
+            <span class="spacer"></span>
+            <button class="linkbtn quiet">Cambiar</button>
+            <button class="linkbtn quiet">Quitar</button>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="artrow">
+            <span class="st-ic ok"><i data-i="check"></i></span>
+            <span class="qty num" style="text-align:center">1</span>
+            <span class="nm"><span class="tx">Pulverizador de agua de metal</span></span>
+            <span class="price num r">$132.90</span>
+            <span><span class="mg-pill tint sm" style="--pc:#8FA98C"><span class="dot"></span><span class="tx">Personal</span></span></span>
+            <span><span class="mg-pill neutral sm"><span class="tx">Jardín</span></span></span>
+            <span class="sub num r">$132.90</span>
+            <span class="editghost"><i data-i="pencil"></i></span>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="artrow">
+            <span class="st-ic ok"><i data-i="check"></i></span>
+            <span class="qty num" style="text-align:center">1</span>
+            <span class="nm"><span class="tx">Estante colgante Wifi, enrutador</span><span class="mg-pill amber sm"><i data-i="percent" style="width:11px;height:11px"></i>−10%</span></span>
+            <span class="price num r">$274.90</span>
+            <span><span class="mg-pill tint sm" style="--pc:#56698F"><span class="dot"></span><span class="tx">Electrónica Personal</span></span></span>
+            <span><span class="mg-pill neutral sm"><span class="tx">Accesorios</span></span></span>
+            <span class="sub num r">$274.90</span>
+            <span class="editghost"><i data-i="pencil"></i></span>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="artrow">
+            <span class="st-ic ok"><i data-i="check"></i></span>
+            <span class="qty num" style="text-align:center">1</span>
+            <span class="nm"><span class="tx">Carillón de viento con patrón</span></span>
+            <span class="price num r">$68.90</span>
+            <span><span class="mg-pill tint sm" style="--pc:#B0806A"><span class="dot"></span><span class="tx">Artículos del Hogar</span></span></span>
+            <span><span class="mg-pill neutral sm"><span class="tx">Decoración</span></span></span>
+            <span class="sub num r">$68.90</span>
+            <span class="editghost"><i data-i="pencil"></i></span>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="artrow">
+            <span class="st-ic ok"><i data-i="check"></i></span>
+            <span class="qty num" style="text-align:center">3</span>
+            <span class="nm"><span class="tx">Soporte para Casco de Aleación</span><span class="mg-pill neutral sm">×3</span></span>
+            <span class="price num r">$62.97</span>
+            <span><span class="mg-pill tint sm" style="--pc:#7D6A85"><span class="dot"></span><span class="tx">Entretenimiento</span></span></span>
+            <span><span class="mg-pill neutral sm"><span class="tx">Ciclismo</span></span></span>
+            <span class="sub num r">$188.90</span>
+            <span class="editghost"><i data-i="pencil"></i></span>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="artrow">
+            <span class="st-ic ok"><i data-i="check"></i></span>
+            <span class="qty num" style="text-align:center">1</span>
+            <span class="nm"><span class="tx">Etiquetas de identificación</span></span>
+            <span class="price num r">$94.90</span>
+            <span><span class="mg-pill tint sm" style="--pc:#B0806A"><span class="dot"></span><span class="tx">Artículos del Hogar</span></span></span>
+            <span><span class="mg-pill neutral sm"><span class="tx">Misceláneos</span></span></span>
+            <span class="sub num r">$94.90</span>
+            <span class="editghost"><i data-i="pencil"></i></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mg-modalfoot">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span class="mg-pill teal sm">9 verificados</span>
+        <span class="mg-pill amber sm">2 pendientes</span>
+        <span class="num" style="font-size:16px; font-weight:700; margin-left:6px;">$1,785.10</span>
+      </div>
+      <div class="actions">
+        <button class="mg-btn secondary">Cancelar</button>
+        <button class="mg-btn primary">Guardar borrador</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="shared/shell.js"></script>
+</body>
+</html>

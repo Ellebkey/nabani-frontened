@@ -1,0 +1,288 @@
+<div class="flex flex-col flex-auto w-full">
+  <div class="flex flex-col w-full max-w-screen-xl mx-auto p-4 sm:p-6 md:p-8">
+    <!-- Page header: date + Compare in the actions, chips below -->
+    <div class="mb-5 grid w-full grid-cols-1 items-start gap-x-2.5 gap-y-2.5 sm:grid-cols-[1fr_250px_auto]">
+      <div>
+        <h1 class="text-[23px] font-bold leading-[30px] tracking-tight text-ink">Flujo de caja</h1>
+        <div class="mt-0.5 text-[13px] text-ink-3">
+          @if (compareMode()) {
+            Modo comparación — elige categorías y períodos en cada lado
+          } @else {
+            Distribución y desglose de gastos
+          }
+        </div>
+      </div>
+      @if (!compareMode()) {
+        <app-date-range-filter [defaultPreset]="'all'" (rangeChange)="onDateRangeChange($event)">
+        </app-date-range-filter>
+        <button mat-stroked-button class="sm:col-start-3 sm:row-start-1" (click)="toggleCompareMode()">
+          <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:arrows-right-left'"></mat-icon>
+          <span class="ml-2">Comparar</span>
+        </button>
+      } @else {
+        <button mat-stroked-button class="sm:col-start-3 sm:row-start-1" (click)="toggleCompareMode()">
+          <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+          <span class="ml-2">Salir de comparar</span>
+        </button>
+      }
+    </div>
+
+    @if (!compareMode()) {
+    <!-- Tags: the cards ARE the filter -->
+    <div class="w-full">
+      <app-tag-summary-cards
+        [tagSummaries]="tagSummaries()"
+        [selectedIds]="selectedTagIds.value || []"
+        (tagClick)="onTagSummaryClick($event)">
+      </app-tag-summary-cards>
+    </div>
+
+    <!-- Active tag stats -->
+    @if (selectedSummaries().length && !isLoading()) {
+      <div class="my-5 grid w-full grid-cols-1 gap-4 sm:grid-cols-3">
+        <div class="bg-card rounded-card flex items-center gap-3.5 px-5 py-[18px]">
+          <mg-tile [neutral]="true">
+            <mat-icon class="text-current" [svgIcon]="'heroicons_outline:tag'"></mat-icon>
+          </mg-tile>
+          <div>
+            <div class="text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Total etiqueta</div>
+            <div class="mt-0.5 text-[22px] font-bold tabular-nums">{{ formatCurrency(tagStatsTotal()) }}</div>
+          </div>
+        </div>
+        <div class="bg-card rounded-card flex items-center gap-3.5 px-5 py-[18px]">
+          <mg-tile [neutral]="true">
+            <mat-icon class="text-current" [svgIcon]="'heroicons_outline:document-text'"></mat-icon>
+          </mg-tile>
+          <div>
+            <div class="text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Gastos</div>
+            <div class="mt-0.5 text-[22px] font-bold tabular-nums">{{ tagStatsCount() }}</div>
+          </div>
+        </div>
+        <div class="bg-card rounded-card flex items-center gap-3.5 px-5 py-[18px]">
+          <mg-tile [neutral]="true">
+            <mat-icon class="text-current" [svgIcon]="'heroicons_outline:calendar'"></mat-icon>
+          </mg-tile>
+          <div>
+            <div class="text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Período</div>
+            <div class="mt-0.5 text-[17px] font-bold tabular-nums">{{ tagStatsPeriod() || '—' }}</div>
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (isLoading()) {
+      <div class="bg-card rounded-card mt-5 w-full">
+        @for (i of [1, 2, 3, 4]; track i) {
+          <mg-row-skeleton></mg-row-skeleton>
+        }
+      </div>
+    }
+
+    @if (error() && !isLoading()) {
+      <div class="bg-card rounded-card mt-5 w-full">
+        <mg-empty-state icon="heroicons_outline:exclamation-circle" title="Error al cargar" [message]="error()!">
+          <button mat-stroked-button (click)="loadData()">Reintentar</button>
+        </mg-empty-state>
+      </div>
+    }
+
+    <!-- Sankey -->
+    @if (sankeyData() && !isLoading() && !error()) {
+      <div class="bg-card rounded-card mb-5 w-full">
+        <div class="flex items-start gap-2.5 px-5 pt-4">
+          <div>
+            <h2 class="text-[15px] font-semibold text-ink">
+              Flujo@if (selectedTagName()) { · Etiqueta: {{ selectedTagName() }}}
+            </h2>
+            <div class="text-[12px] text-ink-3">
+              Haz clic en una categoría para ver el desglose por subcategoría · sin etiqueta, la fuente es Total Gastos
+            </div>
+          </div>
+        </div>
+        <div class="w-full px-5 pb-5 pt-2.5">
+          @defer (on viewport) {
+            <app-sankey-chart
+              [data]="sankeyData()!"
+              [primaryColor]="selectedTagColor()"
+              (nodeClick)="onCategoryClick($event)">
+            </app-sankey-chart>
+          } @placeholder {
+            <mg-skeleton class="h-[360px] w-full rounded-card"></mg-skeleton>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Drill-down level 1: subcategories -->
+    @if (selectedCategory(); as category) {
+      <div class="bg-card rounded-card mb-5 w-full" #categoryDetail>
+        <div class="flex items-center gap-2.5 px-5 pb-2.5 pt-4">
+          <span class="h-[9px] w-[9px] flex-none rounded-[3px]" [style.background-color]="category.color"></span>
+          <div>
+            <h2 class="text-[15px] font-semibold text-ink">{{ category.label }}</h2>
+            <div class="text-[12px] text-ink-3">
+              Total: <b class="font-semibold text-ink-2 tabular-nums">{{ formatCurrency(category.value) }}</b>@if (categoryPercentLabel(category.value); as percent) { · {{ percent }}}
+            </div>
+          </div>
+          <button
+            type="button"
+            class="ml-auto grid h-[30px] w-[30px] place-items-center rounded-lg text-ink-3 hover:bg-ink/5 hover:text-ink"
+            aria-label="Cerrar"
+            (click)="clearCategorySelection()">
+            <mat-icon class="icon-size-4 text-current" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+          </button>
+        </div>
+
+        @if (isLoadingSubCategories()) {
+          <div class="flex gap-2.5 px-5 pb-4 pt-1">
+            <mg-skeleton class="h-[74px] w-40 !rounded-xl"></mg-skeleton>
+            <mg-skeleton class="h-[74px] w-40 !rounded-xl"></mg-skeleton>
+            <mg-skeleton class="h-[74px] w-40 !rounded-xl"></mg-skeleton>
+          </div>
+        } @else if (subCategoryData().length) {
+          <div class="flex flex-wrap gap-2.5 px-5 pb-3 pt-1">
+            @for (subCat of subCategoryData(); track subCat.x) {
+              <button
+                type="button"
+                class="min-w-[160px] rounded-xl border px-3.5 py-3 text-left"
+                [class]="selectedSubCategory()?.x === subCat.x
+                  ? 'border-brand bg-brand-tint ring-1 ring-inset ring-brand'
+                  : 'border-line bg-surface hover:bg-brand-tint'"
+                (click)="onSubCategoryClick(subCat)">
+                <span class="mb-1 block text-[12.5px] font-semibold text-ink">{{ subCat.x }}</span>
+                <b class="block text-[15px] font-bold tabular-nums">{{ formatCurrency(subCat.y) }}</b>
+                <span class="mt-0.5 block text-[11.5px] text-ink-3">
+                  {{ ((subCat.y / category.value) * 100).toFixed(1) }}% del total
+                </span>
+              </button>
+            }
+          </div>
+          <div class="px-5 pb-4 text-[12px] text-ink-3">Haz clic en una subcategoría para ver los gastos</div>
+        } @else {
+          <div class="px-5 pb-4 text-[13px] text-ink-3">No hay subcategorías para esta categoría</div>
+        }
+      </div>
+
+      <!-- Drill-down level 2: expenses table -->
+      @if (selectedSubCategory()) {
+        <div class="bg-card rounded-card w-full overflow-hidden">
+          <div class="flex items-center gap-2.5 px-5 pb-3 pt-4">
+            <span class="h-[9px] w-[9px] flex-none rounded-[3px]" [style.background-color]="category.color"></span>
+            <div>
+              <h2 class="text-[15px] font-semibold text-ink">{{ selectedSubCategory()?.x }}</h2>
+              <div class="text-[12px] text-ink-3 tabular-nums">
+                {{ expenseItemsCount() }} gastos · Total:
+                <b class="font-semibold text-ink-2">{{ formatCurrency(expenseItemsTotal()) }}</b>
+              </div>
+            </div>
+            <span class="ml-auto"></span>
+            @if (expenseItemsPagination.count > 0) {
+              <div [class.pointer-events-none]="isLoadingExpenseItems()" [class.opacity-60]="isLoadingExpenseItems()">
+                <mg-pager
+                  [limit]="expenseItemsPagination.limit"
+                  [offset]="expenseItemsPagination.offset"
+                  [count]="expenseItemsPagination.count"
+                  (pageChange)="onExpenseItemsPaginationChange($event)">
+                </mg-pager>
+              </div>
+            }
+            <button
+              type="button"
+              class="grid h-[30px] w-[30px] place-items-center rounded-lg text-ink-3 hover:bg-ink/5 hover:text-ink"
+              aria-label="Cerrar"
+              (click)="clearSubCategorySelection()">
+              <mat-icon class="icon-size-4 text-current" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+            </button>
+          </div>
+
+          @if (isLoadingExpenseItems() && !expenseItems().length) {
+            @for (i of [1, 2, 3]; track i) {
+              <mg-row-skeleton></mg-row-skeleton>
+            }
+          }
+
+          @if (expenseItems().length) {
+            <div class="overflow-x-auto" [class.opacity-60]="isLoadingExpenseItems()">
+              <table class="w-full border-collapse">
+                <thead>
+                  <tr>
+                    <th class="w-[110px] border-b border-line px-3.5 py-2.5 pl-5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Folio</th>
+                    <th class="w-[160px] border-b border-line px-3.5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Fecha</th>
+                    <th class="w-[200px] border-b border-line px-3.5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Comercio</th>
+                    <th class="border-b border-line px-3.5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Concepto</th>
+                    <th class="w-[300px] border-b border-line px-3.5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Categoría / Subcategoría</th>
+                    <th class="w-[120px] border-b border-line px-3.5 py-2.5 text-right text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Monto</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of expenseItems(); track itemKey(item)) {
+                    <tr class="hover:bg-ink/[.025]">
+                      <td class="border-b border-line px-3.5 py-3 pl-5 font-mono text-[12px] text-ink-3">INV-{{ item.expenseId }}</td>
+                      <td class="border-b border-line px-3.5 py-3 text-[13.5px] text-ink-3 tabular-nums">{{ formatDateTime(item.expenseDate) }}</td>
+                      <td class="border-b border-line px-3.5 py-3 text-[13.5px] text-ink">{{ item.recipientName }}</td>
+                      <td class="border-b border-line px-3.5 py-3 text-[13.5px] text-ink">{{ item.concept }}</td>
+                      <td class="border-b border-line px-3.5 py-3">
+                        @if (editingItemKey() === itemKey(item)) {
+                          <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
+                            <mg-compact-select
+                              class="w-36"
+                              placeholder="Categoría"
+                              [options]="categoryOptions()"
+                              [ngModel]="editCategoryId()"
+                              (ngModelChange)="onEditCategoryChange($event)">
+                            </mg-compact-select>
+                            <mg-compact-select
+                              class="w-36"
+                              placeholder="Subcategoría"
+                              [options]="editSubcategoryOptions()"
+                              [ngModel]="editSubcategoryId()"
+                              [disabled]="isSavingCategory() || !editCategoryId()"
+                              (ngModelChange)="onEditSubcategoryChange($event, item)">
+                            </mg-compact-select>
+                            <button
+                              type="button"
+                              class="grid h-7 w-7 place-items-center rounded-lg text-ink-3 hover:bg-ink/5 hover:text-ink"
+                              (click)="cancelCategoryEdit()"
+                              [disabled]="isSavingCategory()">
+                              <mat-icon class="icon-size-[15px] text-current" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                            </button>
+                          </div>
+                        } @else {
+                          <button
+                            type="button"
+                            class="group/edit inline-flex max-w-full items-center gap-1.5"
+                            title="Editar categoría"
+                            (click)="startCategoryEdit(item); $event.stopPropagation()">
+                            <mg-pill variant="tint" size="sm" [color]="category.color">
+                              {{ item.categoryName }} · {{ item.subcategoryName }}
+                            </mg-pill>
+                            <mat-icon
+                              class="icon-size-[13px] text-ink-3 opacity-0 group-hover/edit:opacity-100"
+                              [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+                          </button>
+                        }
+                      </td>
+                      <td class="border-b border-line px-3.5 py-3 text-right text-[13.5px] font-semibold tabular-nums">
+                        {{ formatCurrency(item.subtotal) }}
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+
+          @if (!isLoadingExpenseItems() && !expenseItems().length && expenseItemsPagination.count === 0) {
+            <div class="px-5 pb-5 text-[13px] text-ink-3">No hay gastos para esta subcategoría</div>
+          }
+        </div>
+      }
+    }
+    }
+
+    <!-- Compare mode: separate component -->
+    @if (compareMode()) {
+      <app-cash-flow-compare class="block w-full" [categories]="categories()"></app-cash-flow-compare>
+    }
+  </div>
+</div>

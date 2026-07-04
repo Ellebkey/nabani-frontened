@@ -1,0 +1,46 @@
+/* To learn more about this file see: https://angular.io/config/tsconfig. */
+{
+    "compileOnSave": false,
+    "compilerOptions": {
+      "strict": true,
+      // TS 6 no longer auto-loads @types packages — list the globals we rely on
+      "types": ["node", "jest"],
+      "allowSyntheticDefaultImports": true,
+      "skipLibCheck": true,
+      "paths": {
+        "@app/*": [
+          "./src/app/*"
+        ],
+        "@shared/*": [
+          "./src/app/modules/shared/*"
+        ],
+        "@root/*": [
+          "./src/*"
+        ],
+        "@maguey": [
+          "./src/@maguey"
+        ],
+        "@maguey/*": [
+          "./src/@maguey/*"
+        ],
+        "app/*": [
+          "./src/app/*"
+        ],
+        "environments/*": [
+          "./src/environments/*"
+        ]
+      },
+      "outDir": "./dist/out-tsc",
+      "sourceMap": true,
+      "declaration": false,
+      "experimentalDecorators": true,
+      "moduleResolution": "bundler",
+      "importHelpers": true,
+      "target": "ES2022",
+      "module": "ES2022",
+      "useDefineForClassFields": false
+    },
+    "angularCompilerOptions": {
+        "enableI18nLegacyMessageIdFormat": false
+    }
+}

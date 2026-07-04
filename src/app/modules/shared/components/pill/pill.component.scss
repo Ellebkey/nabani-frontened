@@ -1,0 +1,81 @@
+/* Variants with color-mix over the dynamic --pc: no Tailwind equivalent.
+   Source: docs/design_handoff_maguey/shared/maguey.css (PILLS block) */
+:host {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+:host(.sm) {
+  height: 20px;
+  padding: 0 8px;
+  font-size: 11px;
+  gap: 5px;
+}
+
+.tx {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--pc, currentColor);
+  flex: none;
+}
+
+:host(.tint) {
+  background: color-mix(in srgb, var(--pc) 11%, rgb(var(--maguey-card)));
+  color: color-mix(in srgb, var(--pc) 80%, rgb(var(--maguey-ink)));
+}
+
+:host(.solid) {
+  background: var(--pc, #5f7386);
+  color: #fff;
+}
+
+:host(.neutral) {
+  background: color-mix(in srgb, rgb(var(--maguey-ink)) 7%, rgb(var(--maguey-card)));
+  color: rgb(var(--maguey-ink-2));
+}
+
+:host(.outline) {
+  background: rgb(var(--maguey-card));
+  border: 1px solid rgb(var(--maguey-line-strong));
+  color: rgb(var(--maguey-ink-2));
+  height: 26px;
+}
+
+:host(.outline.sm) {
+  height: 22px;
+}
+
+:host(.teal) {
+  background: rgb(var(--maguey-teal-tint));
+  color: rgb(var(--maguey-teal));
+}
+
+:host(.rose) {
+  background: rgb(var(--maguey-rose-tint));
+  color: rgb(var(--maguey-rose));
+}
+
+:host(.amber) {
+  background: rgb(var(--maguey-amber-tint));
+  color: rgb(var(--maguey-amber));
+}
+
+:host(.brand) {
+  background: rgb(var(--maguey-brand-tint));
+  color: rgb(var(--maguey-brand));
+}

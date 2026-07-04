@@ -1,0 +1,120 @@
+<!-- Notification toggle -->
+<button
+  mat-icon-button
+  (click)="openPanel()"
+  matTooltip="Borradores"
+  #draftOrigin>
+  @if (count > 0 || receiptDrafts.length > 0) {
+    <span class="absolute top-1 right-1 h-2.5 w-2.5 rounded-full bg-amber-bright ring-2 ring-card"></span>
+  }
+  <mat-icon [svgIcon]="'heroicons_outline:bell'"></mat-icon>
+</button>
+
+<!-- Drafts popover (popover-borradores.html) -->
+<ng-template #draftPanel>
+  <div class="fixed inset-0 flex w-full flex-col overflow-hidden bg-card sm:static sm:inset-auto sm:w-[380px] sm:rounded-[14px] sm:border sm:border-line sm:shadow-overlay">
+    <!-- Header -->
+    <div class="flex shrink-0 items-center gap-2 px-4 pb-2.5 pt-3.5">
+      <button mat-icon-button class="-ml-1 sm:!hidden" (click)="closePanel()">
+        <mat-icon class="icon-size-5 text-current" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+      </button>
+      <h3 class="text-[14px] font-semibold text-ink">Borradores</h3>
+      @if (pendingCount > 0) {
+        <mg-pill variant="amber" size="sm" class="ml-1.5">{{ pendingCount }} por revisar</mg-pill>
+      }
+    </div>
+
+    <div class="flex-1 overflow-y-auto sm:max-h-96">
+      @if (drafts.length === 0 && receiptDrafts.length === 0) {
+        <mg-empty-state
+          icon="heroicons_outline:inbox"
+          title="Sin borradores"
+          message="Los recibos escaneados por revisar aparecerán aquí.">
+        </mg-empty-state>
+      } @else {
+        <!-- Receipts to review -->
+        @if (receiptDrafts.length > 0) {
+          <div class="px-4 pb-2 text-[11px] font-bold uppercase tracking-[.07em] text-ink-3">Recibos por revisar</div>
+          @for (rd of receiptDrafts; track rd.id) {
+            <button
+              type="button"
+              class="group flex w-full items-center gap-3 border-t border-line px-4 py-[11px] text-left hover:bg-brand-tint"
+              (click)="openReceiptDraft(rd)">
+              <mg-tile size="sm" [neutral]="true">
+                <mat-icon class="text-current" [svgIcon]="'heroicons_outline:document-text'"></mat-icon>
+              </mg-tile>
+              <div class="min-w-0">
+                <div class="truncate text-[13.5px] font-semibold text-ink">{{ rd.store || 'Recibo' }}</div>
+                <div class="mt-px text-[12px] text-ink-3">
+                  {{ rd.itemCount }} {{ rd.itemCount === 1 ? 'artículo' : 'artículos' }} ·
+                  <span [class]="isOldDraft(rd.expenseDate) ? 'font-semibold text-amber' : ''">{{ rd.expenseDate | date: 'd MMM yyyy' }}</span>
+                </div>
+              </div>
+              <div class="ml-auto text-right">
+                <div class="text-[13.5px] font-bold text-ink tabular-nums">{{ rd.total | currency: 'MXN' : 'symbol-narrow' }}</div>
+                @if (rd.verifiedItemCount) {
+                  <div class="mt-px text-[11px] font-semibold text-teal">{{ rd.verifiedItemCount }} de {{ rd.itemCount }} ✓</div>
+                } @else {
+                  <div class="mt-px text-[11px] font-semibold text-ink-3">sin revisar</div>
+                }
+              </div>
+              <span
+                class="grid h-[26px] w-[26px] flex-none place-items-center rounded-lg text-ink-3 opacity-0 hover:!bg-rose-tint hover:!text-rose group-hover:opacity-100"
+                matTooltip="Eliminar recibo"
+                (click)="deleteReceiptDraft($event, rd)">
+                <mat-icon class="icon-size-[14px] text-current" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+              </span>
+            </button>
+          }
+        }
+
+        <!-- Draft expenses (legacy flow) -->
+        @if (drafts.length > 0) {
+          <div class="px-4 pb-2 pt-3 text-[11px] font-bold uppercase tracking-[.07em] text-ink-3">Gastos borrador</div>
+          @for (draft of drafts; track draft.id) {
+            <button
+              type="button"
+              class="group flex w-full items-center gap-3 border-t border-line px-4 py-[11px] text-left hover:bg-brand-tint"
+              (click)="openDraft(draft)">
+              <mg-tile size="sm" [neutral]="true">
+                <mat-icon class="text-current" [svgIcon]="'heroicons_outline:receipt-percent'"></mat-icon>
+              </mg-tile>
+              <div class="min-w-0">
+                <div class="truncate text-[13.5px] font-semibold text-ink">{{ draft.recipientName || 'Ticket escaneado' }}</div>
+                <div class="mt-px text-[12px] text-ink-3">
+                  <span [class]="isOldDraft(draft.expenseDate) ? 'font-semibold text-amber' : ''">{{ draft.expenseDate | date: 'd MMM yyyy, HH:mm' }}</span>
+                </div>
+              </div>
+              <div class="ml-auto text-[13.5px] font-bold text-ink tabular-nums">
+                {{ draft.totalAmount | currency: 'MXN' : 'symbol-narrow' }}
+              </div>
+              <span
+                class="grid h-[26px] w-[26px] flex-none place-items-center rounded-lg text-ink-3 opacity-0 hover:!bg-rose-tint hover:!text-rose group-hover:opacity-100"
+                matTooltip="Eliminar borrador"
+                (click)="deleteDraft($event, draft)">
+                <mat-icon class="icon-size-[14px] text-current" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+              </span>
+            </button>
+          }
+        }
+      }
+    </div>
+
+    <!-- Footer -->
+    <div class="flex shrink-0 items-center border-t border-line px-4 py-2.5">
+      <button
+        type="button"
+        class="rounded-[7px] px-2 py-1 text-[12.5px] font-semibold text-brand hover:bg-brand-tint"
+        (click)="scanAnotherReceipt()">
+        Escanear otro recibo
+      </button>
+      <span class="ml-auto"></span>
+      <button
+        type="button"
+        class="rounded-[7px] px-2 py-1 text-[12.5px] font-semibold text-ink-3 hover:bg-ink/5 hover:text-ink"
+        (click)="goToExpenses()">
+        Ver todos
+      </button>
+    </div>
+  </div>
+</ng-template>

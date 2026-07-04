@@ -1,0 +1,83 @@
+<!-- Item wrapper -->
+<div
+  class="mg-vertical-navigation-item-wrapper"
+  [class.mg-vertical-navigation-item-has-subtitle]="!!item().subtitle"
+  [ngClass]="item().classes?.wrapper">
+
+  <div class="mg-vertical-navigation-item">
+
+    <!-- Icon -->
+    @if (item().icon) {
+      <mat-icon
+        class="mg-vertical-navigation-item-icon"
+        [ngClass]="item().classes?.icon"
+      [svgIcon]="item().icon!"></mat-icon>
+    }
+
+    <!-- Title & Subtitle -->
+    <div class="mg-vertical-navigation-item-title-wrapper">
+      <div class="mg-vertical-navigation-item-title">
+        <span [ngClass]="item().classes?.title">
+          {{item().title}}
+        </span>
+      </div>
+      @if (item().subtitle) {
+        <div class="mg-vertical-navigation-item-subtitle">
+          <span [ngClass]="item().classes?.subtitle">
+            {{item().subtitle}}
+          </span>
+        </div>
+      }
+    </div>
+
+    <!-- Badge -->
+    @if (item().badge) {
+      <div class="mg-vertical-navigation-item-badge">
+        <div
+          class="mg-vertical-navigation-item-badge-content"
+          [ngClass]="item().badge?.classes">
+          {{item().badge?.title}}
+        </div>
+      </div>
+    }
+
+  </div>
+
+</div>
+
+@for (child of item().children; track trackByFn($index, child)) {
+  <!-- Skip the hidden items -->
+  @if ((child.hidden && !child.hidden(child)) || !child.hidden) {
+    <!-- Basic -->
+    @if (child.type === 'basic') {
+      <mg-vertical-navigation-basic-item
+        [item]="child"
+      [name]="name()"></mg-vertical-navigation-basic-item>
+    }
+    <!-- Collapsable -->
+    @if (child.type === 'collapsable') {
+      <mg-vertical-navigation-collapsable-item
+        [item]="child"
+        [name]="name()"
+      [autoCollapse]="autoCollapse()"></mg-vertical-navigation-collapsable-item>
+    }
+    <!-- Divider -->
+    @if (child.type === 'divider') {
+      <mg-vertical-navigation-divider-item
+        [item]="child"
+      [name]="name()"></mg-vertical-navigation-divider-item>
+    }
+    <!-- Group -->
+    @if (child.type === 'group') {
+      <mg-vertical-navigation-group-item
+        [item]="child"
+      [name]="name()"></mg-vertical-navigation-group-item>
+    }
+    <!-- Spacer -->
+    @if (child.type === 'spacer') {
+      <mg-vertical-navigation-spacer-item
+        [item]="child"
+      [name]="name()"></mg-vertical-navigation-spacer-item>
+    }
+  }
+}
