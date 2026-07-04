@@ -7,6 +7,11 @@
   display: grid;
   grid-template-columns: 92px 1fr;
   min-height: 100vh;
+  /* Fill the flex parent (compact-layout is a flex row via layout > *);
+     without this the grid shrinks to content width and left-aligns. */
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
 }
 
 /* --- Sidebar (92px, brand) --- */
