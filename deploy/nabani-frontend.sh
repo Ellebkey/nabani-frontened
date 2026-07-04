@@ -10,7 +10,7 @@ DEPLOY_START=$(date +%s)
 log() { echo "==> [$(date '+%H:%M:%S')] $1"; }
 
 # nginx matches requests by server_name — talk to it locally with the right Host
-SITE_HOST="${SITE_HOST:-nabani.app}"
+SITE_HOST="${SITE_HOST:-nabani.joelbarranco.io}"
 
 # 200 only: a 301 (http→https redirect) must not count as healthy
 check_url() {

@@ -130,13 +130,15 @@ CI/CD to a DigitalOcean droplet (nginx) via GitHub Actions. On push to `master` 
 
 `deploy/nabani-frontend.sh` extracts into `frontend.new`, **verifies integrity** (index.html + every
 referenced hashed chunk present), **atomically swaps** it in (keeping the previous as `frontend.old`),
-then **health-checks through nginx** (`https://nabani.app/` + a hashed chunk, must be 200) — **rolling
-back** to `frontend.old` if the site doesn't come up.
+then **health-checks through nginx** (`https://nabani.joelbarranco.io/` + a hashed chunk, must be 200)
+— **rolling back** to `frontend.old` if the site doesn't come up.
 
 - **Server layout:** `/home/ellebkey/apps/nabani/{backend,frontend}` (nginx serves the `frontend/` dir).
 - **After editing the deploy script, copy it to the droplet:** `scp deploy/nabani-frontend.sh <user>@<host>:~/nabani-frontend`.
+- **Domains:** frontend `nabani.joelbarranco.io`, API `apinabani.joelbarranco.io` (set in
+  `environment.prod.ts`).
 - **GitHub secrets:** `HOST`, `USERNAME`, `PASSWORD`, `PORT`. Override `SITE_HOST` if the nginx
-  `server_name` isn't `nabani.app`.
+  `server_name` isn't `nabani.joelbarranco.io`.
 - The build job runs `npm run lint` + `npm test` — both must pass for a deploy to proceed.
 
 ## Status

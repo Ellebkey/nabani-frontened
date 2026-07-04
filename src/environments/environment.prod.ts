@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  url: 'https://api.nabani.app/api',
+  url: 'https://apinabani.joelbarranco.io/api',
   theme: 'theme-maguey'
 };
