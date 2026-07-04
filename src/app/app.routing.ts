@@ -20,14 +20,12 @@ export const appRoutes: Routes = [
       },
       {
         path: 'planeacion',
-        loadComponent: () => import('./modules/shell/section-placeholder.component').then(m => m.SectionPlaceholderComponent),
-        data: {title: 'Planeación'},
+        loadChildren: () => import('./modules/planeacion/planeacion.routing').then(m => m.PlaneacionRoutes),
         canActivate: [authGuardFn]
       },
       {
         path: 'produccion',
-        loadComponent: () => import('./modules/shell/section-placeholder.component').then(m => m.SectionPlaceholderComponent),
-        data: {title: 'Producción'},
+        loadChildren: () => import('./modules/produccion/produccion.routing').then(m => m.ProduccionRoutes),
         canActivate: [authGuardFn]
       },
       {

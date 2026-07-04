@@ -1,0 +1,9 @@
+/* Producción · Mapa — print partial (design-spec §8). On screen the grid scrolls
+   inside an overflow-auto card; on print the global stylesheet already strips the
+   shell + `.nb-noprint` chrome, so here we only release the scroll clip so the
+   full 1760px map lands on paper (landscape). */
+@media print {
+  .nb-map-card {
+    overflow: visible !important;
+  }
+}

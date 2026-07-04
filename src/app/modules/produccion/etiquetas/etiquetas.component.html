@@ -1,0 +1,91 @@
+<div class="flex flex-col flex-auto w-full">
+  <div class="flex flex-col w-full max-w-screen-xl mx-auto p-4 sm:p-6 md:p-8">
+    <!-- Page header -->
+    <div class="mb-5 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+      <div>
+        <h1 class="text-[23px] font-bold leading-[30px] tracking-[-0.01em] text-ink">Etiquetas de entrega</h1>
+        <div class="mt-0.5 text-[13px] text-ink-3 tabular-nums">
+          Menús finalizados listos para entrega · {{ longDate() }}
+        </div>
+      </div>
+      <div class="nb-noprint flex items-center gap-2.5 sm:ml-auto">
+        <app-produccion-date-field [value]="selectedDate()" (valueChange)="onDateChange($event)"></app-produccion-date-field>
+        <button mat-flat-button [color]="'primary'" (click)="print()">
+          <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:printer'"></mat-icon>
+          <span class="ml-2">Imprimir</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Section sub-navigation -->
+    <app-produccion-nav></app-produccion-nav>
+
+    @if (!isDataLoaded()) {
+      <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+        @for (i of [1, 2, 3, 4]; track i) {
+          <div class="bg-card rounded-card h-40 w-full animate-pulse"></div>
+        }
+      </div>
+    } @else if (rows().length) {
+      <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+        @for (row of rows(); track row.deliveryDayId) {
+          <div class="bg-card rounded-card w-full overflow-hidden break-inside-avoid">
+            <!-- Label header: Nabani mark + centered name + kicker -->
+            <div class="flex items-center gap-3 border-b-2 border-brand px-5 pb-3.5 pt-5">
+              <img src="assets/images/logo/nabani-logo.png" alt="Nabani" class="h-[34px] w-[34px] rounded-[10px]" />
+              <div class="flex-1 text-center text-[16px] font-bold text-brand">{{ patientName(row) }}</div>
+              <span class="text-[11px] font-bold uppercase tracking-[.07em] text-ink-3">Nabani</span>
+            </div>
+
+            <!-- Body: meals + free beverages -->
+            <div class="flex flex-col gap-4 p-5 sm:flex-row">
+              <div class="flex flex-1 flex-col gap-3">
+                @if (row.meals?.length) {
+                  @for (meal of row.meals; track $index) {
+                    <div class="flex gap-3">
+                      <mg-tile [color]="brandColor">
+                        <span class="text-[15px] font-bold">{{ mealCode(meal) }}</span>
+                      </mg-tile>
+                      <div class="min-w-0">
+                        <div class="text-[14px] font-bold text-ink">{{ mealSlotLabel(meal.mealSlot) }}</div>
+                        <div class="text-[13px] text-ink-2">
+                          {{ meal.dishName }}
+                          @for (sub of substitutionsOf(meal); track $index) {
+                            <span class="font-semibold text-blue"> ({{ sub.substitutedFromName }} sustituido)</span>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  }
+                }
+              </div>
+
+              <div class="flex flex-1 gap-3">
+                <mg-tile [neutral]="true">
+                  <span class="text-[15px] font-bold">B</span>
+                </mg-tile>
+                <div class="min-w-0">
+                  <div class="text-[14px] font-bold text-ink">Bebidas libres</div>
+                  <div class="mt-1 rounded-compact border border-line px-2 py-1.5 text-[12px] text-ink-3">
+                    {{ row.freeBeverages }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer PA quote -->
+            <div class="px-5 pb-4 text-[12.5px] italic text-ink-3">"30 min de Actividad Física"</div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="bg-card rounded-card w-full overflow-hidden">
+        <mg-empty-state
+          icon="heroicons_outline:tag"
+          title="Sin etiquetas"
+          message="No hay entregas para la fecha seleccionada.">
+        </mg-empty-state>
+      </div>
+    }
+  </div>
+</div>

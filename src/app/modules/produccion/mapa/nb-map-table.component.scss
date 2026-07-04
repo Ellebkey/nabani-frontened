@@ -1,0 +1,38 @@
+/* Producción · Mapa — the dense full-grid table (design-spec §2.13, §4.6).
+   Scoped to this component: full-grid borders, meal-time separator (.gsep),
+   zebra rows, and the white-on-brand header border. CSS vars hold "R G B"
+   channels (see tailwind.config.js), so wrap them in rgb(). */
+:host {
+  display: block;
+}
+
+.nb-map {
+  min-width: 1760px;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th,
+  td {
+    border: 1px solid rgb(var(--maguey-line));
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Meal-time separator on the first column of each meal group. */
+  .gsep {
+    border-left: 2px solid rgb(var(--maguey-line-strong));
+  }
+
+  /* Brand header row uses a translucent white divider. */
+  thead tr:first-child th {
+    border-color: rgba(255, 255, 255, 0.28);
+  }
+
+  /* Zebra even rows. */
+  tbody tr:nth-child(even) td {
+    background: color-mix(in srgb, rgb(var(--maguey-ink)) 2.5%, rgb(var(--maguey-card)));
+  }
+
+  tbody tr:last-child td {
+    border-bottom: 1px solid rgb(var(--maguey-line));
+  }
+}

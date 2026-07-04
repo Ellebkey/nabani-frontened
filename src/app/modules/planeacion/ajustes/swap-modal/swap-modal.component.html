@@ -1,0 +1,78 @@
+<mg-modal-shell title="Sustituir ingrediente" [subtitle]="subtitle()" (closed)="closeDialog()">
+  <div class="flex flex-col gap-3.5 p-5">
+    <!-- Conflict banner: amber = preferencia, blue = enfermedad -->
+    @if (isDisease) {
+      <div class="rounded-field bg-blue-tint px-3.5 py-2.5 text-[12.5px] font-semibold text-blue">
+        {{ bannerText() }}
+      </div>
+    } @else {
+      <div class="rounded-field bg-amber-tint px-3.5 py-2.5 text-[12.5px] font-semibold text-amber">
+        {{ bannerText() }}
+      </div>
+    }
+
+    <!-- Search -->
+    <label
+      class="flex h-10 items-center gap-2 rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+      <mat-icon class="icon-size-4 text-ink-3" [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+      <input class="w-full border-0 bg-transparent outline-none placeholder:text-ink-3"
+        placeholder="Buscar ingrediente" [formControl]="searchControl" />
+    </label>
+
+    <!-- Suggestions -->
+    <div class="text-[11px] font-bold uppercase tracking-[.07em] text-ink-3">
+      Equivalentes sugeridos · {{ groupLabel() }} · sin conflicto
+    </div>
+
+    @if (loading()) {
+      <div class="flex flex-col gap-2">
+        @for (i of [1, 2, 3, 4]; track i) {
+          <div class="h-14 animate-pulse rounded-field bg-ink/[.06]"></div>
+        }
+      </div>
+    } @else if (visibleSuggestions().length) {
+      <div class="flex flex-col divide-y divide-line rounded-field border border-line">
+        @for (suggestion of visibleSuggestions(); track suggestion.ingredientId) {
+          <div class="flex items-center gap-3 px-3.5 py-2.5">
+            <div class="min-w-0 grow">
+              <div class="flex items-center gap-2">
+                <span class="text-[13.5px] font-semibold text-ink">{{ suggestion.name }}</span>
+                @if (suggestion.quantity != null) {
+                  <span class="text-[12px] text-ink-3 tabular-nums">{{ suggestion.quantity }} {{ suggestion.unit }}</span>
+                }
+              </div>
+              <div class="mt-1 flex flex-wrap items-center gap-2">
+                @if (suggestion.foodGroup) {
+                  <mg-pill variant="neutral" size="sm">{{ suggestion.foodGroup }}</mg-pill>
+                }
+                <span class="text-[12px] text-ink-3 tabular-nums">{{ suggestion.portions ?? 1 }} porción</span>
+                @if (suggestion.flag) {
+                  <mg-pill variant="amber" size="sm">{{ suggestion.flag }}</mg-pill>
+                }
+              </div>
+            </div>
+            <button type="button" mat-stroked-button [disabled]="busy()" (click)="use(suggestion)">Usar</button>
+          </div>
+        }
+      </div>
+    } @else {
+      <mg-empty-state
+        icon="heroicons_outline:arrows-right-left"
+        title="Sin equivalentes"
+        message="No hay ingredientes equivalentes sin conflicto para sugerir.">
+      </mg-empty-state>
+    }
+  </div>
+
+  <div mgModalInfo>
+    <div class="text-[12px] text-ink-3">La sustitución se marca en azul en el mapa de producción.</div>
+  </div>
+
+  <ng-container mgModalActions>
+    <button type="button" [disabled]="busy()" (click)="eliminate()"
+      class="inline-flex h-10 items-center gap-2 rounded-btn bg-rose-tint px-3.5 text-[14px] font-semibold text-rose hover:brightness-95 disabled:opacity-45">
+      <mat-icon class="icon-size-4 text-current" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+      <span>Eliminar de la comida</span>
+    </button>
+  </ng-container>
+</mg-modal-shell>

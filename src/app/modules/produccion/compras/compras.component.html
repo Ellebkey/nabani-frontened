@@ -1,0 +1,180 @@
+<div class="flex flex-col flex-auto w-full">
+  <div class="flex flex-col w-full max-w-screen-xl mx-auto p-4 sm:p-6 md:p-8">
+    <!-- Page header -->
+    <div class="mb-5 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+      <div>
+        <h1 class="text-[23px] font-bold leading-[30px] tracking-[-0.01em] text-ink">Compras y costos</h1>
+        <div class="mt-0.5 text-[13px] text-ink-3">
+          Lista de compras generada del mapa de producción · margen real por paquete
+        </div>
+      </div>
+      <div class="nb-noprint flex items-center gap-2.5 sm:ml-auto">
+        <app-produccion-date-field [value]="selectedDate()" (valueChange)="onDateChange($event)"></app-produccion-date-field>
+        <button mat-stroked-button (click)="print()">
+          <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:printer'"></mat-icon>
+          <span class="ml-2">Imprimir lista</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Section sub-navigation -->
+    <app-produccion-nav></app-produccion-nav>
+
+    <div class="grid grid-cols-1 items-start gap-5 lg:grid-cols-[1fr_400px]">
+      <!-- LEFT: Lista de compras -->
+      <div class="bg-card rounded-card w-full overflow-hidden">
+        <div class="flex flex-wrap items-center gap-3 border-b border-line px-5 pb-3 pt-4">
+          <div>
+            <h2 class="text-[15px] font-semibold text-ink">Lista de compras</h2>
+            <div class="text-[12px] text-ink-3">Porciones del mapa × gramaje base</div>
+          </div>
+          <mg-chip-row class="nb-noprint ml-auto">
+            <mg-chip [active]="mode() === 'hoy'" (click)="setMode('hoy')">Hoy · {{ shortDate() }}</mg-chip>
+            <mg-chip [active]="mode() === 'semana'" (click)="setMode('semana')">{{ weekChipLabel() }}</mg-chip>
+          </mg-chip-row>
+        </div>
+
+        <!-- Gold hero: estimated -->
+        <div class="px-5 pb-3 pt-4">
+          <span class="text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">{{ heroLabel() }}</span>
+          <div class="text-[30px] font-bold leading-9 text-gold tabular-nums">
+            {{ estimated() | currency: 'MXN' : 'symbol-narrow' }}
+          </div>
+        </div>
+
+        @if (!isDataLoaded()) {
+          <div class="p-5">
+            @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+              <div class="mb-2.5 h-5 w-full animate-pulse rounded bg-ink/[.06]"></div>
+            }
+          </div>
+        } @else if (groups().length) {
+          @for (group of groups(); track group.foodGroup) {
+            <!-- Group subtotal header -->
+            <div class="flex items-center gap-2 border-t border-line px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[.06em] text-ink-3">
+              <span class="h-1.5 w-1.5 rounded-full" [style.background-color]="foodGroupMeta(group.foodGroup).color"></span>
+              <span>{{ group.foodGroup }}</span>
+              <span class="ml-auto tabular-nums">{{ group.subtotal | currency: 'MXN' : 'symbol-narrow' }}</span>
+            </div>
+            <table class="w-full border-collapse">
+              <tbody>
+                @for (item of group.items; track item.ingredientId) {
+                  <tr class="hover:bg-ink/[.025]">
+                    <td class="w-[34px] border-b border-line py-3 pl-5">
+                      <input
+                        type="checkbox"
+                        class="h-[15px] w-[15px] accent-brand"
+                        [checked]="isChecked(item.ingredientId)"
+                        (change)="toggleItem(item.ingredientId)"
+                        [attr.aria-label]="'Comprado: ' + item.name" />
+                    </td>
+                    <td
+                      class="border-b border-line px-3.5 py-3 text-[13.5px] font-semibold text-ink"
+                      [class.text-ink-3]="isChecked(item.ingredientId)"
+                      [class.line-through]="isChecked(item.ingredientId)">
+                      {{ item.name }}
+                    </td>
+                    <td class="border-b border-line px-3.5 py-3 text-[13px] text-ink-3 tabular-nums">
+                      {{ item.portions | number }} porciones × {{ item.baseQuantity }} {{ item.unit }}
+                    </td>
+                    <td
+                      class="border-b border-line px-3.5 py-3 text-right text-[13.5px] text-ink tabular-nums"
+                      [class.font-bold]="!isChecked(item.ingredientId)"
+                      [class.text-ink-3]="isChecked(item.ingredientId)">
+                      {{ item.quantity | number: '1.0-2' }} {{ item.quantityUnit }}
+                    </td>
+                    <td
+                      class="w-[90px] border-b border-line px-3.5 py-3 pr-5 text-right text-[13px] text-ink tabular-nums"
+                      [class.text-ink-3]="isChecked(item.ingredientId)">
+                      {{ item.cost | currency: 'MXN' : 'symbol-narrow' }}
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        } @else {
+          <mg-empty-state
+            icon="heroicons_outline:shopping-bag"
+            title="Sin lista de compras"
+            message="No hay compras para el periodo seleccionado.">
+          </mg-empty-state>
+        }
+      </div>
+
+      <!-- RIGHT: Costo por platillo + Margen por paquete -->
+      <div class="flex flex-col gap-5">
+        <!-- Costo por platillo -->
+        <div class="bg-card rounded-card w-full overflow-hidden">
+          <div class="border-b border-line px-5 pb-3 pt-4">
+            <h2 class="text-[15px] font-semibold text-ink">Costo por platillo</h2>
+            <div class="text-[12px] text-ink-3">Con precios de la última compra</div>
+          </div>
+          @if (costPerDish().length) {
+            <div>
+              @for (dish of costPerDish(); track dish.dishId) {
+                <div class="flex items-center gap-3 border-b border-line px-5 py-3 last:border-b-0">
+                  <div class="min-w-0 flex-1">
+                    <div class="text-[14px] font-semibold text-ink">{{ dish.dishName }}</div>
+                    <div class="text-[12.5px] text-ink-3 tabular-nums">{{ dish.portions | number }} porciones</div>
+                  </div>
+                  <div class="text-right">
+                    <div class="text-[14.5px] font-bold text-ink tabular-nums">
+                      {{ dish.costPerPortion | currency: 'MXN' : 'symbol-narrow' }}
+                    </div>
+                    <div class="text-[11.5px] font-medium text-ink-3">por porción</div>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="px-5 py-6 text-center text-[13px] text-ink-3">Sin costos para el periodo.</div>
+          }
+        </div>
+
+        <!-- Margen por paquete -->
+        <div class="bg-card rounded-card w-full overflow-hidden">
+          <div class="border-b border-line px-5 pb-3 pt-4">
+            <h2 class="text-[15px] font-semibold text-ink">Margen por paquete</h2>
+            <div class="text-[12px] text-ink-3">Precio por día vs. costo real del día</div>
+          </div>
+          <div class="p-5">
+            @if (marginPerPackage().length) {
+              <div class="flex flex-col gap-4">
+                @for (bar of marginPerPackage(); track bar.packageId) {
+                  <div>
+                    <div class="mb-1.5 flex items-center justify-between gap-3">
+                      <span class="min-w-0 truncate text-[13px] text-ink">
+                        {{ bar.displayLabel }} · {{ bar.pricePerDay | currency: 'MXN' : 'symbol-narrow' }}/día
+                      </span>
+                      <b class="flex-none text-[13px] font-bold tabular-nums" [class.text-teal]="!bar.alert" [class.text-amber]="bar.alert">
+                        {{ bar.marginPercent | number }}% · {{ bar.margin | currency: 'MXN' : 'symbol-narrow' }}
+                      </b>
+                    </div>
+                    <div class="h-1.5 w-full overflow-hidden rounded-full bg-ink/[.06]">
+                      <div class="h-full rounded-full" [style.width.%]="bar.widthPercent" [style.background-color]="bar.color"></div>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              @if (hasAlert()) {
+                <div class="mt-3.5 flex items-start gap-2 rounded-[10px] bg-amber-tint px-3.5 py-3 text-[12.5px] text-amber">
+                  <mat-icon class="icon-size-4 flex-none text-current" [svgIcon]="'heroicons_outline:exclamation-triangle'"></mat-icon>
+                  <span>
+                    @for (pkg of alertPackages(); track pkg.packageId) {
+                      {{ pkg.displayLabel }}{{ $last ? '' : ', ' }}
+                    }
+                    está por debajo del margen objetivo. Considera ajustar precio o porciones.
+                  </span>
+                </div>
+              }
+            } @else {
+              <div class="py-6 text-center text-[13px] text-ink-3">Sin paquetes en el periodo.</div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

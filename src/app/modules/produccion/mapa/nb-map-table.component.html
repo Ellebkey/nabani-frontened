@@ -1,0 +1,50 @@
+<table class="nb-map w-full">
+  <thead>
+    <!-- Row 1: meal-slot groups, one colspan cell per dish, on brand. -->
+    <tr>
+      <th class="bg-brand px-3 py-2.5 text-left text-[12px] font-semibold text-white">Paciente</th>
+      <th class="bg-brand px-3 py-2.5 text-center text-[12px] font-semibold text-white">Cal</th>
+      @for (dish of headerDishes(); track $index) {
+        <th [attr.colspan]="dish.colspan" class="bg-brand px-3 py-2.5 text-center text-[12px] font-semibold text-white">
+          {{ dish.label }}
+        </th>
+      }
+    </tr>
+    <!-- Row 2: per-ingredient name + gramaje on two lines. -->
+    <tr>
+      <th class="bg-card"></th>
+      <th class="bg-card"></th>
+      @for (col of columns(); track col.key) {
+        <th class="px-2 py-1.5 text-center align-bottom text-[11px] font-semibold text-ink" [class.gsep]="col.gsep">
+          {{ col.ingredientName }}
+          <div class="mt-0.5 text-[10px] font-normal normal-case tracking-normal text-ink-3">
+            {{ col.baseQuantity }} {{ col.unit }}
+          </div>
+        </th>
+      }
+    </tr>
+  </thead>
+  <tbody>
+    @for (row of rows(); track row.deliveryDayId) {
+      <tr>
+        <td class="px-3 py-2 text-[13px] font-bold text-ink">{{ patientName(row) }}</td>
+        <td class="px-3 py-2 text-center text-[13px] text-ink-2">{{ row.kcal }}</td>
+        @for (col of columns(); track col.key) {
+          @if (row.cells[col.key]; as cell) {
+            @if (cell.eliminated) {
+              <td class="px-2 py-2 text-center text-[13px] font-bold text-rose" [class.gsep]="col.gsep">0</td>
+            } @else if (cell.substituted) {
+              <td class="px-2 py-2 text-center text-[12.5px] font-semibold text-blue" [class.gsep]="col.gsep">
+                {{ cell.substituteName }} {{ cell.portions }}
+              </td>
+            } @else {
+              <td class="px-2 py-2 text-center text-[13px] text-ink" [class.gsep]="col.gsep">{{ cell.portions }}</td>
+            }
+          } @else {
+            <td class="px-2 py-2" [class.gsep]="col.gsep"></td>
+          }
+        }
+      </tr>
+    }
+  </tbody>
+</table>

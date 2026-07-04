@@ -1,0 +1,204 @@
+<div class="flex flex-col flex-auto w-full">
+  <div class="flex flex-col w-full max-w-screen-xl mx-auto p-4 sm:p-6 md:p-8">
+    <!-- Page header -->
+    <div class="mb-5 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+      <div>
+        <h1 class="text-[23px] font-bold leading-[30px] tracking-[-0.01em] text-ink">
+          Menú del día · {{ formatLongDate(date()) }}
+        </h1>
+        <div class="mt-0.5 text-[13px] text-ink-3">Define el platillo y las porciones por nivel de cada tiempo de comida</div>
+      </div>
+      <div class="flex items-center gap-2.5 sm:ml-auto">
+        <button mat-stroked-button [disabled]="applying()" (click)="applyToPatients()">
+          <span>Aplicar a pacientes</span>
+          <mat-icon class="ml-2 icon-size-4" [svgIcon]="'heroicons_outline:arrow-right'"></mat-icon>
+        </button>
+        <button mat-flat-button [color]="'primary'" [disabled]="saving()" (click)="save()">
+          <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:check'"></mat-icon>
+          <span class="ml-2">Guardar</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Section sub-navigation -->
+    <app-planeacion-nav></app-planeacion-nav>
+
+    <!-- Toolbar -->
+    <div class="mb-5 flex flex-wrap items-center gap-3">
+      <label
+        class="flex h-10 w-[200px] items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+        <input type="date" [value]="date()" (change)="onDateChange($event)"
+          class="w-full border-0 bg-transparent outline-none tabular-nums" />
+      </label>
+      <button mat-stroked-button (click)="openLibrary()">
+        <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:book-open'"></mat-icon>
+        <span class="ml-2">Desde biblioteca</span>
+      </button>
+      <button mat-stroked-button (click)="openCopy()">
+        <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:document-duplicate'"></mat-icon>
+        <span class="ml-2">Copiar de otro día</span>
+      </button>
+      <div class="text-[12.5px] text-ink-3">Las porciones por nivel se guardan en el platillo.</div>
+    </div>
+
+    @if (!isDataLoaded()) {
+      <div class="flex flex-col gap-4">
+        @for (i of [1, 2, 3]; track i) {
+          <div class="h-40 animate-pulse rounded-card bg-ink/[.06]"></div>
+        }
+      </div>
+    } @else {
+      <div class="flex flex-col gap-4">
+        @for (meal of meals(); track meal.slot) {
+          <div class="bg-card rounded-card w-full overflow-hidden">
+            <!-- Card header -->
+            <div class="flex flex-wrap items-center gap-3 border-b border-line px-5 py-3">
+              <mg-tile size="sm" [neutral]="true">
+                <mat-icon class="text-current icon-size-5" [svgIcon]="'heroicons_outline:fire'"></mat-icon>
+              </mg-tile>
+              <h2 class="text-[15px] font-semibold text-ink">{{ meal.label }}</h2>
+              @if (meal.hasDish) {
+                <label
+                  class="ml-1 flex h-[34px] w-[340px] max-w-full items-center rounded-field border border-line-strong bg-surface px-3 text-[13.5px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+                  <input [(ngModel)]="meal.dishName" placeholder="Nombre del platillo"
+                    class="w-full border-0 bg-transparent outline-none placeholder:text-ink-3" />
+                </label>
+                <button
+                  type="button"
+                  class="ml-auto grid h-[30px] w-[30px] place-items-center rounded-lg text-ink-3 hover:bg-brand-tint hover:text-ink"
+                  [matMenuTriggerFor]="mealMenu"
+                  (menuOpened)="menuMeal.set(meal)"
+                  aria-label="Acciones">
+                  <mat-icon class="icon-size-[17px] text-current" [svgIcon]="'heroicons_outline:ellipsis-horizontal'"></mat-icon>
+                </button>
+              }
+            </div>
+
+            <!-- Card body -->
+            @if (meal.hasDish) {
+              <div class="overflow-x-auto">
+                <table class="w-full min-w-[640px] border-collapse">
+                  <thead>
+                    <tr>
+                      <th class="min-w-[180px] border-b border-line px-3.5 py-2.5 pl-5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Ingrediente</th>
+                      <th class="w-[110px] border-b border-line px-3.5 py-2.5 text-right text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Cantidad</th>
+                      <th class="w-[90px] border-b border-line px-3.5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Medida</th>
+                      @for (level of visibleLevels(); track level.id) {
+                        <th class="w-[76px] border-b border-line bg-brand-tint px-2 py-2.5 text-center text-[11px] font-semibold uppercase tracking-[.05em] text-brand tabular-nums">
+                          {{ level.kcal | number }}
+                        </th>
+                      }
+                      <th class="w-[86px] border-b border-line px-2 py-2 text-center">
+                        @if (addableLevels().length) {
+                          <button type="button" [matMenuTriggerFor]="levelMenu"
+                            class="inline-flex items-center gap-1 rounded-btn px-2 py-1 text-[12px] font-semibold text-brand hover:bg-brand-tint">
+                            <mat-icon class="text-current icon-size-4" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                            Nivel
+                          </button>
+                        }
+                      </th>
+                      <th class="w-[44px] border-b border-line px-2 py-2.5"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (ing of meal.ingredients; track ing.key) {
+                      <tr class="hover:bg-ink/[.02]">
+                        <td class="border-b border-line px-3.5 py-2.5 pl-5 text-[13.5px] font-semibold text-ink whitespace-nowrap">{{ ing.name }}</td>
+                        <td class="border-b border-line px-3.5 py-2.5">
+                          <input type="number" [(ngModel)]="ing.baseQuantity" placeholder="0"
+                            class="h-8 w-full rounded-compact border border-line-strong bg-surface px-2 text-right text-[13px] text-ink outline-none tabular-nums focus:border-brand" />
+                        </td>
+                        <td class="border-b border-line px-3.5 py-2.5">
+                          <input [(ngModel)]="ing.unit" placeholder="gr"
+                            class="h-8 w-full rounded-compact border border-line-strong bg-surface px-2 text-[13px] text-ink outline-none focus:border-brand" />
+                        </td>
+                        @for (level of visibleLevels(); track level.id) {
+                          <td class="border-b border-line bg-brand-tint/40 px-1.5 py-2.5 text-center">
+                            <input type="number" [(ngModel)]="ing.portions[level.id]" placeholder="—"
+                              class="h-8 w-[60px] rounded-compact border border-line-strong bg-brand-tint px-1.5 text-center text-[13px] font-semibold text-ink outline-none tabular-nums focus:border-brand placeholder:font-normal placeholder:text-ink-3" />
+                          </td>
+                        }
+                        <td class="border-b border-line px-2 py-2.5"></td>
+                        <td class="border-b border-line px-2 py-2.5 text-center">
+                          <button type="button" (click)="removeIngredient(meal, ing)" aria-label="Quitar ingrediente"
+                            class="grid h-[28px] w-[28px] place-items-center rounded-lg text-ink-3 hover:bg-rose-tint hover:text-rose">
+                            <mat-icon class="text-current icon-size-4" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                          </button>
+                        </td>
+                      </tr>
+                    } @empty {
+                      <tr>
+                        <td class="px-5 py-4 text-[13px] text-ink-3" [attr.colspan]="visibleLevels().length + 5">
+                          Aún no hay ingredientes. Búscalos abajo para agregarlos.
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Add-ingredient footer -->
+              <div class="relative border-t border-line px-5 py-3">
+                <label
+                  class="flex h-9 w-full max-w-[420px] items-center gap-2 rounded-field border border-line-strong bg-surface px-3 text-[13px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+                  <mat-icon class="icon-size-4 text-ink-3" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                  <input [value]="meal.addSearch" (input)="onAddSearch(meal, $event)"
+                    placeholder="Agregar ingrediente…"
+                    class="w-full border-0 bg-transparent outline-none placeholder:text-ink-3" />
+                </label>
+                @if (addResults(meal).length) {
+                  <div class="absolute left-5 z-10 mt-1 w-full max-w-[420px] overflow-hidden rounded-field border border-line bg-card shadow-overlay">
+                    @for (option of addResults(meal); track option.id) {
+                      <button type="button" (click)="addIngredient(meal, option)"
+                        class="flex w-full items-center justify-between gap-2 px-3.5 py-2 text-left text-[13px] text-ink hover:bg-brand-tint">
+                        <span>{{ option.name }}</span>
+                        @if (option.baseUnit) {
+                          <span class="text-[11.5px] text-ink-3">{{ option.baseUnit }}</span>
+                        }
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            } @else {
+              <mg-empty-state
+                icon="heroicons_outline:fire"
+                title="Sin platillo para {{ meal.label }}"
+                message="Elige cómo crearlo — las porciones por nivel se definen aquí mismo.">
+                <div class="flex flex-wrap items-center justify-center gap-2.5">
+                  <button mat-stroked-button (click)="openLibrary(meal.slot)">
+                    <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:book-open'"></mat-icon>
+                    <span class="ml-2">Desde biblioteca</span>
+                  </button>
+                  <button mat-stroked-button (click)="openCopy(meal.slot)">
+                    <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:document-duplicate'"></mat-icon>
+                    <span class="ml-2">Copiar de otro día</span>
+                  </button>
+                  <button mat-stroked-button (click)="newDish(meal)">
+                    <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                    <span class="ml-2">Platillo nuevo</span>
+                  </button>
+                </div>
+              </mg-empty-state>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <mat-menu #mealMenu="matMenu">
+      <button mat-menu-item (click)="clearDish(menuMeal())">
+        <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+        <span>Quitar platillo</span>
+      </button>
+    </mat-menu>
+
+    <mat-menu #levelMenu="matMenu">
+      @for (level of addableLevels(); track level.id) {
+        <button mat-menu-item (click)="addLevel(level.id)">
+          <span class="tabular-nums">{{ level.kcal | number }} kcal</span>
+        </button>
+      }
+    </mat-menu>
+  </div>
+</div>
