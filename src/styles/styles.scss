@@ -2,9 +2,9 @@
 /*  @ Import/write your custom styles here.
 /*  @ Styles from this file will override 'vendors.scss' and Maguey's base styles.
 /* ----------------------------------------------------------------------------------------------------- */
-@import "maguey-tokens";
-@import "server-table-pagination";
-@import "custom-ng-select" ;
+@use "maguey-tokens";
+@use "server-table-pagination";
+@use "custom-ng-select";
 
 /* ========================================
    Design System — Clean Minimal Theme
