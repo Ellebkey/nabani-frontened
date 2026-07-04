@@ -1,0 +1,130 @@
+<div class="flex flex-col flex-auto w-full">
+  <div class="flex flex-col w-full max-w-screen-xl mx-auto p-4 sm:p-6 md:p-8">
+    <!-- Page header -->
+    <div class="mb-5 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+      <div>
+        <h1 class="text-[23px] font-bold leading-[30px] tracking-[-0.01em] text-ink">Equipo</h1>
+        <div class="mt-0.5 text-[13px] text-ink-3 tabular-nums">{{ pagination().count | number }} activos</div>
+      </div>
+      <div class="flex items-center gap-5 sm:ml-auto">
+        <div class="text-right">
+          <div class="text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Nómina del mes</div>
+          <div class="text-[26px] font-bold leading-tight text-gold tabular-nums">
+            {{ payrollTotal() | currency: 'MXN' : 'symbol-narrow' }}
+          </div>
+        </div>
+        <button mat-flat-button [color]="'primary'" (click)="openCreate()">
+          <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+          <span class="ml-2">Nuevo</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Section sub-navigation -->
+    <app-catalogos-nav></app-catalogos-nav>
+
+    <div class="bg-card rounded-card w-full overflow-hidden">
+      <!-- Card header: search + pager -->
+      <div class="flex flex-wrap items-center gap-3 border-b border-line px-5 pb-3 pt-4">
+        <label
+          class="flex h-9 w-60 items-center gap-2 rounded-[9px] border border-line-strong bg-surface px-3 text-[13px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+          <mat-icon class="icon-size-4 text-ink-3" [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+          <input
+            class="w-full border-0 bg-transparent outline-none placeholder:text-ink-3"
+            placeholder="Buscar por nombre"
+            [formControl]="searchControl" />
+        </label>
+        <div class="ml-auto" [class.opacity-60]="!isDataLoaded()" [class.pointer-events-none]="!isDataLoaded()">
+          <mg-pager
+            [limit]="pagination().limit"
+            [offset]="pagination().offset"
+            [count]="pagination().count"
+            (pageChange)="onPageChange($event)">
+          </mg-pager>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full border-collapse">
+          <thead>
+            <tr>
+              <th class="border-b border-line px-3.5 py-2.5 pl-5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Nombre</th>
+              <th class="w-[150px] border-b border-line px-3.5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Puesto</th>
+              <th class="border-b border-line px-3.5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Email</th>
+              <th class="w-[170px] border-b border-line px-3.5 py-2.5 text-right text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Salario quincenal</th>
+              <th class="w-[130px] border-b border-line px-3.5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[.07em] text-ink-3">Último pago</th>
+              <th class="w-[60px] border-b border-line px-3.5 py-2.5"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (!isDataLoaded()) {
+              @for (i of skeletonRows; track i) {
+                <tr>
+                  <td class="border-b border-line px-3.5 py-3 pl-5" colspan="6">
+                    <div class="h-5 w-full animate-pulse rounded bg-ink/[.06]"></div>
+                  </td>
+                </tr>
+              }
+            } @else {
+              @for (employee of employees(); track employee.id) {
+                <tr class="hover:bg-ink/[.025]">
+                  <td class="border-b border-line px-3.5 py-3 pl-5">
+                    <div class="flex items-center gap-3">
+                      <nb-init size="sm" [name]="fullName(employee)"></nb-init>
+                      <span class="text-[13.5px] font-semibold text-ink">{{ fullName(employee) }}</span>
+                    </div>
+                  </td>
+                  <td class="border-b border-line px-3.5 py-3">
+                    @if (positionMeta(employee.position); as pos) {
+                      <mg-pill [variant]="pos.variant" size="sm">{{ pos.label }}</mg-pill>
+                    }
+                  </td>
+                  <td class="border-b border-line px-3.5 py-3 text-[13px] text-ink-2">{{ employee.email || '—' }}</td>
+                  <td class="border-b border-line px-3.5 py-3 text-right text-[13.5px] font-semibold text-ink tabular-nums">
+                    {{ employee.salaryQuincenal | currency: 'MXN' : 'symbol-narrow' }}
+                  </td>
+                  <td class="border-b border-line px-3.5 py-3 text-[13px] text-ink-2 tabular-nums">
+                    {{ employee.lastPaymentDate ? (employee.lastPaymentDate | date: 'd MMM y') : '—' }}
+                  </td>
+                  <td class="border-b border-line px-3.5 py-3">
+                    <button
+                      type="button"
+                      class="grid h-[30px] w-[30px] place-items-center rounded-lg text-ink-3 hover:bg-brand-tint hover:text-ink"
+                      [matMenuTriggerFor]="employeeMenu"
+                      (menuOpened)="menuEmployee.set(employee)"
+                      aria-label="Acciones">
+                      <mat-icon class="icon-size-[17px] text-current" [svgIcon]="'heroicons_outline:ellipsis-horizontal'"></mat-icon>
+                    </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6">
+                    <mg-empty-state
+                      icon="heroicons_outline:users"
+                      title="Sin empleados"
+                      message="Ajusta la búsqueda o registra un nuevo empleado.">
+                    </mg-empty-state>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <mat-menu #employeeMenu="matMenu">
+        @if (menuEmployee(); as employee) {
+          <button mat-menu-item (click)="edit(employee)">
+            <mat-icon [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+            <span>Editar</span>
+          </button>
+          <button mat-menu-item (click)="delete(employee)">
+            <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+            <span>Eliminar</span>
+          </button>
+        }
+      </mat-menu>
+    </div>
+  </div>
+</div>

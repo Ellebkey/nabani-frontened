@@ -1,0 +1,87 @@
+<mg-modal-shell [title]="title()" (closed)="closeDialog()">
+  <form class="flex flex-col gap-3.5 p-5" [formGroup]="form">
+    <div>
+      <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Nombre *</label>
+      <label
+        class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+        <input formControlName="name" placeholder="Nombre del ingrediente"
+          class="w-full border-0 bg-transparent outline-none placeholder:text-ink-3" />
+      </label>
+      @if (showError('name')) {
+        <div class="mt-1 text-[12.5px] text-rose">El nombre es obligatorio</div>
+      }
+    </div>
+
+    <div class="grid grid-cols-3 gap-2.5">
+      <div class="col-span-3 sm:col-span-1">
+        <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Grupo *</label>
+        <mg-compact-select size="field" placeholder="Elegir grupo" [options]="foodGroupOptions" formControlName="foodGroup">
+        </mg-compact-select>
+        @if (showError('foodGroup')) {
+          <div class="mt-1 text-[12.5px] text-rose">El grupo es obligatorio</div>
+        }
+      </div>
+      <div>
+        <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Cantidad base *</label>
+        <label
+          class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+          <input type="number" formControlName="baseQuantity" placeholder="0"
+            class="w-full border-0 bg-transparent text-right outline-none tabular-nums placeholder:text-ink-3" />
+        </label>
+        @if (showError('baseQuantity')) {
+          <div class="mt-1 text-[12.5px] text-rose">Requerida</div>
+        }
+      </div>
+      <div>
+        <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Medida *</label>
+        <mg-compact-select size="field" placeholder="Medida" [options]="baseUnitOptions" formControlName="baseUnit">
+        </mg-compact-select>
+      </div>
+    </div>
+
+    <div>
+      <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">Último precio</label>
+      <label
+        class="flex h-10 items-center rounded-field border border-line-strong bg-surface px-3 text-[14px] text-ink focus-within:border-brand focus-within:ring-[3px] focus-within:ring-brand/15">
+        <span class="mr-1 text-ink-3">$</span>
+        <input type="number" formControlName="lastPrice" placeholder="0.00"
+          class="w-full border-0 bg-transparent outline-none tabular-nums placeholder:text-ink-3" />
+      </label>
+    </div>
+
+    <div>
+      <label class="mb-1.5 block text-[12.5px] font-semibold text-ink-2">No apto para</label>
+      @if (diseases().length) {
+        <div class="grid grid-cols-2 gap-x-3 gap-y-1.5">
+          @for (disease of diseases(); track disease.id) {
+            <label class="flex cursor-pointer items-center gap-2 text-[13px] text-ink">
+              <input type="checkbox" class="accent-brand" [checked]="isDiseaseSelected(disease.id)"
+                (change)="toggleDisease(disease.id)" />
+              <span class="truncate">{{ disease.name }}</span>
+            </label>
+          }
+        </div>
+      } @else {
+        <div class="text-[13px] text-ink-3">No hay enfermedades registradas.</div>
+      }
+    </div>
+  </form>
+
+  <div mgModalInfo>
+    <div class="text-[11px] font-bold uppercase tracking-[.08em] text-ink-3">Último precio</div>
+    <div class="text-[20px] font-bold text-ink tabular-nums">
+      {{ (formValue().lastPrice || 0) | currency: 'MXN' : 'symbol-narrow' }}
+    </div>
+  </div>
+
+  <ng-container mgModalActions>
+    <button type="button" mat-stroked-button (click)="closeDialog()">Cancelar</button>
+    <button mat-flat-button [color]="'primary'" [disabled]="formDisabled()" (click)="save()">
+      @if (!formDisabled()) {
+        <span>Guardar</span>
+      } @else {
+        <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+      }
+    </button>
+  </ng-container>
+</mg-modal-shell>

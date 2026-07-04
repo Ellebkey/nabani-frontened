@@ -44,8 +44,7 @@ export const appRoutes: Routes = [
       },
       {
         path: 'catalogos',
-        loadComponent: () => import('./modules/shell/section-placeholder.component').then(m => m.SectionPlaceholderComponent),
-        data: {title: 'Catálogos'},
+        loadChildren: () => import('./modules/catalogos/catalogos.routing').then(m => m.CatalogosRoutes),
         canActivate: [authGuardFn]
       },
       // --- Legacy finance modules (unrouted from the Nabani nav; replaced later) ---
