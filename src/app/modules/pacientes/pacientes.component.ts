@@ -85,11 +85,11 @@ export class PacientesComponent implements OnInit, OnDestroy {
   private loadCounts(): void {
     this.pacientesService.getPatients({ status: 'activo', limit: 1, offset: 0 }).subscribe({
       next: (r) => this.activeCount.set(r.count ?? 0),
-      error: () => {},
+      error: () => { /* keep current state on load failure */ },
     });
     this.pacientesService.getPatients({ status: 'inactivo', limit: 1, offset: 0 }).subscribe({
       next: (r) => this.inactiveCount.set(r.count ?? 0),
-      error: () => {},
+      error: () => { /* keep current state on load failure */ },
     });
   }
 

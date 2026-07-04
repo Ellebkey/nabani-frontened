@@ -37,7 +37,7 @@
             <div class="min-w-0 grow">
               <div class="flex items-center gap-2">
                 <span class="text-[13.5px] font-semibold text-ink">{{ suggestion.name }}</span>
-                @if (suggestion.quantity != null) {
+                @if (suggestion.quantity !== null) {
                   <span class="text-[12px] text-ink-3 tabular-nums">{{ suggestion.quantity }} {{ suggestion.unit }}</span>
                 }
               </div>

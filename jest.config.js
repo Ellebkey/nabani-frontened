@@ -4,6 +4,13 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/setup-jest.ts'],
   testEnvironment: 'jsdom',
   testMatch: ['<rootDir>/src/**/*.spec.ts'],
+  // Dead Maguey features Nabani doesn't use (receipt-scan / expense-draft OCR, dropped per D6).
+  // The code stays as reference, but its specs must not gate the Nabani build/deploy.
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '<rootDir>/src/app/modules/expenses/',
+    '<rootDir>/src/app/layout/common/draft-notification/'
+  ],
   modulePaths: ['<rootDir>/src'],
   moduleNameMapper: {
     '^@app/(.*)$': '<rootDir>/src/app/$1',

@@ -29,7 +29,7 @@
             <div>
               <div class="text-[11px] font-bold uppercase tracking-[.07em] text-ink-3">Precio / día</div>
               <div class="mt-1 text-[13.5px] text-ink tabular-nums">
-                {{ patient.pricePerDay != null ? (patient.pricePerDay | currency: 'MXN' : 'symbol-narrow') : '—' }}
+                {{ patient.pricePerDay !== null ? (patient.pricePerDay | currency: 'MXN' : 'symbol-narrow') : '—' }}
               </div>
             </div>
             <div>

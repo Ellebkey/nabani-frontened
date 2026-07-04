@@ -118,6 +118,27 @@ Mirror the **`catalogos/` or `incomes/` module** (both compile cleanly and show 
 - **Jest** (`npm test`): co‑located `*.spec.ts`; `src/styles/theme-drift.spec.ts` guards the palette.
 - **Playwright** (`npm run e2e`): `e2e/`, baseURL `http://localhost:5332`.
 
+## Deployment
+
+CI/CD to a DigitalOcean droplet (nginx) via GitHub Actions. On push to `master` (or manual
+`workflow_dispatch`), `.github/workflows/main.yml`:
+
+1. **build** — `npm ci --legacy-peer-deps` → **lint** → **unit tests** → `npm run build` (production
+   `ng build` → `frontend/`) → `tar -czf frontend.tar.gz frontend` → upload artifact.
+2. **deploy** — `scp` the tarball to `/home/ellebkey/apps/nabani`, then SSH and run `~/nabani-frontend`
+   (the droplet's copy of `deploy/nabani-frontend.sh`).
+
+`deploy/nabani-frontend.sh` extracts into `frontend.new`, **verifies integrity** (index.html + every
+referenced hashed chunk present), **atomically swaps** it in (keeping the previous as `frontend.old`),
+then **health-checks through nginx** (`https://nabani.app/` + a hashed chunk, must be 200) — **rolling
+back** to `frontend.old` if the site doesn't come up.
+
+- **Server layout:** `/home/ellebkey/apps/nabani/{backend,frontend}` (nginx serves the `frontend/` dir).
+- **After editing the deploy script, copy it to the droplet:** `scp deploy/nabani-frontend.sh <user>@<host>:~/nabani-frontend`.
+- **GitHub secrets:** `HOST`, `USERNAME`, `PASSWORD`, `PORT`. Override `SITE_HOST` if the nginx
+  `server_name` isn't `nabani.app`.
+- The build job runs `npm run lint` + `npm test` — both must pass for a deploy to proceed.
+
 ## Status
 
 - ✅ **All 20 desktop screens built + verified** via a Playwright browser smoke (login + every route

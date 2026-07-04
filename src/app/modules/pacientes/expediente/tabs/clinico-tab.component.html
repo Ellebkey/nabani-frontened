@@ -103,7 +103,7 @@
                 }
               </div>
             </div>
-            @if (consultation.consultation.price != null) {
+            @if (consultation.consultation.price !== null) {
               <div class="text-right text-[14.5px] font-bold text-ink tabular-nums">
                 {{ consultation.consultation.price | currency: 'MXN' : 'symbol-narrow' }}
               </div>

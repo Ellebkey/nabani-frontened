@@ -83,7 +83,7 @@ export class VentaModalComponent implements OnInit {
   ngOnInit(): void {
     this.pacientesService.getPackages().subscribe({
       next: (response) => this.packages.set(response.rows ?? []),
-      error: () => {},
+      error: () => { /* keep current state on load failure */ },
     });
   }
 

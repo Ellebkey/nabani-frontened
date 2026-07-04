@@ -9,7 +9,7 @@
       }
       @if (selectedPackage(); as pkg) {
         <div class="mt-2 flex flex-wrap items-center gap-2">
-          @if (pkg.pricePerDay != null) {
+          @if (pkg.pricePerDay !== null) {
             <span class="text-[13px] font-semibold text-ink tabular-nums">{{ pkg.pricePerDay | currency: 'MXN' : 'symbol-narrow' }}/día</span>
           }
           @if (pkg.meals?.length) {

@@ -77,7 +77,7 @@ export class ConsultaModalComponent implements OnInit {
   ngOnInit(): void {
     this.pacientesService.getCalorieLevels().subscribe({
       next: (response) => this.calorieLevels.set(response.rows ?? []),
-      error: () => {},
+      error: () => { /* keep current state on load failure */ },
     });
     this.pacientesService.getConsultations(this.data.patientId).subscribe({
       next: (response) => {
@@ -86,7 +86,7 @@ export class ConsultaModalComponent implements OnInit {
         );
         this.lastConsultation.set(sorted[0] ?? null);
       },
-      error: () => {},
+      error: () => { /* keep current state on load failure */ },
     });
   }
 

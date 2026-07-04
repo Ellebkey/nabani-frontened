@@ -89,7 +89,7 @@ export class BibliotecaComponent implements OnInit, OnDestroy {
   private loadTotal(): void {
     this.planeacionService.getDishes({ limit: 1, offset: 0 }).subscribe({
       next: (response) => this.totalCount.set(response.count ?? 0),
-      error: () => {},
+      error: () => { /* keep current state on load failure */ },
     });
   }
 
@@ -150,7 +150,7 @@ export class BibliotecaComponent implements OnInit, OnDestroy {
     );
   }
 
-  useInMenu(dish: IDishOption): void {
+  useInMenu(_dish: IDishOption): void {
     this.router.navigate(['/planeacion/dia'], { queryParams: { date: todayIso() } });
   }
 

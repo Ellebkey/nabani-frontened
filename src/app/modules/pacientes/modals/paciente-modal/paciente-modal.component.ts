@@ -105,15 +105,15 @@ export class PacienteModalComponent implements OnInit {
   ngOnInit(): void {
     this.pacientesService.getDiseases().subscribe({
       next: (r) => this.diseases.set(r.rows ?? []),
-      error: () => {},
+      error: () => { /* keep current state on load failure */ },
     });
     this.pacientesService.getCalorieLevels().subscribe({
       next: (r) => this.calorieLevels.set(r.rows ?? []),
-      error: () => {},
+      error: () => { /* keep current state on load failure */ },
     });
     this.pacientesService.getIngredients({ limit: 500 }).subscribe({
       next: (r) => this.ingredients.set(r.rows ?? []),
-      error: () => {},
+      error: () => { /* keep current state on load failure */ },
     });
 
     if (this.data?.isEditMode && this.data.patientId) {
