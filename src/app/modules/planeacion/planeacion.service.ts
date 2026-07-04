@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { Query, RecordsList } from '@shared/interfaces/shared.model';
 import { HttpHelpersService } from '@shared/services/httpHelpers.service';
 import {
@@ -89,10 +89,11 @@ export class PlaneacionService extends HttpHelpersService {
     deliveryMealIngredientId: number,
   ): Observable<RecordsList<ISwapSuggestion>> {
     const params = this.createHttpParams({ deliveryMealIngredientId });
-    return this.http.get<RecordsList<ISwapSuggestion>>(
+    // The endpoint returns a bare array; normalize to RecordsList for the consumer.
+    return this.http.get<ISwapSuggestion[] | RecordsList<ISwapSuggestion>>(
       `${this.API_URL}/adjustments/${deliveryDayId}/swap-suggestions`,
       { params },
-    );
+    ).pipe(map((r) => (Array.isArray(r) ? { rows: r, count: r.length } : r)));
   }
 
   swapIngredient(
