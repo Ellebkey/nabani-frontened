@@ -30,6 +30,8 @@
             ],
             "assets": [
               "src/favicon.png",
+              "src/favicon-64.png",
+              "src/apple-touch-icon.png",
               "src/assets",
               {
                 "glob": "_redirects",
@@ -116,6 +118,8 @@
             "inlineStyleLanguage": "scss",
             "assets": [
               "src/favicon.png",
+              "src/favicon-64.png",
+              "src/apple-touch-icon.png",
               "src/assets"
             ],
             "styles": [
