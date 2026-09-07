@@ -54,7 +54,7 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
+          key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.PORT }}
           source: "frontend.tar.gz"
           target: "/home/ellebkey/apps/nabani"
@@ -64,7 +64,7 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
+          key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.PORT }}
           command_timeout: 10m
           script: |
